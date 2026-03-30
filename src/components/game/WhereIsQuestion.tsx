@@ -77,8 +77,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
   const currentComp = currentView?.compartments.find((c) => c.id === selectedComp);
 
   if (question.type === "where_is") {
-    // Text-basierte Verortung für Fallback ohne Bild
-    return <WhereIsTextQuestion question={question} onAnswer={onAnswer} answered={answered} />;
+    return <WhereIsChoiceQuestion question={question} onAnswer={onAnswer} answered={answered} />;
   }
 
   return (
@@ -266,8 +265,8 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
   );
 }
 
-// Fallback: Textbasierte Verortungsfrage
-function WhereIsTextQuestion({
+// Multiple-Choice Ortsauswahl für "Wo ist das?"
+function WhereIsChoiceQuestion({
   question,
   onAnswer,
   answered,
@@ -276,15 +275,11 @@ function WhereIsTextQuestion({
   onAnswer: (correct: boolean) => void;
   answered: boolean;
 }) {
-  const [input, setInput] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    if (!input.trim() || submitted) return;
-    setSubmitted(true);
-    const correct =
-      input.trim().toLowerCase() ===
-      (question.item.locationLabel ?? "").toLowerCase();
+  const handleClick = (label: string, correct: boolean) => {
+    if (answered || selected) return;
+    setSelected(label);
     onAnswer(correct);
   };
 
@@ -295,36 +290,40 @@ function WhereIsTextQuestion({
           <Image src={question.item.imagePath} alt={question.item.name} fill className="object-contain p-2" sizes="256px" />
         </div>
       )}
+
       <h2 className="text-xl font-bold text-white">
         Wo ist die <span className="text-red-400">{question.item.name}</span>?
       </h2>
-      <div className="flex gap-2 w-full">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          placeholder="z.B. G1, orange Kiste"
-          disabled={submitted}
-          className="flex-1 bg-zinc-800 border-2 border-zinc-600 rounded-xl px-4 py-2 text-white placeholder-zinc-500 focus:border-red-400 outline-none"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={submitted || !input.trim()}
-          className="bg-red-600 hover:bg-red-500 disabled:bg-zinc-700 text-white px-4 py-2 rounded-xl font-bold transition-colors"
-        >
-          OK
-        </button>
+
+      <div className="grid grid-cols-2 gap-3 w-full">
+        {question.locationOptions?.map((opt, i) => {
+          let cls = "p-4 rounded-xl font-semibold text-sm border-2 transition-all duration-200 text-left ";
+          if (answered || selected) {
+            if (opt.correct) {
+              cls += "bg-green-600 border-green-400 text-white";
+            } else if (selected === opt.label) {
+              cls += "bg-red-700 border-red-400 text-white";
+            } else {
+              cls += "bg-zinc-700 border-zinc-600 text-zinc-400";
+            }
+          } else {
+            cls += "bg-zinc-800 border-zinc-600 text-white hover:bg-zinc-700 hover:border-yellow-400 active:scale-95";
+          }
+          return (
+            <motion.button
+              key={opt.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className={cls}
+              onClick={() => handleClick(opt.label, opt.correct)}
+              disabled={!!(answered || selected)}
+            >
+              {opt.label}
+            </motion.button>
+          );
+        })}
       </div>
-      {submitted && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-zinc-400 text-sm"
-        >
-          Richtige Antwort: <span className="text-white font-semibold">{question.item.locationLabel}</span>
-        </motion.div>
-      )}
     </div>
   );
 }

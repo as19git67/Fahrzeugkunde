@@ -21,6 +21,7 @@ export function GameScreen({ vehicleId, vehicleName, vehicleData, onFinished }: 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [mode, setMode] = useState<GameMode>("time_attack");
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [answered, setAnswered] = useState(false);
   const [selectedMode, setSelectedMode] = useState(false);
   const finishedRef = useRef(false);
@@ -58,13 +59,24 @@ export function GameScreen({ vehicleId, vehicleName, vehicleData, onFinished }: 
   const handleStart = async (selectedMode: GameMode) => {
     setMode(selectedMode);
     setLoading(true);
+    setLoadError(null);
     finishedRef.current = false;
     try {
       const res = await fetch(`/api/questions?vehicleId=${vehicleId}&count=40`);
-      const qs: Question[] = await res.json();
-      setQuestions(qs);
-      startGame(qs, selectedMode);
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data)) {
+        setLoadError(data?.error ?? "Fragen konnten nicht geladen werden.");
+        return;
+      }
+      if (data.length === 0) {
+        setLoadError("Keine Fragen verfügbar. Bitte zuerst Beladung im Creator anlegen.");
+        return;
+      }
+      setQuestions(data);
+      startGame(data, selectedMode);
       setSelectedMode(true);
+    } catch {
+      setLoadError("Verbindungsfehler beim Laden der Fragen.");
     } finally {
       setLoading(false);
     }
@@ -82,6 +94,11 @@ export function GameScreen({ vehicleId, vehicleName, vehicleData, onFinished }: 
           <h2 className="text-3xl font-black text-white mb-2">{vehicleName}</h2>
           <p className="text-zinc-400">Wähle deinen Spielmodus</p>
         </div>
+        {loadError && (
+          <div className="bg-red-900/40 border border-red-500/50 text-red-300 rounded-xl px-4 py-3 text-sm max-w-md text-center">
+            {loadError}
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
           <ModeCard
             title="⏱ Time Attack"

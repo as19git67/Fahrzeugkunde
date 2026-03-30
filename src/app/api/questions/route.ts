@@ -7,9 +7,6 @@ export type QuestionType = "where_is" | "what_is" | "where_in_vehicle";
 export interface Question {
   id: string;
   type: QuestionType;
-  // where_is: "Wo ist die Seilwinde?"
-  // what_is: "Was ist das?" (Bild anzeigen, 4 Optionen)
-  // where_in_vehicle: mehrstufige Bildnavigation
   item: {
     id: number;
     name: string;
@@ -17,10 +14,11 @@ export interface Question {
     locationLabel: string | null;
     positionId: number | null;
   };
-  // Für what_is: 4 Antwortmöglichkeiten (1 korrekt + 3 Distraktoren)
+  // what_is: 4 Item-Optionen (Name), richtige = item.id
   options?: Array<{ id: number; name: string }>;
-  // Für where_is: Text-Antwort erwartet
-  // Für where_in_vehicle: Navigation durch Views/Compartments/Positions
+  // where_is: 4 Ortsoptionen (locationLabel), richtige = item.locationLabel
+  locationOptions?: Array<{ label: string; correct: boolean }>;
+  // where_in_vehicle: Navigation durch Views/Compartments/Positions
   navigationTarget?: {
     viewId: number;
     compartmentId: number;
@@ -55,25 +53,30 @@ export async function GET(req: NextRequest) {
   }
 
   const itemsWithImage = allItems.filter((i) => i.imagePath);
-  const itemsWithLocation = allItems.filter((i) => i.locationLabel || i.positionId);
+  const itemsWithLocation = allItems.filter((i) => i.locationLabel);
+  const itemsWithPosition = allItems.filter((i) => i.positionId);
+
+  // Welche Fragetypen sind möglich?
+  const canWhatIs = itemsWithImage.length >= 4;
+  const canWhereIs = itemsWithLocation.length >= 4; // braucht 4 verschiedene Orte für Optionen
+  const canWhereInVehicle = itemsWithPosition.length > 0;
+
+  if (!canWhatIs && !canWhereIs && !canWhereInVehicle) {
+    return NextResponse.json(
+      { error: "Zu wenig Daten für Fragen. Bitte mehr Items mit Ort oder Bild anlegen." },
+      { status: 422 }
+    );
+  }
+
+  const enabledTypes: QuestionType[] = [];
+  if (canWhatIs) enabledTypes.push("what_is");
+  if (canWhereIs) enabledTypes.push("where_is");
+  if (canWhereInVehicle) enabledTypes.push("where_in_vehicle");
 
   const questions: Question[] = [];
 
   for (let i = 0; i < count; i++) {
-    const roll = Math.random();
-
-    // Fragetyp basierend auf verfügbaren Daten
-    const canWhatIs = itemsWithImage.length >= 4;
-    const canWhereIs = itemsWithLocation.length > 0;
-
-    let type: QuestionType;
-    if (canWhatIs && canWhereIs) {
-      type = roll < 0.4 ? "where_is" : roll < 0.8 ? "what_is" : "where_in_vehicle";
-    } else if (canWhatIs) {
-      type = "what_is";
-    } else {
-      type = "where_is";
-    }
+    const type = enabledTypes[Math.floor(Math.random() * enabledTypes.length)];
 
     if (type === "what_is") {
       const pool = shuffle(itemsWithImage);
@@ -83,7 +86,6 @@ export async function GET(req: NextRequest) {
         { id: target.id, name: target.name },
         ...distractors.map((d) => ({ id: d.id, name: d.name })),
       ]);
-
       questions.push({
         id: `q_${i}_${target.id}`,
         type: "what_is",
@@ -96,13 +98,36 @@ export async function GET(req: NextRequest) {
         },
         options,
       });
-    } else if (type === "where_is" || type === "where_in_vehicle") {
+    } else if (type === "where_is") {
       const pool = shuffle(itemsWithLocation);
       const target = pool[0];
-
+      // 3 falsche Orte als Distraktoren
+      const distractors = shuffle(
+        itemsWithLocation.filter((it) => it.locationLabel !== target.locationLabel)
+      ).slice(0, 3);
+      const locationOptions = shuffle([
+        { label: target.locationLabel!, correct: true },
+        ...distractors.map((d) => ({ label: d.locationLabel!, correct: false })),
+      ]);
+      questions.push({
+        id: `q_${i}_${target.id}`,
+        type: "where_is",
+        item: {
+          id: target.id,
+          name: target.name,
+          imagePath: target.imagePath,
+          locationLabel: target.locationLabel,
+          positionId: target.positionId,
+        },
+        locationOptions,
+      });
+    } else {
+      // where_in_vehicle
+      const pool = shuffle(itemsWithPosition);
+      const target = pool[0];
       const q: Question = {
         id: `q_${i}_${target.id}`,
-        type,
+        type: "where_in_vehicle",
         item: {
           id: target.id,
           name: target.name,
@@ -111,22 +136,15 @@ export async function GET(req: NextRequest) {
           positionId: target.positionId,
         },
       };
-
-      // Navigation-Target für where_in_vehicle auflösen
-      if (type === "where_in_vehicle" && target.positionId) {
+      if (target.positionId) {
         const pos = await db.select().from(positions).where(eq(positions.id, target.positionId)).get();
         if (pos) {
           const comp = await db.select().from(compartments).where(eq(compartments.id, pos.compartmentId)).get();
           if (comp) {
-            q.navigationTarget = {
-              viewId: comp.viewId,
-              compartmentId: comp.id,
-              positionId: pos.id,
-            };
+            q.navigationTarget = { viewId: comp.viewId, compartmentId: comp.id, positionId: pos.id };
           }
         }
       }
-
       questions.push(q);
     }
   }
