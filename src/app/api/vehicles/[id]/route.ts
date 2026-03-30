@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, vehicles, vehicleViews, compartments, positions, items } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 // Gibt komplette Fahrzeugstruktur zurück (Views → Compartments → Positions → Items)
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -16,25 +16,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     .where(eq(vehicleViews.vehicleId, vehicleId))
     .orderBy(vehicleViews.sortOrder);
 
-  const allCompartments = await db
-    .select()
-    .from(compartments)
-    .where(
-      eq(
-        compartments.viewId,
-        db
-          .select({ id: vehicleViews.id })
-          .from(vehicleViews)
-          .where(eq(vehicleViews.vehicleId, vehicleId))
-          .limit(1)
-          .as("sub")
-          .id
-      )
-    );
-
-  // Einfacher: alle Daten separat laden und zusammenführen
+  // Alle Daten für dieses Fahrzeug laden
   const viewIds = views.map((v) => v.id);
-  const allComps =
+  const vehicleComps =
     viewIds.length > 0
       ? await db
           .select()
@@ -42,11 +26,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           .where(sql`${compartments.viewId} IN (${sql.join(viewIds, sql`, `)})`)
           .orderBy(compartments.sortOrder)
       : [];
-  const vehicleComps = allComps.filter((c) => viewIds.includes(c.viewId));
   const compIds = vehicleComps.map((c) => c.id);
 
-  const allPositions = compIds.length > 0 ? await db.select().from(positions).orderBy(positions.sortOrder) : [];
-  const vehiclePositions = allPositions.filter((p) => compIds.includes(p.compartmentId));
+  const vehiclePositions =
+    compIds.length > 0
+      ? await db
+          .select()
+          .from(positions)
+          .where(sql`${positions.compartmentId} IN (${sql.join(compIds, sql`, `)})`)
+          .orderBy(positions.sortOrder)
+      : [];
 
   const vehicleItems = await db.select().from(items).where(eq(items.vehicleId, vehicleId));
 
