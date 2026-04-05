@@ -1,5 +1,5 @@
 /**
- * Seed-Daten: Demo-Fahrzeug LF 20 mit Beispiel-Beladung
+ * Seed-Daten: Demo-Fahrzeug HLF 20 mit Beispiel-Beladung
  * Aufruf: npx tsx src/db/seed.ts
  */
 import Database from "better-sqlite3";
@@ -12,28 +12,29 @@ db.pragma("foreign_keys = ON");
 // Fahrzeug
 const vehicle = db
   .prepare("INSERT OR IGNORE INTO vehicles (name, description) VALUES (?, ?) RETURNING *")
-  .get("LF 20", "Löschfahrzeug 20 – Demo") as { id: number } | undefined;
+  .get("HLF 20", "Hilfeleistungslöschgruppenfahrzeug 20") as { id: number } | undefined;
 
 if (!vehicle) {
-  const existing = db.prepare("SELECT id FROM vehicles WHERE name = 'LF 20'").get() as { id: number };
-  console.log("Fahrzeug LF 20 bereits vorhanden (id:", existing.id, ")");
+  const existing = db.prepare("SELECT id FROM vehicles WHERE name = 'HLF 20'").get() as { id: number };
+  console.log("Fahrzeug HLF 20 bereits vorhanden (id:", existing.id, ")");
   db.close();
   process.exit(0);
 }
 
 const vId = vehicle.id;
 
-// Ansichten
+// Ansichten mit Bildern
 const views = [
-  { side: "left",  label: "Fahrzeug links",   sortOrder: 0 },
-  { side: "right", label: "Fahrzeug rechts",  sortOrder: 1 },
-  { side: "back",  label: "Fahrzeug hinten",  sortOrder: 2 },
+  { side: "left",  label: "Fahrzeug links",   imagePath: "/uploads/views/hlf_left.svg",  sortOrder: 0 },
+  { side: "right", label: "Fahrzeug rechts",  imagePath: "/uploads/views/hlf_right.svg", sortOrder: 1 },
+  { side: "back",  label: "Fahrzeug hinten",  imagePath: "/uploads/views/hlf_back.svg",  sortOrder: 2 },
+  { side: "top",   label: "Fahrzeug oben",    imagePath: "/uploads/views/hlf_top.svg",   sortOrder: 3 },
 ] as const;
 
 for (const v of views) {
   db.prepare(
-    "INSERT INTO vehicle_views (vehicle_id, side, label, sort_order) VALUES (?, ?, ?, ?)"
-  ).run(vId, v.side, v.label, v.sortOrder);
+    "INSERT INTO vehicle_views (vehicle_id, side, label, image_path, sort_order) VALUES (?, ?, ?, ?, ?)"
+  ).run(vId, v.side, v.label, v.imagePath, v.sortOrder);
 }
 
 const leftViewId = (db.prepare("SELECT id FROM vehicle_views WHERE vehicle_id = ? AND side = 'left'").get(vId) as { id: number }).id;
@@ -48,7 +49,7 @@ for (let i = 0; i < compsLeft.length; i++) {
 }
 
 // Fächer rechts
-const compsRight = ["G5", "G6", "G7"];
+const compsRight = ["G5", "G6", "G7", "G8"];
 for (let i = 0; i < compsRight.length; i++) {
   db.prepare(
     "INSERT INTO compartments (view_id, label, sort_order) VALUES (?, ?, ?)"
@@ -100,5 +101,5 @@ for (const item of items) {
   ).run(vId, item.name, item.desc, item.cat, item.diff, item.posId, item.loc);
 }
 
-console.log(`✅ Seed abgeschlossen: LF 20 mit ${items.length} Gegenständen angelegt (id: ${vId})`);
+console.log(`✅ Seed abgeschlossen: HLF 20 mit ${items.length} Gegenständen angelegt (id: ${vId})`);
 db.close();
