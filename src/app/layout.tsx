@@ -4,6 +4,15 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Fahrzeugkunde – Feuerwehr Lernspiel",
   description: "Lerne spielerisch, wo welche Ausrüstung im Feuerwehrauto verstaut ist.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Fahrzeugkunde",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
