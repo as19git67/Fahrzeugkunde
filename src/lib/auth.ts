@@ -15,11 +15,11 @@ export function generateToken(): string {
 
 export async function createOrGetUser(handle: string, email: string) {
   // Existiert User mit dieser Email?
-  const existing = await db.select().from(users).where(eq(users.email, email)).get();
+  const [existing] = await db.select().from(users).where(eq(users.email, email));
   if (existing) return { user: existing, isNew: false };
 
   // Handle schon vergeben?
-  const handleTaken = await db.select().from(users).where(eq(users.handle, handle)).get();
+  const [handleTaken] = await db.select().from(users).where(eq(users.handle, handle));
   if (handleTaken) return { user: null, isNew: false, error: "handle_taken" };
 
   const [user] = await db.insert(users).values({ handle, email }).returning();
@@ -39,7 +39,7 @@ export async function createAuthCode(userId: number): Promise<string> {
 
 export async function verifyCode(userId: number, code: string): Promise<boolean> {
   const now = new Date().toISOString();
-  const record = await db
+  const [record] = await db
     .select()
     .from(authCodes)
     .where(
@@ -50,7 +50,7 @@ export async function verifyCode(userId: number, code: string): Promise<boolean>
         gt(authCodes.expiresAt, now)
       )
     )
-    .get();
+    .limit(1);
 
   if (!record) return false;
 
@@ -76,9 +76,9 @@ export async function getSessionUser() {
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
-  const session = await db.select().from(sessions).where(eq(sessions.token, token)).get();
+  const [session] = await db.select().from(sessions).where(eq(sessions.token, token));
   if (!session) return null;
 
-  const user = await db.select().from(users).where(eq(users.id, session.userId)).get();
+  const [user] = await db.select().from(users).where(eq(users.id, session.userId));
   return user ?? null;
 }

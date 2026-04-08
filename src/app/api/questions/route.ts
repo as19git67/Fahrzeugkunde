@@ -137,9 +137,9 @@ export async function GET(req: NextRequest) {
         },
       };
       if (target.positionId) {
-        const pos = await db.select().from(positions).where(eq(positions.id, target.positionId)).get();
+        const [pos] = await db.select().from(positions).where(eq(positions.id, target.positionId));
         if (pos) {
-          const comp = await db.select().from(compartments).where(eq(compartments.id, pos.compartmentId)).get();
+          const [comp] = await db.select().from(compartments).where(eq(compartments.id, pos.compartmentId));
           if (comp) {
             q.navigationTarget = { viewId: comp.viewId, compartmentId: comp.id, positionId: pos.id };
           }

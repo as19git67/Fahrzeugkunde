@@ -2,29 +2,23 @@
  * Initialisiert die Datenbank (Tabellen anlegen).
  * Aufruf: npx tsx src/db/migrate.ts
  */
-import Database from "better-sqlite3";
-import path from "path";
-import fs from "fs";
+import pg from "pg";
 
-const DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), "data", "fahrzeugkunde.db");
+const DATABASE_URL = process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/fahrzeugkunde";
 
-// data/ Verzeichnis anlegen
-fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+const client = new pg.Client({ connectionString: DATABASE_URL });
+await client.connect();
 
-const sqlite = new Database(DB_PATH);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-
-sqlite.exec(`
+await client.query(`
 CREATE TABLE IF NOT EXISTS vehicles (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS vehicle_views (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   side TEXT NOT NULL CHECK(side IN ('left','right','back','top','front')),
   label TEXT NOT NULL,
@@ -33,30 +27,30 @@ CREATE TABLE IF NOT EXISTS vehicle_views (
 );
 
 CREATE TABLE IF NOT EXISTS compartments (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   view_id INTEGER NOT NULL REFERENCES vehicle_views(id) ON DELETE CASCADE,
   label TEXT NOT NULL,
   image_path TEXT,
-  hotspot_x REAL,
-  hotspot_y REAL,
-  hotspot_w REAL,
-  hotspot_h REAL,
+  hotspot_x DOUBLE PRECISION,
+  hotspot_y DOUBLE PRECISION,
+  hotspot_w DOUBLE PRECISION,
+  hotspot_h DOUBLE PRECISION,
   sort_order INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS positions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   compartment_id INTEGER NOT NULL REFERENCES compartments(id) ON DELETE CASCADE,
   label TEXT NOT NULL,
-  hotspot_x REAL,
-  hotspot_y REAL,
-  hotspot_w REAL,
-  hotspot_h REAL,
+  hotspot_x DOUBLE PRECISION,
+  hotspot_y DOUBLE PRECISION,
+  hotspot_w DOUBLE PRECISION,
+  hotspot_h DOUBLE PRECISION,
   sort_order INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
@@ -66,35 +60,35 @@ CREATE TABLE IF NOT EXISTS items (
   difficulty INTEGER DEFAULT 1,
   position_id INTEGER REFERENCES positions(id),
   location_label TEXT,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   handle TEXT NOT NULL UNIQUE,
   email TEXT NOT NULL UNIQUE,
-  verified INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now'))
+  verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS auth_codes (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   code TEXT NOT NULL,
-  expires_at TEXT NOT NULL,
-  used INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now'))
+  expires_at TIMESTAMP NOT NULL,
+  used BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   token TEXT NOT NULL UNIQUE,
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS highscores (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id),
   handle TEXT NOT NULL,
   score INTEGER NOT NULL,
@@ -103,9 +97,9 @@ CREATE TABLE IF NOT EXISTS highscores (
   total_answers INTEGER NOT NULL,
   duration_seconds INTEGER NOT NULL,
   vehicle_id INTEGER REFERENCES vehicles(id),
-  created_at TEXT DEFAULT (datetime('now'))
+  created_at TIMESTAMP DEFAULT now()
 );
 `);
 
-console.log("✅ Datenbank initialisiert:", DB_PATH);
-sqlite.close();
+console.log("✅ Datenbank initialisiert:", DATABASE_URL.replace(/\/\/.*@/, "//<credentials>@"));
+await client.end();

@@ -1,9 +1,6 @@
 # --- Stage 1: Dependencies ---
 FROM node:24-bookworm-slim AS deps
 
-# Build tools for better-sqlite3 native module (fallback if no prebuild available)
-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -36,15 +33,19 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Migration script for DB init
+# Migration + seed scripts
 COPY --from=builder --chown=nextjs:nodejs /app/src/db/migrate.ts ./src/db/migrate.ts
 COPY --from=builder --chown=nextjs:nodejs /app/src/db/seed.ts ./src/db/seed.ts
 COPY --from=builder --chown=nextjs:nodejs /app/src/db/schema.ts ./src/db/schema.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 
-# Persistent directories (mount as volumes in production)
-RUN mkdir -p /app/data /app/public/uploads && \
-    chown -R nextjs:nodejs /app/data /app/public/uploads
+# Entrypoint: verlinkt /data/assets → public/uploads
+COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
+
+# /data wird als Volume gemountet (gemeinsam mit PostgreSQL)
+# PostgreSQL nutzt /data/pgdata, die App nutzt /data/assets
+RUN mkdir -p /data/assets /app/public/uploads && \
+    chown -R nextjs:nodejs /data /app/public/uploads
 
 USER nextjs
 
@@ -52,4 +53,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
