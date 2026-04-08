@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+.env*
+!.env.example
+data/*.db
+data/*.db-shm
+data/*.db-wal
+*.md
+LICENSE
+.github
+.vscode
+.idea
+*.tsbuildinfo
+next-env.d.ts
