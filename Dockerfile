@@ -33,14 +33,8 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Migration + seed scripts
-COPY --from=builder --chown=nextjs:nodejs /app/src/db/migrate.ts ./src/db/migrate.ts
-COPY --from=builder --chown=nextjs:nodejs /app/src/db/seed.ts ./src/db/seed.ts
-COPY --from=builder --chown=nextjs:nodejs /app/src/db/schema.ts ./src/db/schema.ts
-COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
-
-# Entrypoint: verlinkt /data/assets → public/uploads
-COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
+# Startup-Skript: Migration + Seed + Server
+COPY --chown=nextjs:nodejs startup.js ./
 
 # /data wird als Volume gemountet (gemeinsam mit PostgreSQL)
 # PostgreSQL nutzt /data/pgdata, die App nutzt /data/assets
@@ -53,4 +47,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["node", "startup.js"]
