@@ -29,6 +29,11 @@ RUN addgroup --system --gid 1001 nodejs && \
 # Static assets from public/
 COPY --from=builder /app/public ./public
 
+# Im Image eine unveränderliche Kopie der Seed-Assets aufheben, die der
+# Startup-Symlink (public/uploads -> /data/assets) NICHT überdeckt. Beim
+# Container-Start werden fehlende Dateien daraus ins Volume gespiegelt.
+COPY --from=builder /app/public/uploads ./bundled-uploads
+
 # Next.js standalone output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
