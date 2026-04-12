@@ -1,13 +1,15 @@
 /**
  * POST /api/admin/reset-seed
  *
- * Setzt die Datenbank zurück (alle spielrelevanten Tabellen außer Benutzern)
- * und befüllt sie frisch mit dem HLF-20-Seed. Nur eingeloggte Benutzer dürfen
- * die Aktion auslösen — so kann sie bequem aus dem Creator-UI genutzt werden.
+ * Stellt sicher, dass das Schema migriert ist, setzt dann die spielrelevanten
+ * Tabellen zurück und befüllt sie frisch mit dem HLF-20-Seed. Nur eingeloggte
+ * Benutzer dürfen die Aktion auslösen — so kann sie bequem aus dem Creator-UI
+ * genutzt werden. Benutzer/Sessions bleiben erhalten.
  */
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
 import { seedDemoVehicle } from "@/db/seed-data";
+import { SCHEMA_SQL } from "@/db/schema-sql";
 import { getSessionUser } from "@/lib/auth";
 
 const DATABASE_URL =
@@ -21,6 +23,9 @@ export async function POST() {
 
   const pool = new Pool({ connectionString: DATABASE_URL });
   try {
+    // Schema sicherstellen, falls die DB frisch oder veraltet ist
+    await pool.query(SCHEMA_SQL);
+
     // Nur Fahrzeug- und Spiel-Daten löschen. Benutzer/Sessions bleiben erhalten.
     await pool.query(`
       DELETE FROM highscores;
