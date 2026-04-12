@@ -67,18 +67,29 @@ for (let i = 0; i < compsRight.length; i++) {
   );
 }
 
-// Positionen für G1
+// Positionen für G1 (nur Orte — Kisten werden separat modelliert)
 const g1Res = await client.query(
   "SELECT id FROM compartments WHERE view_id = $1 AND label = 'G1'", [leftViewId]
 );
 const g1Id = g1Res.rows[0].id;
-const g1Positions = ["oben links", "oben rechts", "unten links", "orange Kiste"];
+const g1Positions = ["oben links", "oben rechts", "unten links", "unten rechts"];
 for (let i = 0; i < g1Positions.length; i++) {
   await client.query(
     "INSERT INTO positions (compartment_id, label, sort_order) VALUES ($1, $2, $3)",
     [g1Id, g1Positions[i], i]
   );
 }
+
+// Kiste in G1 unten rechts: "orange Kiste"
+const g1UntenRechtsRes = await client.query(
+  "SELECT id FROM positions WHERE compartment_id = $1 AND label = 'unten rechts'", [g1Id]
+);
+const g1UntenRechtsId = g1UntenRechtsRes.rows[0].id;
+const g1OrangeKisteRes = await client.query(
+  "INSERT INTO boxes (position_id, label, sort_order) VALUES ($1, $2, $3) RETURNING id",
+  [g1UntenRechtsId, "orange Kiste", 0]
+);
+const g1OrangeKisteId = g1OrangeKisteRes.rows[0].id;
 
 const g2Res = await client.query(
   "SELECT id FROM compartments WHERE view_id = $1 AND label = 'G2'", [leftViewId]
@@ -112,29 +123,33 @@ async function getPosId(compId: number, label: string): Promise<number> {
   return res.rows[0].id;
 }
 
-const g1OrangeKiste = await getPosId(g1Id, "orange Kiste");
 const g1ObenLinks = await getPosId(g1Id, "oben links");
 const g2Vorne = await getPosId(g2Id, "vorne");
 const g5Oben = await getPosId(g5Id, "oben");
 const g5UntenLinks = await getPosId(g5Id, "unten links");
 
-const seedItems = [
-  { name: "Seilwinde",           desc: "Zum Ziehen schwerer Lasten",      cat: "bergung",   diff: 2, posId: g1OrangeKiste, loc: "G1, orange Kiste" },
-  { name: "Schutzmulde",         desc: "Auffangwanne für Gefahrenstoffe", cat: "gefahrgut", diff: 2, posId: g1ObenLinks,   loc: "G1, oben links" },
-  { name: "Rettungsschere",      desc: "Hydraulisches Schneidwerkzeug",   cat: "bergung",   diff: 1, posId: g2Vorne,       loc: "G2, vorne" },
-  { name: "Rettungszylinder",    desc: "Hydraulischer Spreizer",          cat: "bergung",   diff: 2, posId: g2Vorne,       loc: "G2, vorne" },
-  { name: "Atemschutzgerät",     desc: "Pressluftatemschutz PA",          cat: "atemschutz",diff: 1, posId: g5Oben,        loc: "G5, oben" },
-  { name: "Handlampe",           desc: "Tragbare LED-Handlampe",          cat: "beleuchtung",diff:1, posId: g5UntenLinks,  loc: "G5, unten links" },
-  { name: "Mehrzweckzug",        desc: "Handseilzug für Bergungen",       cat: "bergung",   diff: 3, posId: g1ObenLinks,   loc: "G1, oben links" },
-  { name: "Trennschleifer",      desc: "Elektrisches Schneidwerkzeug",    cat: "werkzeug",  diff: 2, posId: g2Vorne,       loc: "G2, vorne" },
-  { name: "Tempest Lüfter",      desc: "Hochleistungs-Belüftungsgerät",   cat: "belüftung", diff: 2, posId: g5UntenLinks,  loc: "G5, unten links" },
-  { name: "Sanitätskoffer",      desc: "Erste-Hilfe Ausrüstung",          cat: "sanitaet",  diff: 1, posId: g5Oben,        loc: "G5, oben" },
+type SeedItem = {
+  name: string; desc: string; cat: string; diff: number;
+  posId: number; boxId: number | null; loc: string;
+};
+
+const seedItems: SeedItem[] = [
+  { name: "Seilwinde",        desc: "Zum Ziehen schwerer Lasten",      cat: "bergung",     diff: 2, posId: g1UntenRechtsId, boxId: g1OrangeKisteId, loc: "G1, unten rechts, orange Kiste" },
+  { name: "Schutzmulde",      desc: "Auffangwanne für Gefahrenstoffe", cat: "gefahrgut",   diff: 2, posId: g1ObenLinks,     boxId: null,            loc: "G1, oben links" },
+  { name: "Rettungsschere",   desc: "Hydraulisches Schneidwerkzeug",   cat: "bergung",     diff: 1, posId: g2Vorne,         boxId: null,            loc: "G2, vorne" },
+  { name: "Rettungszylinder", desc: "Hydraulischer Spreizer",          cat: "bergung",     diff: 2, posId: g2Vorne,         boxId: null,            loc: "G2, vorne" },
+  { name: "Atemschutzgerät",  desc: "Pressluftatemschutz PA",          cat: "atemschutz",  diff: 1, posId: g5Oben,          boxId: null,            loc: "G5, oben" },
+  { name: "Handlampe",        desc: "Tragbare LED-Handlampe",          cat: "beleuchtung", diff: 1, posId: g5UntenLinks,    boxId: null,            loc: "G5, unten links" },
+  { name: "Mehrzweckzug",     desc: "Handseilzug für Bergungen",       cat: "bergung",     diff: 3, posId: g1ObenLinks,     boxId: null,            loc: "G1, oben links" },
+  { name: "Trennschleifer",   desc: "Elektrisches Schneidwerkzeug",    cat: "werkzeug",    diff: 2, posId: g2Vorne,         boxId: null,            loc: "G2, vorne" },
+  { name: "Tempest Lüfter",   desc: "Hochleistungs-Belüftungsgerät",   cat: "belüftung",   diff: 2, posId: g5UntenLinks,    boxId: null,            loc: "G5, unten links" },
+  { name: "Sanitätskoffer",   desc: "Erste-Hilfe Ausrüstung",          cat: "sanitaet",    diff: 1, posId: g5Oben,          boxId: null,            loc: "G5, oben" },
 ];
 
 for (const item of seedItems) {
   await client.query(
-    "INSERT INTO items (vehicle_id, name, description, category, difficulty, position_id, location_label) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-    [vId, item.name, item.desc, item.cat, item.diff, item.posId, item.loc]
+    "INSERT INTO items (vehicle_id, name, description, category, difficulty, position_id, box_id, location_label) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+    [vId, item.name, item.desc, item.cat, item.diff, item.posId, item.boxId, item.loc]
   );
 }
 

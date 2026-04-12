@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, items, vehicleViews, compartments, positions } from "@/db";
+import { db, items, vehicleViews, compartments, positions, boxes } from "@/db";
 import { eq } from "drizzle-orm";
 
 export type QuestionType = "where_is" | "what_is" | "where_in_vehicle";
@@ -13,16 +13,18 @@ export interface Question {
     imagePath: string | null;
     locationLabel: string | null;
     positionId: number | null;
+    boxId: number | null;
   };
   // what_is: 4 Item-Optionen (Name), richtige = item.id
   options?: Array<{ id: number; name: string }>;
   // where_is: 4 Ortsoptionen (locationLabel), richtige = item.locationLabel
   locationOptions?: Array<{ label: string; correct: boolean }>;
-  // where_in_vehicle: Navigation durch Views/Compartments/Positions
+  // where_in_vehicle: Navigation durch Views/Compartments/Positions/Boxes (Box optional)
   navigationTarget?: {
     viewId: number;
     compartmentId: number;
     positionId: number;
+    boxId: number | null;
   };
 }
 
@@ -54,7 +56,7 @@ export async function GET(req: NextRequest) {
 
   const itemsWithImage = allItems.filter((i) => i.imagePath);
   const itemsWithLocation = allItems.filter((i) => i.locationLabel);
-  const itemsWithPosition = allItems.filter((i) => i.positionId);
+  const itemsWithPosition = allItems.filter((i) => i.positionId || i.boxId);
 
   // Welche Fragetypen sind möglich?
   const canWhatIs = itemsWithImage.length >= 4;
@@ -95,6 +97,7 @@ export async function GET(req: NextRequest) {
           imagePath: target.imagePath,
           locationLabel: target.locationLabel,
           positionId: target.positionId,
+          boxId: target.boxId,
         },
         options,
       });
@@ -118,6 +121,7 @@ export async function GET(req: NextRequest) {
           imagePath: target.imagePath,
           locationLabel: target.locationLabel,
           positionId: target.positionId,
+          boxId: target.boxId,
         },
         locationOptions,
       });
@@ -134,14 +138,26 @@ export async function GET(req: NextRequest) {
           imagePath: target.imagePath,
           locationLabel: target.locationLabel,
           positionId: target.positionId,
+          boxId: target.boxId,
         },
       };
-      if (target.positionId) {
-        const [pos] = await db.select().from(positions).where(eq(positions.id, target.positionId));
+      // Position-ID herleiten: entweder direkt oder über die Box
+      let positionId = target.positionId;
+      if (!positionId && target.boxId) {
+        const [box] = await db.select().from(boxes).where(eq(boxes.id, target.boxId));
+        if (box) positionId = box.positionId;
+      }
+      if (positionId) {
+        const [pos] = await db.select().from(positions).where(eq(positions.id, positionId));
         if (pos) {
           const [comp] = await db.select().from(compartments).where(eq(compartments.id, pos.compartmentId));
           if (comp) {
-            q.navigationTarget = { viewId: comp.viewId, compartmentId: comp.id, positionId: pos.id };
+            q.navigationTarget = {
+              viewId: comp.viewId,
+              compartmentId: comp.id,
+              positionId: pos.id,
+              boxId: target.boxId ?? null,
+            };
           }
         }
       }

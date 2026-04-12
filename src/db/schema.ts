@@ -31,11 +31,24 @@ export const compartments = pgTable("compartments", {
   sortOrder: integer("sort_order").default(0),
 });
 
-// --- Positionen innerhalb eines Fachs ---
+// --- Positionen innerhalb eines Fachs (oben/mitte/unten/links/rechts/...) ---
 export const positions = pgTable("positions", {
   id: serial("id").primaryKey(),
   compartmentId: integer("compartment_id").notNull().references(() => compartments.id, { onDelete: "cascade" }),
   label: text("label").notNull(),
+  hotspotX: doublePrecision("hotspot_x"),
+  hotspotY: doublePrecision("hotspot_y"),
+  hotspotW: doublePrecision("hotspot_w"),
+  hotspotH: doublePrecision("hotspot_h"),
+  sortOrder: integer("sort_order").default(0),
+});
+
+// --- Kisten innerhalb einer Position (optional) ---
+export const boxes = pgTable("boxes", {
+  id: serial("id").primaryKey(),
+  positionId: integer("position_id").notNull().references(() => positions.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  imagePath: text("image_path"),
   hotspotX: doublePrecision("hotspot_x"),
   hotspotY: doublePrecision("hotspot_y"),
   hotspotW: doublePrecision("hotspot_w"),
@@ -54,6 +67,7 @@ export const items = pgTable("items", {
   category: text("category"),
   difficulty: integer("difficulty").default(1),
   positionId: integer("position_id").references(() => positions.id),
+  boxId: integer("box_id").references(() => boxes.id),
   locationLabel: text("location_label"),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
 });

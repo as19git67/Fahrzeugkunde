@@ -45,6 +45,7 @@ export async function cleanDb() {
     DELETE FROM auth_codes;
     DELETE FROM users;
     DELETE FROM items;
+    DELETE FROM boxes;
     DELETE FROM positions;
     DELETE FROM compartments;
     DELETE FROM vehicle_views;

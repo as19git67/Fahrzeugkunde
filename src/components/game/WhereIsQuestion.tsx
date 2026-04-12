@@ -5,29 +5,44 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import type { Question } from "@/app/api/questions/route";
 
+interface Box {
+  id: number;
+  label: string;
+  imagePath: string | null;
+  hotspotX: number | null;
+  hotspotY: number | null;
+  hotspotW: number | null;
+  hotspotH: number | null;
+}
+
+interface Position {
+  id: number;
+  label: string;
+  hotspotX: number | null;
+  hotspotY: number | null;
+  hotspotW: number | null;
+  hotspotH: number | null;
+  boxes: Box[];
+}
+
+interface Compartment {
+  id: number;
+  label: string;
+  imagePath: string | null;
+  hotspotX: number | null;
+  hotspotY: number | null;
+  hotspotW: number | null;
+  hotspotH: number | null;
+  positions: Position[];
+}
+
 interface VehicleData {
   views: Array<{
     id: number;
     side: string;
     label: string;
     imagePath: string | null;
-    compartments: Array<{
-      id: number;
-      label: string;
-      imagePath: string | null;
-      hotspotX: number | null;
-      hotspotY: number | null;
-      hotspotW: number | null;
-      hotspotH: number | null;
-      positions: Array<{
-        id: number;
-        label: string;
-        hotspotX: number | null;
-        hotspotY: number | null;
-        hotspotW: number | null;
-        hotspotH: number | null;
-      }>;
-    }>;
+    compartments: Compartment[];
   }>;
 }
 
@@ -38,7 +53,7 @@ interface Props {
   answered: boolean;
 }
 
-type NavStep = "view" | "compartment" | "position";
+type NavStep = "view" | "compartment" | "position" | "box";
 
 const SIDE_LABELS: Record<string, string> = {
   left: "Links",
@@ -52,6 +67,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
   const [step, setStep] = useState<NavStep>("view");
   const [selectedView, setSelectedView] = useState<number | null>(null);
   const [selectedComp, setSelectedComp] = useState<number | null>(null);
+  const [selectedPos, setSelectedPos] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
 
   const target = question.navigationTarget;
@@ -66,15 +82,38 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
     setStep("position");
   };
 
+  const currentView = vehicle.views.find((v) => v.id === selectedView);
+  const currentComp = currentView?.compartments.find((c) => c.id === selectedComp);
+  const currentPos = currentComp?.positions.find((p) => p.id === selectedPos);
+
   const handlePositionClick = (posId: number) => {
     if (answered) return;
-    const correct = posId === target?.positionId;
+    const pos = currentComp?.positions.find((p) => p.id === posId);
+    // Wenn Ziel eine Box erwartet und diese Position Boxen hat → nächster Schritt
+    if (target?.boxId && pos && pos.boxes.length > 0) {
+      setSelectedPos(posId);
+      setStep("box");
+      return;
+    }
+    // Wenn Position Boxen hat und der User eine davon wählen könnte → Option anbieten
+    if (pos && pos.boxes.length > 0 && !target?.boxId) {
+      // Ziel ist die Position direkt (keine Box erwartet) → sofortige Antwort
+      const correct = posId === target?.positionId;
+      setFeedback(correct ? "correct" : "wrong");
+      onAnswer(correct);
+      return;
+    }
+    const correct = posId === target?.positionId && !target?.boxId;
     setFeedback(correct ? "correct" : "wrong");
     onAnswer(correct);
   };
 
-  const currentView = vehicle.views.find((v) => v.id === selectedView);
-  const currentComp = currentView?.compartments.find((c) => c.id === selectedComp);
+  const handleBoxClick = (boxId: number) => {
+    if (answered) return;
+    const correct = boxId === target?.boxId;
+    setFeedback(correct ? "correct" : "wrong");
+    onAnswer(correct);
+  };
 
   if (question.type === "where_is") {
     return <WhereIsChoiceQuestion question={question} onAnswer={onAnswer} answered={answered} />;
@@ -87,9 +126,9 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
       </h2>
 
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-zinc-400">
+      <div className="flex items-center gap-2 text-sm text-zinc-400 flex-wrap">
         <button
-          onClick={() => { setStep("view"); setSelectedView(null); setSelectedComp(null); }}
+          onClick={() => { setStep("view"); setSelectedView(null); setSelectedComp(null); setSelectedPos(null); }}
           className="hover:text-white transition-colors"
         >
           Fahrzeug
@@ -98,7 +137,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
           <>
             <span>/</span>
             <button
-              onClick={() => { setStep("compartment"); setSelectedComp(null); }}
+              onClick={() => { setStep("compartment"); setSelectedComp(null); setSelectedPos(null); }}
               className="hover:text-white transition-colors"
             >
               {SIDE_LABELS[currentView?.side ?? ""] ?? currentView?.label}
@@ -108,7 +147,18 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
         {selectedComp && (
           <>
             <span>/</span>
-            <span className="text-white">{currentComp?.label}</span>
+            <button
+              onClick={() => { setStep("position"); setSelectedPos(null); }}
+              className="hover:text-white transition-colors"
+            >
+              {currentComp?.label}
+            </button>
+          </>
+        )}
+        {selectedPos && (
+          <>
+            <span>/</span>
+            <span className="text-white">{currentPos?.label}</span>
           </>
         )}
       </div>
@@ -209,7 +259,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
                     onClick={() => handlePositionClick(p.id)}
                     disabled={answered}
                     className={`absolute border-2 rounded transition-all ${
-                      answered && p.id === target?.positionId
+                      answered && p.id === target?.positionId && !target?.boxId
                         ? "border-green-400 bg-green-400/40"
                         : "border-blue-400/70 bg-blue-400/20 hover:bg-blue-400/40"
                     }`}
@@ -226,7 +276,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {currentComp.positions.map((p, i) => {
-                const isTarget = p.id === target?.positionId;
+                const isTarget = p.id === target?.positionId && !target?.boxId;
                 let cls = "p-4 rounded-xl border-2 font-semibold text-white transition-all ";
                 if (answered) {
                   cls += isTarget ? "bg-green-600 border-green-400" : "bg-zinc-700 border-zinc-600 text-zinc-400";
@@ -244,11 +294,46 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
                     className={cls}
                   >
                     {p.label}
+                    {p.boxes.length > 0 && (
+                      <span className="block text-xs text-zinc-400 font-normal mt-0.5">
+                        {p.boxes.length} Kiste{p.boxes.length === 1 ? "" : "n"}
+                      </span>
+                    )}
                   </motion.button>
                 );
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Schritt 4 (optional): Kiste wählen */}
+      {step === "box" && currentPos && (
+        <div className="w-full">
+          <div className="grid grid-cols-2 gap-3">
+            {currentPos.boxes.map((b, i) => {
+              const isTarget = b.id === target?.boxId;
+              let cls = "p-4 rounded-xl border-2 font-semibold text-white transition-all ";
+              if (answered) {
+                cls += isTarget ? "bg-green-600 border-green-400" : "bg-zinc-700 border-zinc-600 text-zinc-400";
+              } else {
+                cls += "bg-zinc-800 border-zinc-600 hover:border-orange-400";
+              }
+              return (
+                <motion.button
+                  key={b.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => handleBoxClick(b.id)}
+                  disabled={answered}
+                  className={cls}
+                >
+                  📦 {b.label}
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
       )}
 
