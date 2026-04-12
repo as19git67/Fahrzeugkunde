@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  article TEXT,
   description TEXT,
   image_path TEXT,
   silhouette_path TEXT,
@@ -78,6 +79,7 @@ CREATE TABLE IF NOT EXISTS items (
 
 -- Migration für bestehende Datenbanken: box_id nachrüsten
 ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
+ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
 
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,

@@ -14,6 +14,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .update(items)
     .set({
       name: body.name,
+      article: body.article,
       description: body.description,
       imagePath: body.imagePath,
       silhouettePath: body.silhouettePath,

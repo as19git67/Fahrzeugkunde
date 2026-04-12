@@ -62,6 +62,7 @@ export function WhatIsQuestion({ question, onAnswer, answered, wasCorrect }: Pro
               <span className="text-zinc-400 mr-2">
                 {String.fromCharCode(65 + i)})
               </span>
+              {opt.article ? <span className="text-zinc-400 mr-1">{opt.article}</span> : null}
               {opt.name}
             </motion.button>
           );

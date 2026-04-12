@@ -10,13 +10,14 @@ export interface Question {
   item: {
     id: number;
     name: string;
+    article: string | null;
     imagePath: string | null;
     locationLabel: string | null;
     positionId: number | null;
     boxId: number | null;
   };
   // what_is: 4 Item-Optionen (Name), richtige = item.id
-  options?: Array<{ id: number; name: string }>;
+  options?: Array<{ id: number; name: string; article: string | null }>;
   // where_is: 4 Ortsoptionen (locationLabel), richtige = item.locationLabel
   locationOptions?: Array<{ label: string; correct: boolean }>;
   // where_in_vehicle: Navigation durch Views/Compartments/Positions/Boxes (Box optional)
@@ -85,8 +86,8 @@ export async function GET(req: NextRequest) {
       const target = pool[0];
       const distractors = pool.slice(1, 4);
       const options = shuffle([
-        { id: target.id, name: target.name },
-        ...distractors.map((d) => ({ id: d.id, name: d.name })),
+        { id: target.id, name: target.name, article: target.article },
+        ...distractors.map((d) => ({ id: d.id, name: d.name, article: d.article })),
       ]);
       questions.push({
         id: `q_${i}_${target.id}`,
@@ -94,6 +95,7 @@ export async function GET(req: NextRequest) {
         item: {
           id: target.id,
           name: target.name,
+          article: target.article,
           imagePath: target.imagePath,
           locationLabel: target.locationLabel,
           positionId: target.positionId,
@@ -118,6 +120,7 @@ export async function GET(req: NextRequest) {
         item: {
           id: target.id,
           name: target.name,
+          article: target.article,
           imagePath: target.imagePath,
           locationLabel: target.locationLabel,
           positionId: target.positionId,
@@ -135,6 +138,7 @@ export async function GET(req: NextRequest) {
         item: {
           id: target.id,
           name: target.name,
+          article: target.article,
           imagePath: target.imagePath,
           locationLabel: target.locationLabel,
           positionId: target.positionId,

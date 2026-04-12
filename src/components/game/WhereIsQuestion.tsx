@@ -122,7 +122,8 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-xl mx-auto">
       <h2 className="text-xl font-bold text-white">
-        Wo ist die <span className="text-red-400">{question.item.name}</span>?
+        Wo ist{question.item.article ? ` ${question.item.article}` : ""}{" "}
+        <span className="text-red-400">{question.item.name}</span>?
       </h2>
 
       {/* Breadcrumb */}
@@ -377,7 +378,8 @@ function WhereIsChoiceQuestion({
       )}
 
       <h2 className="text-xl font-bold text-white">
-        Wo ist die <span className="text-red-400">{question.item.name}</span>?
+        Wo ist{question.item.article ? ` ${question.item.article}` : ""}{" "}
+        <span className="text-red-400">{question.item.name}</span>?
       </h2>
 
       <div className="grid grid-cols-2 gap-3 w-full">
