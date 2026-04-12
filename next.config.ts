@@ -1,7 +1,28 @@
 import type { NextConfig } from "next";
+import { execSync } from "node:child_process";
+
+function readBuildNumber(): string {
+  // Im CI wird BUILD_NUMBER als Docker-Build-Arg gesetzt (z.B. "42-abcdef1234...").
+  if (process.env.BUILD_NUMBER) return process.env.BUILD_NUMBER;
+  if (process.env.NEXT_PUBLIC_BUILD_SHA) return process.env.NEXT_PUBLIC_BUILD_SHA;
+  try {
+    return execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+      .toString()
+      .trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+const BUILD_SHA = readBuildNumber();
+const BUILD_TIME = new Date().toISOString();
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  env: {
+    NEXT_PUBLIC_BUILD_SHA: BUILD_SHA,
+    NEXT_PUBLIC_BUILD_TIME: BUILD_TIME,
+  },
   images: {
     // Lokale Uploads erlauben
     remotePatterns: [],

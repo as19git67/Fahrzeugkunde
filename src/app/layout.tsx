@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { BuildInfoFooter } from "@/components/BuildInfoFooter";
 
 export const metadata: Metadata = {
   title: "Fahrzeugkunde – Feuerwehr Lernspiel",
@@ -16,7 +17,10 @@ export default function RootLayout({
       lang="de"
       className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col bg-zinc-950">{children}</body>
+      <body className="min-h-full flex flex-col bg-zinc-950">
+        <div className="flex-1 flex flex-col">{children}</div>
+        <BuildInfoFooter />
+      </body>
     </html>
   );
 }
