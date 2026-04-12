@@ -77,6 +77,17 @@ export async function setup() {
         hotspot_h DOUBLE PRECISION,
         sort_order INTEGER DEFAULT 0
       );
+      CREATE TABLE IF NOT EXISTS boxes (
+        id SERIAL PRIMARY KEY,
+        position_id INTEGER NOT NULL REFERENCES positions(id) ON DELETE CASCADE,
+        label TEXT NOT NULL,
+        image_path TEXT,
+        hotspot_x DOUBLE PRECISION,
+        hotspot_y DOUBLE PRECISION,
+        hotspot_w DOUBLE PRECISION,
+        hotspot_h DOUBLE PRECISION,
+        sort_order INTEGER DEFAULT 0
+      );
       CREATE TABLE IF NOT EXISTS items (
         id SERIAL PRIMARY KEY,
         vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
@@ -87,9 +98,12 @@ export async function setup() {
         category TEXT,
         difficulty INTEGER DEFAULT 1,
         position_id INTEGER REFERENCES positions(id),
+        box_id INTEGER REFERENCES boxes(id),
         location_label TEXT,
         created_at TIMESTAMP DEFAULT now()
       );
+      -- Nachträgliche Migration für bestehende Test-DBs
+      ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         handle TEXT NOT NULL UNIQUE,
