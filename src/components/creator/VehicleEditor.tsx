@@ -46,6 +46,7 @@ interface VehicleView {
 interface ItemData {
   id: number;
   name: string;
+  article: string | null;
   description: string | null;
   imagePath: string | null;
   category: string | null;
@@ -504,7 +505,10 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
               <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
             )}
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-white truncate">{item.name}</div>
+              <div className="font-semibold text-white truncate">
+                {item.article && <span className="text-zinc-400 mr-1">{item.article}</span>}
+                {item.name}
+              </div>
               {item.locationLabel && (
                 <div className="text-xs text-zinc-500 mt-0.5">{item.locationLabel}</div>
               )}
@@ -570,6 +574,7 @@ function ItemForm({
   onDelete: () => void;
 }) {
   const [name, setName] = useState(item?.name ?? "");
+  const [article, setArticle] = useState(item?.article ?? "");
   const [description, setDescription] = useState(item?.description ?? "");
   const [category, setCategory] = useState(item?.category ?? "");
   const [difficulty, setDifficulty] = useState(item?.difficulty ?? 1);
@@ -615,6 +620,7 @@ function ItemForm({
       const body = {
         vehicleId,
         name,
+        article: article || null,
         description: description || null,
         category: category || null,
         difficulty,
@@ -664,6 +670,20 @@ function ItemForm({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-zinc-400">Artikel</label>
+          <select
+            value={article}
+            onChange={(e) => setArticle(e.target.value)}
+            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
+          >
+            <option value="">— kein Artikel —</option>
+            <option value="der">der</option>
+            <option value="die">die</option>
+            <option value="das">das</option>
+          </select>
+        </div>
+
         <div className="flex flex-col gap-1">
           <label className="text-xs text-zinc-400">Name *</label>
           <input

@@ -61,6 +61,8 @@ export const items = pgTable("items", {
   id: serial("id").primaryKey(),
   vehicleId: integer("vehicle_id").notNull().references(() => vehicles.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  // Grammatischer Artikel (der/die/das) — steuert die Anrede in der UI
+  article: text("article"),
   description: text("description"),
   imagePath: text("image_path"),
   silhouettePath: text("silhouette_path"),

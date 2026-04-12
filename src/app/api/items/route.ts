@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     .values({
       vehicleId: body.vehicleId,
       name: body.name,
+      article: body.article,
       description: body.description,
       imagePath: body.imagePath,
       silhouettePath: body.silhouettePath,
