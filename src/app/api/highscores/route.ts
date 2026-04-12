@@ -26,7 +26,6 @@ export async function GET(req: NextRequest) {
 
   const results = await query;
 
-  // Filter nachträglich (einfache Lösung für SQLite)
   const filtered = results.filter((r) => {
     if (mode && r.mode !== mode) return false;
     return true;

@@ -7,7 +7,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const vehicleId = parseInt(id);
 
-  const vehicle = await db.select().from(vehicles).where(eq(vehicles.id, vehicleId)).get();
+  const [vehicle] = await db.select().from(vehicles).where(eq(vehicles.id, vehicleId));
   if (!vehicle) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
 
   const views = await db

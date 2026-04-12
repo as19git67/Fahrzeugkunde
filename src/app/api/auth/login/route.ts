@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Existiert User mit dieser Email aber anderem Handle?
-  const existingByEmail = await db.select().from(users).where(eq(users.email, trimEmail)).get();
+  const [existingByEmail] = await db.select().from(users).where(eq(users.email, trimEmail));
   if (existingByEmail && existingByEmail.handle !== trimHandle) {
     return NextResponse.json(
       { error: "Diese Email ist bereits mit einem anderen Handle registriert" },

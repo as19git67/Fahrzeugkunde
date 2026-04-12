@@ -1,9 +1,8 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
-import path from "path";
 
-const DB_PATH = process.env.DATABASE_PATH || path.join(process.cwd(), "data", "fahrzeugkunde.db");
+const DATABASE_URL = process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/fahrzeugkunde";
 
 // Singleton für Next.js dev (hot reload)
 declare global {
@@ -14,11 +13,8 @@ declare global {
 function getDb() {
   if (global.__db) return global.__db;
 
-  const sqlite = new Database(DB_PATH);
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
-
-  const db = drizzle(sqlite, { schema });
+  const pool = new Pool({ connectionString: DATABASE_URL });
+  const db = drizzle(pool, { schema });
   global.__db = db;
   return db;
 }

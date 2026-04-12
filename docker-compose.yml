@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fahrzeugkunde
+      POSTGRES_PASSWORD: fahrzeugkunde
+      POSTGRES_DB: fahrzeugkunde
+      PGDATA: /data/pgdata
+    volumes:
+      - app-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fahrzeugkunde"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://fahrzeugkunde:fahrzeugkunde@db:5432/fahrzeugkunde
+    volumes:
+      - app-data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  app-data:

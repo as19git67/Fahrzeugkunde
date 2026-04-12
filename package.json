@@ -6,19 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "vitest run",
     "lint": "eslint",
     "db:migrate": "npx tsx src/db/migrate.ts",
     "db:seed": "npx tsx src/db/seed.ts"
   },
   "dependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/nodemailer": "^7.0.11",
-    "better-sqlite3": "^12.8.0",
+    "@types/pg": "^8.11.6",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
     "next": "16.2.1",
     "nodemailer": "^8.0.4",
+    "pg": "^8.13.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -30,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.3"
   }
 }
