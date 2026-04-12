@@ -4,6 +4,16 @@ import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface Box {
+  id: number;
+  label: string;
+  imagePath: string | null;
+  hotspotX: number | null;
+  hotspotY: number | null;
+  hotspotW: number | null;
+  hotspotH: number | null;
+}
+
 interface Position {
   id: number;
   label: string;
@@ -11,6 +21,7 @@ interface Position {
   hotspotY: number | null;
   hotspotW: number | null;
   hotspotH: number | null;
+  boxes: Box[];
 }
 
 interface Compartment {
@@ -40,6 +51,7 @@ interface ItemData {
   category: string | null;
   difficulty: number;
   positionId: number | null;
+  boxId: number | null;
   locationLabel: string | null;
 }
 
@@ -361,10 +373,11 @@ function PositionList({
 
   return (
     <div className="flex flex-col gap-1">
-      <h5 className="text-xs text-zinc-500 font-semibold">Positionen</h5>
+      <h5 className="text-xs text-zinc-500 font-semibold">Positionen (Ort)</h5>
       {positions.map((p) => (
-        <div key={p.id} className="text-sm text-zinc-300 px-2 py-1 bg-zinc-700/50 rounded-lg">
-          {p.label}
+        <div key={p.id} className="flex flex-col gap-1 bg-zinc-700/50 rounded-lg px-2 py-1">
+          <div className="text-sm text-zinc-300">{p.label}</div>
+          <BoxList positionId={p.id} boxes={p.boxes} onReload={onReload} />
         </div>
       ))}
       {adding ? (
@@ -373,7 +386,7 @@ function PositionList({
             type="text"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="z.B. orange Kiste"
+            placeholder="z.B. oben links"
             required
             className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-red-400"
           />
@@ -389,20 +402,87 @@ function PositionList({
   );
 }
 
+function BoxList({
+  positionId,
+  boxes,
+  onReload,
+}: {
+  positionId: number;
+  boxes: Box[];
+  onReload: () => void;
+}) {
+  const [adding, setAdding] = useState(false);
+  const [label, setLabel] = useState("");
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await fetch(`/api/positions/${positionId}/boxes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    setAdding(false);
+    setLabel("");
+    await onReload();
+  };
+
+  return (
+    <div className="flex flex-col gap-1 pl-3 border-l border-zinc-600/60">
+      {boxes.map((b) => (
+        <div key={b.id} className="text-xs text-zinc-400">
+          📦 {b.label}
+        </div>
+      ))}
+      {adding ? (
+        <form onSubmit={handleAdd} className="flex gap-2">
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="z.B. orange Kiste"
+            required
+            className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-orange-400"
+          />
+          <button type="submit" className="bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-lg">OK</button>
+          <button type="button" onClick={() => setAdding(false)} className="text-zinc-500 hover:text-white text-xs">✕</button>
+        </form>
+      ) : (
+        <button onClick={() => setAdding(true)} className="text-xs text-zinc-500 hover:text-orange-400 transition-colors text-left">
+          + Kiste (optional)
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ---- Items Editor ----
 
 function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => void }) {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<ItemData | null>(null);
 
-  // Flache Liste aller Positionen mit Pfad
-  const allPositions = vehicle.views.flatMap((v) =>
+  // Flache Liste aller Ziele (Position oder Box) mit Pfad
+  const allTargets = vehicle.views.flatMap((v) =>
     v.compartments.flatMap((c) =>
-      c.positions.map((p) => ({
-        id: p.id,
-        label: `${v.label} → ${c.label} → ${p.label}`,
-        shortLabel: `${c.label}, ${p.label}`,
-      }))
+      c.positions.flatMap((p) => {
+        const posTarget = {
+          kind: "position" as const,
+          id: p.id,
+          positionId: p.id,
+          boxId: null as number | null,
+          label: `${v.label} → ${c.label} → ${p.label}`,
+          shortLabel: `${c.label}, ${p.label}`,
+        };
+        const boxTargets = p.boxes.map((b) => ({
+          kind: "box" as const,
+          id: b.id,
+          positionId: p.id,
+          boxId: b.id as number | null,
+          label: `${v.label} → ${c.label} → ${p.label} → 📦 ${b.label}`,
+          shortLabel: `${c.label}, ${p.label}, ${b.label}`,
+        }));
+        return [posTarget, ...boxTargets];
+      })
     )
   );
 
@@ -441,7 +521,7 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
         <ItemForm
           vehicleId={vehicle.id}
           item={editingItem}
-          positions={allPositions}
+          targets={allTargets}
           onSave={() => { setShowForm(false); setEditingItem(null); onReload(); }}
           onCancel={() => { setShowForm(false); setEditingItem(null); }}
           onDelete={async () => {
@@ -465,17 +545,26 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
   );
 }
 
+interface Target {
+  kind: "position" | "box";
+  id: number;
+  positionId: number;
+  boxId: number | null;
+  label: string;
+  shortLabel: string;
+}
+
 function ItemForm({
   vehicleId,
   item,
-  positions,
+  targets,
   onSave,
   onCancel,
   onDelete,
 }: {
   vehicleId: number;
   item: ItemData | null;
-  positions: Array<{ id: number; label: string; shortLabel: string }>;
+  targets: Target[];
   onSave: () => void;
   onCancel: () => void;
   onDelete: () => void;
@@ -484,7 +573,10 @@ function ItemForm({
   const [description, setDescription] = useState(item?.description ?? "");
   const [category, setCategory] = useState(item?.category ?? "");
   const [difficulty, setDifficulty] = useState(item?.difficulty ?? 1);
-  const [positionId, setPositionId] = useState<number | "">(item?.positionId ?? "");
+  // Kodiere aktuelles Ziel als "pos:<id>" oder "box:<id>"
+  const initialTargetKey =
+    item?.boxId ? `box:${item.boxId}` : item?.positionId ? `pos:${item.positionId}` : "";
+  const [targetKey, setTargetKey] = useState<string>(initialTargetKey);
   const [locationLabel, setLocationLabel] = useState(item?.locationLabel ?? "");
   const [imagePath, setImagePath] = useState(item?.imagePath ?? "");
   const [uploading, setUploading] = useState(false);
@@ -508,13 +600,26 @@ function ItemForm({
     e.preventDefault();
     setSaving(true);
     try {
+      // Ziel auflösen: "pos:<id>" oder "box:<id>"
+      let positionId: number | null = null;
+      let boxId: number | null = null;
+      if (targetKey.startsWith("pos:")) {
+        positionId = parseInt(targetKey.slice(4));
+      } else if (targetKey.startsWith("box:")) {
+        const t = targets.find((x) => x.kind === "box" && x.id === parseInt(targetKey.slice(4)));
+        if (t) {
+          positionId = t.positionId;
+          boxId = t.boxId;
+        }
+      }
       const body = {
         vehicleId,
         name,
         description: description || null,
         category: category || null,
         difficulty,
-        positionId: positionId !== "" ? positionId : null,
+        positionId,
+        boxId,
         locationLabel: locationLabel || null,
         imagePath: imagePath || null,
       };
@@ -605,15 +710,17 @@ function ItemForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Position (Navigation)</label>
+          <label className="text-xs text-zinc-400">Position / Kiste (Navigation)</label>
           <select
-            value={positionId}
-            onChange={(e) => setPositionId(e.target.value === "" ? "" : parseInt(e.target.value))}
+            value={targetKey}
+            onChange={(e) => setTargetKey(e.target.value)}
             className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
           >
             <option value="">— keine —</option>
-            {positions.map((p) => (
-              <option key={p.id} value={p.id}>{p.label}</option>
+            {targets.map((t) => (
+              <option key={`${t.kind}:${t.id}`} value={`${t.kind}:${t.id}`}>
+                {t.label}
+              </option>
             ))}
           </select>
         </div>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, items } from "@/db";
+import { db, boxes } from "@/db";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
@@ -10,22 +10,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await req.json();
 
-  const [item] = await db
-    .update(items)
+  const [box] = await db
+    .update(boxes)
     .set({
-      name: body.name,
-      description: body.description,
+      label: body.label,
       imagePath: body.imagePath,
-      silhouettePath: body.silhouettePath,
-      category: body.category,
-      difficulty: body.difficulty,
-      positionId: body.positionId,
-      boxId: body.boxId,
-      locationLabel: body.locationLabel,
+      hotspotX: body.hotspotX,
+      hotspotY: body.hotspotY,
+      hotspotW: body.hotspotW,
+      hotspotH: body.hotspotH,
+      sortOrder: body.sortOrder,
     })
-    .where(eq(items.id, parseInt(id)))
+    .where(eq(boxes.id, parseInt(id)))
     .returning();
-  return NextResponse.json(item);
+  return NextResponse.json(box);
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -33,6 +31,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
 
   const { id } = await params;
-  await db.delete(items).where(eq(items.id, parseInt(id)));
+  await db.delete(boxes).where(eq(boxes.id, parseInt(id)));
   return NextResponse.json({ success: true });
 }

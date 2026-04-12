@@ -32,6 +32,15 @@ interface VehicleData {
         hotspotY: number | null;
         hotspotW: number | null;
         hotspotH: number | null;
+        boxes: Array<{
+          id: number;
+          label: string;
+          imagePath: string | null;
+          hotspotX: number | null;
+          hotspotY: number | null;
+          hotspotW: number | null;
+          hotspotH: number | null;
+        }>;
       }>;
     }>;
   }>;

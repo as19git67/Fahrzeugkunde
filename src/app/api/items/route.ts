@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
       category: body.category,
       difficulty: body.difficulty ?? 1,
       positionId: body.positionId,
+      boxId: body.boxId,
       locationLabel: body.locationLabel,
     })
     .returning();

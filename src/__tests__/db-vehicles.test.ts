@@ -6,6 +6,7 @@ import {
   vehicleViews,
   compartments,
   positions,
+  boxes,
   items,
 } from "@/db/schema";
 
@@ -142,6 +143,88 @@ describe("full vehicle hierarchy", () => {
     expect(updated.description).toBe("Hydraulisch");
     expect(updated.difficulty).toBe(3);
     expect(updated.name).toBe("Rettungsschere");
+  });
+});
+
+describe("boxes (optional Kiste-Ebene)", () => {
+  it("can attach an item to a box inside a position", async () => {
+    const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
+    const [view] = await db
+      .insert(vehicleViews)
+      .values({ vehicleId: v.id, side: "left", label: "links" })
+      .returning();
+    const [comp] = await db
+      .insert(compartments)
+      .values({ viewId: view.id, label: "G1" })
+      .returning();
+    const [pos] = await db
+      .insert(positions)
+      .values({ compartmentId: comp.id, label: "unten rechts" })
+      .returning();
+    const [box] = await db
+      .insert(boxes)
+      .values({ positionId: pos.id, label: "orange Kiste" })
+      .returning();
+
+    const [item] = await db
+      .insert(items)
+      .values({
+        vehicleId: v.id,
+        name: "Seilwinde",
+        positionId: pos.id,
+        boxId: box.id,
+        locationLabel: "G1, unten rechts, orange Kiste",
+      })
+      .returning();
+
+    expect(item.boxId).toBe(box.id);
+    expect(item.positionId).toBe(pos.id);
+  });
+
+  it("cascades: deleting a position deletes its boxes", async () => {
+    const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
+    const [view] = await db
+      .insert(vehicleViews)
+      .values({ vehicleId: v.id, side: "left", label: "links" })
+      .returning();
+    const [comp] = await db
+      .insert(compartments)
+      .values({ viewId: view.id, label: "G1" })
+      .returning();
+    const [pos] = await db
+      .insert(positions)
+      .values({ compartmentId: comp.id, label: "unten rechts" })
+      .returning();
+    await db.insert(boxes).values({ positionId: pos.id, label: "orange Kiste" });
+
+    await db.delete(positions).where(eq(positions.id, pos.id));
+
+    const remaining = await db.select().from(boxes);
+    expect(remaining).toHaveLength(0);
+  });
+
+  it("allows box to be optional: item with only positionId works", async () => {
+    const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
+    const [view] = await db
+      .insert(vehicleViews)
+      .values({ vehicleId: v.id, side: "right", label: "rechts" })
+      .returning();
+    const [comp] = await db
+      .insert(compartments)
+      .values({ viewId: view.id, label: "G5" })
+      .returning();
+    const [pos] = await db
+      .insert(positions)
+      .values({ compartmentId: comp.id, label: "oben" })
+      .returning();
+
+    const [item] = await db
+      .insert(items)
+      .values({ vehicleId: v.id, name: "Atemschutzgerät", positionId: pos.id })
+      .returning();
+
+    expect(item.positionId).toBe(pos.id);
+    expect(item.boxId).toBeNull();
   });
 });
 

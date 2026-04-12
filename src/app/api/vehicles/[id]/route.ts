@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, vehicles, vehicleViews, compartments, positions, items } from "@/db";
+import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
 import { eq, sql } from "drizzle-orm";
 
-// Gibt komplette Fahrzeugstruktur zurück (Views → Compartments → Positions → Items)
+// Gibt komplette Fahrzeugstruktur zurück (Views → Compartments → Positions → Boxes → Items)
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const vehicleId = parseInt(id);
@@ -36,6 +36,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           .where(sql`${positions.compartmentId} IN (${sql.join(compIds, sql`, `)})`)
           .orderBy(positions.sortOrder)
       : [];
+  const posIds = vehiclePositions.map((p) => p.id);
+
+  const vehicleBoxes =
+    posIds.length > 0
+      ? await db
+          .select()
+          .from(boxes)
+          .where(sql`${boxes.positionId} IN (${sql.join(posIds, sql`, `)})`)
+          .orderBy(boxes.sortOrder)
+      : [];
 
   const vehicleItems = await db.select().from(items).where(eq(items.vehicleId, vehicleId));
 
@@ -51,7 +61,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
             .filter((p) => p.compartmentId === c.id)
             .map((p) => ({
               ...p,
-              items: vehicleItems.filter((i) => i.positionId === p.id),
+              boxes: vehicleBoxes
+                .filter((b) => b.positionId === p.id)
+                .map((b) => ({
+                  ...b,
+                  items: vehicleItems.filter((i) => i.boxId === b.id),
+                })),
+              items: vehicleItems.filter((i) => i.positionId === p.id && !i.boxId),
             })),
         })),
     })),
