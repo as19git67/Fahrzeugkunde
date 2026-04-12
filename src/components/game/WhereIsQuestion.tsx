@@ -192,9 +192,11 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
       )}
 
       {/* Schritt 2: Rolladen/Fach wählen */}
-      {step === "compartment" && currentView && (
+      {step === "compartment" && currentView && (() => {
+        const hasHotspots = currentView.compartments.some((c) => c.hotspotX != null);
+        return (
         <div className="w-full">
-          {currentView.imagePath ? (
+          {currentView.imagePath && hasHotspots ? (
             <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
               <Image
                 src={currentView.imagePath}
@@ -223,28 +225,44 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
-              {currentView.compartments.map((c, i) => (
-                <motion.button
-                  key={c.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => handleCompClick(c.id)}
-                  className="p-4 bg-zinc-800 rounded-xl border-2 border-zinc-600 hover:border-yellow-400 text-white font-bold transition-all"
-                >
-                  {c.label}
-                </motion.button>
-              ))}
+            <div className="flex flex-col items-center gap-3">
+              {currentView.imagePath && (
+                <div className="relative w-full max-w-md" style={{ paddingBottom: "56.25%" }}>
+                  <Image
+                    src={currentView.imagePath}
+                    alt={currentView.label}
+                    fill
+                    className="object-contain rounded-xl"
+                    sizes="100vw"
+                  />
+                </div>
+              )}
+              <div className="grid grid-cols-3 gap-3 w-full">
+                {currentView.compartments.map((c, i) => (
+                  <motion.button
+                    key={c.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => handleCompClick(c.id)}
+                    className="p-4 bg-zinc-800 rounded-xl border-2 border-zinc-600 hover:border-yellow-400 text-white font-bold transition-all"
+                  >
+                    {c.label}
+                  </motion.button>
+                ))}
+              </div>
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
 
       {/* Schritt 3: Position wählen */}
-      {step === "position" && currentComp && (
+      {step === "position" && currentComp && (() => {
+        const hasHotspots = currentComp.positions.some((p) => p.hotspotX != null);
+        return (
         <div className="w-full">
-          {currentComp.imagePath ? (
+          {currentComp.imagePath && hasHotspots ? (
             <div className="relative w-full" style={{ paddingBottom: "75%" }}>
               <Image
                 src={currentComp.imagePath}
@@ -306,7 +324,8 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
 
       {/* Schritt 4 (optional): Kiste wählen */}
       {step === "box" && currentPos && (
