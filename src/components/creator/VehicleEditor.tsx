@@ -701,6 +701,8 @@ function BoxList({
 }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -714,12 +716,98 @@ function BoxList({
     await onReload();
   };
 
+  const startRename = (id: number, current: string) => {
+    setRenamingId(id);
+    setRenameValue(current);
+  };
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+  const submitRename = async (id: number) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/boxes/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRename();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDelete = async (box: Box) => {
+    const ok = window.confirm(
+      `Kiste "${box.label}" wirklich löschen?\n\n` +
+      "Alle darin verorteten Gegenstände werden ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/boxes/${box.id}`, { method: "DELETE" });
+    if (res.ok) {
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1 pl-3 border-l border-zinc-600/60">
       {boxes.map((b) => (
-        <div key={b.id} className="text-xs text-zinc-400">
-          📦 {b.label}
-        </div>
+        renamingId === b.id ? (
+          <form
+            key={b.id}
+            onSubmit={(e) => { e.preventDefault(); submitRename(b.id); }}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="text"
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape") cancelRename(); }}
+              className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-orange-400"
+            />
+            <button
+              type="submit"
+              className="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+            >
+              OK
+            </button>
+            <button
+              type="button"
+              onClick={cancelRename}
+              className="text-zinc-400 hover:text-white text-xs px-1"
+            >
+              ✕
+            </button>
+          </form>
+        ) : (
+          <div key={b.id} className="flex items-center gap-1 text-xs text-zinc-400">
+            <span className="flex-1">📦 {b.label}</span>
+            <button
+              onClick={() => startRename(b.id, b.label)}
+              title="Kiste umbenennen"
+              aria-label="Kiste umbenennen"
+              className="text-zinc-500 hover:text-white p-0.5 rounded transition-colors"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => handleDelete(b)}
+              title="Kiste löschen"
+              aria-label="Kiste löschen"
+              className="text-zinc-500 hover:text-red-400 p-0.5 rounded transition-colors"
+            >
+              🗑️
+            </button>
+          </div>
+        )
       ))}
       {adding ? (
         <form onSubmit={handleAdd} className="flex gap-2">
