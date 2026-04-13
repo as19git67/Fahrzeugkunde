@@ -1456,6 +1456,278 @@ const iconVerteilerstueck: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- Heck Icons --------------------------------------------------------------
+
+/** Feuerlöschkreiselpumpe: Pumpengehäuse mit Saug- und Druckflansch. */
+const iconKreiselpumpe: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sockel -->
+      <rect x="${x - 70}" y="${y + 44}" width="140" height="14" rx="3" fill="${ink}" />
+      <!-- Motor/Getriebeblock -->
+      <rect x="${x + 30}" y="${y - 24}" width="48" height="68" rx="4" fill="${accent}" />
+      <line x1="${x + 38}" y1="${y - 16}" x2="${x + 38}" y2="${y + 36}" stroke-width="1.8" />
+      <line x1="${x + 50}" y1="${y - 16}" x2="${x + 50}" y2="${y + 36}" stroke-width="1.8" />
+      <line x1="${x + 62}" y1="${y - 16}" x2="${x + 62}" y2="${y + 36}" stroke-width="1.8" />
+      <!-- Pumpengehäuse (rund/spiralförmig) -->
+      <circle cx="${x - 10}" cy="${y + 10}" r="38" fill="${accent}" />
+      <circle cx="${x - 10}" cy="${y + 10}" r="22" fill="#d0d0d0" />
+      <circle cx="${x - 10}" cy="${y + 10}" r="6" fill="${ink}" />
+      <!-- Laufradspuren -->
+      <path d="M ${x - 10} ${y + 4} Q ${x - 2} ${y + 10} ${x - 10} ${y + 16} Q ${x - 18} ${y + 10} ${x - 10} ${y + 4}" fill="none" stroke-width="1.6" />
+      <!-- Saugflansch links -->
+      <rect x="${x - 80}" y="${y - 6}" width="34" height="32" fill="${accent}" />
+      <rect x="${x - 86}" y="${y - 12}" width="14" height="44" rx="2" fill="${ink}" />
+      <!-- Druckabgang oben -->
+      <rect x="${x - 20}" y="${y - 44}" width="24" height="26" fill="${accent}" />
+      <rect x="${x - 26}" y="${y - 54}" width="36" height="14" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Druckbegrenzungsventil: Ventilgehäuse mit Einstellschraube und Feder. */
+const iconDruckbegrenzungsventil: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Durchflussrohr -->
+      <rect x="${x - 70}" y="${y}" width="140" height="30" rx="4" fill="${accent}" />
+      <!-- Kupplung links -->
+      <rect x="${x - 78}" y="${y - 6}" width="14" height="42" rx="2" fill="${ink}" />
+      <!-- Kupplung rechts -->
+      <rect x="${x + 62}" y="${y - 6}" width="14" height="42" rx="2" fill="${ink}" />
+      <!-- Ventilgehäuse aufgesetzt -->
+      <rect x="${x - 18}" y="${y - 28}" width="36" height="32" fill="${accent}" />
+      <!-- Federzylinder -->
+      <rect x="${x - 10}" y="${y - 54}" width="20" height="28" fill="#d0d0d0" />
+      <!-- Feder-Windungen angedeutet -->
+      <line x1="${x - 10}" y1="${y - 48}" x2="${x + 10}" y2="${y - 44}" stroke-width="1.4" />
+      <line x1="${x - 10}" y1="${y - 42}" x2="${x + 10}" y2="${y - 38}" stroke-width="1.4" />
+      <line x1="${x - 10}" y1="${y - 36}" x2="${x + 10}" y2="${y - 32}" stroke-width="1.4" />
+      <!-- Einstellschraube oben -->
+      <rect x="${x - 6}" y="${y - 68}" width="12" height="16" fill="${ink}" />
+      <path d="M ${x - 12} ${y - 68} L ${x + 12} ${y - 68}" stroke-width="3" />
+      <!-- Manometer seitlich -->
+      <circle cx="${x + 36}" cy="${y - 16}" r="10" fill="#ffffff" />
+      <line x1="${x + 36}" y1="${y - 16}" x2="${x + 42}" y2="${y - 22}" stroke-width="2" />
+      <line x1="${x + 36}" y1="${y - 16}" x2="${x + 18}" y2="${y - 4}" stroke-width="1" />
+    </g>
+  `;
+};
+
+/** Ölbindemittel: Sack mit körnigem Inhalt. */
+const iconOelbindemittel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sackform -->
+      <path d="M ${x - 50} ${y - 36} Q ${x - 30} ${y - 50} ${x} ${y - 50} Q ${x + 30} ${y - 50} ${x + 50} ${y - 36} L ${x + 60} ${y + 48} Q ${x + 60} ${y + 54} ${x + 52} ${y + 54} L ${x - 52} ${y + 54} Q ${x - 60} ${y + 54} ${x - 60} ${y + 48} Z" fill="${accent}" />
+      <!-- Verschluss-Band oben -->
+      <rect x="${x - 30}" y="${y - 50}" width="60" height="10" rx="3" fill="${ink}" />
+      <!-- Granulat (Punkte) -->
+      <circle cx="${x - 32}" cy="${y - 10}" r="2" fill="${ink}" />
+      <circle cx="${x - 20}" cy="${y - 4}" r="2" fill="${ink}" />
+      <circle cx="${x - 6}" cy="${y - 14}" r="2" fill="${ink}" />
+      <circle cx="${x + 10}" cy="${y - 6}" r="2" fill="${ink}" />
+      <circle cx="${x + 26}" cy="${y - 16}" r="2" fill="${ink}" />
+      <circle cx="${x - 28}" cy="${y + 12}" r="2" fill="${ink}" />
+      <circle cx="${x - 10}" cy="${y + 18}" r="2" fill="${ink}" />
+      <circle cx="${x + 8}" cy="${y + 14}" r="2" fill="${ink}" />
+      <circle cx="${x + 30}" cy="${y + 8}" r="2" fill="${ink}" />
+      <circle cx="${x - 16}" cy="${y + 36}" r="2" fill="${ink}" />
+      <circle cx="${x + 14}" cy="${y + 34}" r="2" fill="${ink}" />
+      <!-- Etikett -->
+      <rect x="${x - 24}" y="${y - 32}" width="48" height="16" fill="#ffffff" />
+      <line x1="${x - 18}" y1="${y - 24}" x2="${x + 18}" y2="${y - 24}" stroke-width="1.6" />
+    </g>
+  `;
+};
+
+/** Bindevlies: Rolle Vliesstoff mit abrollendem Ende. */
+const iconBindevlies: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rolle (Kern) -->
+      <ellipse cx="${x - 30}" cy="${y}" rx="42" ry="40" fill="${accent}" />
+      <!-- Spiral-Ringe -->
+      <ellipse cx="${x - 30}" cy="${y}" rx="32" ry="30" fill="none" stroke-width="1.6" />
+      <ellipse cx="${x - 30}" cy="${y}" rx="22" ry="20" fill="none" stroke-width="1.6" />
+      <ellipse cx="${x - 30}" cy="${y}" rx="12" ry="10" fill="none" stroke-width="1.6" />
+      <!-- Kernloch -->
+      <ellipse cx="${x - 30}" cy="${y}" rx="5" ry="4" fill="${ink}" />
+      <!-- Abgerolltes Stück (Fahne) -->
+      <path d="M ${x + 12} ${y - 20} L ${x + 76} ${y - 28} L ${x + 80} ${y + 12} L ${x + 12} ${y + 22} Z" fill="${accent}" />
+      <!-- Textur / Fasern -->
+      <line x1="${x + 22}" y1="${y - 14}" x2="${x + 72}" y2="${y - 20}" stroke-width="1.2" />
+      <line x1="${x + 22}" y1="${y - 6}" x2="${x + 74}" y2="${y - 10}" stroke-width="1.2" />
+      <line x1="${x + 22}" y1="${y + 2}" x2="${x + 76}" y2="${y}" stroke-width="1.2" />
+      <line x1="${x + 22}" y1="${y + 10}" x2="${x + 76}" y2="${y + 10}" stroke-width="1.2" />
+    </g>
+  `;
+};
+
+/** Auffangwanne-Factory: Faltwanne mit Ramenstreben; Größe variiert. */
+function makeAuffangwanne(size: "klein" | "gross"): IconFn {
+  const w = size === "gross" ? 150 : 110;
+  const h = size === "gross" ? 70 : 50;
+  return ({ accent, ink, cx, cy }) => {
+    const x = cx, y = cy;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Oberer Rand (Ellipse für Perspektive) -->
+        <ellipse cx="${x}" cy="${y - h / 2}" rx="${w / 2}" ry="10" fill="${accent}" />
+        <!-- Wannenkorpus -->
+        <path d="M ${x - w / 2} ${y - h / 2} L ${x - w / 2 + 16} ${y + h / 2} L ${x + w / 2 - 16} ${y + h / 2} L ${x + w / 2} ${y - h / 2} Z" fill="${accent}" />
+        <!-- Boden-Ellipse -->
+        <ellipse cx="${x}" cy="${y + h / 2}" rx="${w / 2 - 16}" ry="6" fill="#d0d0d0" />
+        <!-- Stütz-Streben am Rand -->
+        <rect x="${x - w / 2 - 4}" y="${y - h / 2 - 14}" width="10" height="22" rx="2" fill="${ink}" />
+        <rect x="${x + w / 2 - 6}" y="${y - h / 2 - 14}" width="10" height="22" rx="2" fill="${ink}" />
+        <rect x="${x - 6}" y="${y - h / 2 - 14}" width="12" height="20" rx="2" fill="${ink}" />
+        <!-- Innere Flüssigkeitslinie -->
+        <ellipse cx="${x}" cy="${y - h / 2 + 4}" rx="${w / 2 - 10}" ry="7" fill="#b8d8f0" />
+        <ellipse cx="${x}" cy="${y - h / 2 + 4}" rx="${w / 2 - 10}" ry="7" fill="none" stroke-width="1.6" />
+      </g>
+    `;
+  };
+}
+
+const iconAuffangwanneKlein = makeAuffangwanne("klein");
+const iconAuffangwanneGross = makeAuffangwanne("gross");
+
+/** Leckdichtkissen: rechteckiges Druckkissen mit Ventilzugang. */
+const iconLeckdichtkissen: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kissenkörper -->
+      <rect x="${x - 70}" y="${y - 38}" width="140" height="76" rx="18" fill="${accent}" />
+      <!-- Gewebe-Streifen (Sicherheits-Crosshatch) -->
+      <line x1="${x - 60}" y1="${y - 28}" x2="${x + 60}" y2="${y + 28}" stroke-width="1.4" />
+      <line x1="${x - 60}" y1="${y - 12}" x2="${x + 60}" y2="${y + 12}" stroke-width="1.4" />
+      <line x1="${x - 60}" y1="${y + 28}" x2="${x + 60}" y2="${y - 28}" stroke-width="1.4" />
+      <line x1="${x - 60}" y1="${y + 12}" x2="${x + 60}" y2="${y - 12}" stroke-width="1.4" />
+      <!-- Ventil mit Schlauchanschluss -->
+      <circle cx="${x - 60}" cy="${y}" r="10" fill="${ink}" />
+      <circle cx="${x - 60}" cy="${y}" r="4" fill="${accent}" />
+      <path d="M ${x - 70} ${y} Q ${x - 92} ${y - 10} ${x - 90} ${y - 32}" fill="none" stroke-width="4" />
+      <!-- Label -->
+      <rect x="${x - 18}" y="${y - 12}" width="36" height="24" fill="#ffffff" />
+      <line x1="${x - 10}" y1="${y - 2}" x2="${x + 10}" y2="${y - 2}" stroke-width="1.6" />
+      <line x1="${x - 10}" y1="${y + 6}" x2="${x + 10}" y2="${y + 6}" stroke-width="1.6" />
+    </g>
+  `;
+};
+
+/** Schutzanzug-Factory: Ganzkörper-Silhouette; CSA oder Hitzeschutz. */
+function makeAnzug(variant: "csa" | "hitze"): IconFn {
+  return ({ ink, cx, cy }) => {
+    const x = cx, y = cy;
+    const body = variant === "csa" ? "#f2b52f" : "#c9c9c9";
+    const visor = variant === "csa" ? "#b8d8f0" : "#ffffff";
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Kapuze + Kopfbereich -->
+        <path d="M ${x - 22} ${y - 60} Q ${x - 28} ${y - 80} ${x} ${y - 80} Q ${x + 28} ${y - 80} ${x + 22} ${y - 60} Z" fill="${body}" />
+        <!-- Sichtfenster -->
+        <rect x="${x - 16}" y="${y - 72}" width="32" height="16" rx="3" fill="${visor}" />
+        <!-- Rumpf + Beine -->
+        <path d="M ${x - 40} ${y - 58} L ${x + 40} ${y - 58} L ${x + 46} ${y + 2} L ${x + 22} ${y + 60} L ${x + 4} ${y + 60} L ${x + 4} ${y - 10} L ${x - 4} ${y - 10} L ${x - 4} ${y + 60} L ${x - 22} ${y + 60} L ${x - 46} ${y + 2} Z" fill="${body}" />
+        <!-- Arme -->
+        <rect x="${x - 62}" y="${y - 44}" width="22" height="56" rx="5" fill="${body}" />
+        <rect x="${x + 40}" y="${y - 44}" width="22" height="56" rx="5" fill="${body}" />
+        <!-- Handschuhe/Enden -->
+        <rect x="${x - 64}" y="${y + 10}" width="24" height="14" rx="3" fill="${ink}" />
+        <rect x="${x + 40}" y="${y + 10}" width="24" height="14" rx="3" fill="${ink}" />
+        ${variant === "hitze" ? `
+          <!-- Reflex-Streifen für Hitzeschutz -->
+          <rect x="${x - 36}" y="${y - 30}" width="72" height="6" fill="#ffffff" />
+          <rect x="${x - 40}" y="${y - 10}" width="80" height="6" fill="#ffffff" />
+          <rect x="${x - 20}" y="${y + 30}" width="40" height="6" fill="#ffffff" />
+        ` : `
+          <!-- Reißverschluss für CSA -->
+          <line x1="${x}" y1="${y - 58}" x2="${x}" y2="${y - 10}" stroke-width="2" stroke-dasharray="3 3" />
+          <!-- CSA-Stiefel -->
+          <rect x="${x - 24}" y="${y + 54}" width="22" height="12" rx="2" fill="${ink}" />
+          <rect x="${x + 2}" y="${y + 54}" width="22" height="12" rx="2" fill="${ink}" />
+        `}
+      </g>
+    `;
+  };
+}
+
+const iconCsa = makeAnzug("csa");
+const iconHitzeschutz = makeAnzug("hitze");
+
+/** Warngerät-Factory: Gas-Warngerät mit Display. */
+function makeWarngeraet(kind: "co" | "ex"): IconFn {
+  return ({ accent, ink, cx, cy }) => {
+    const x = cx, y = cy;
+    const w = kind === "co" ? 80 : 100;
+    const h = kind === "co" ? 110 : 130;
+    const sensorColor = kind === "co" ? "#f5c330" : "#f25c4a";
+    const dispLines = kind === "co"
+      ? `
+          <!-- "CO"-Indikator (ohne Text: zwei Kreise) -->
+          <circle cx="${x - 14}" cy="${y - h / 2 + 44}" r="8" fill="none" stroke-width="2.4" />
+          <circle cx="${x + 14}" cy="${y - h / 2 + 44}" r="8" fill="none" stroke-width="2.4" />
+        `
+      : `
+          <!-- Vier Balken als Multi-Gas-Anzeige -->
+          <rect x="${x - 26}" y="${y - h / 2 + 40}" width="8" height="18" fill="#d83a2a" />
+          <rect x="${x - 14}" y="${y - h / 2 + 40}" width="8" height="18" fill="#f5c330" />
+          <rect x="${x - 2}" y="${y - h / 2 + 40}" width="8" height="18" fill="#3aa0ff" />
+          <rect x="${x + 10}" y="${y - h / 2 + 40}" width="8" height="18" fill="#50b8d8" />
+        `;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Gehäuse -->
+        <rect x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="8" fill="${accent}" />
+        <!-- Display -->
+        <rect x="${x - w / 2 + 8}" y="${y - h / 2 + 10}" width="${w - 16}" height="36" fill="#2a2a2a" />
+        ${dispLines}
+        <!-- Sensorkopf oben -->
+        <rect x="${x - w / 2 + 16}" y="${y - h / 2 - 16}" width="${w - 32}" height="16" rx="3" fill="${sensorColor}" />
+        <line x1="${x - w / 2 + 24}" y1="${y - h / 2 - 8}" x2="${x + w / 2 - 24}" y2="${y - h / 2 - 8}" stroke-width="1.6" />
+        <!-- Tasten -->
+        <circle cx="${x - w / 2 + 18}" cy="${y + 12}" r="6" fill="${ink}" />
+        <circle cx="${x}" cy="${y + 12}" r="6" fill="${ink}" />
+        <circle cx="${x + w / 2 - 18}" cy="${y + 12}" r="6" fill="${ink}" />
+        <!-- Alarm-LED -->
+        <circle cx="${x}" cy="${y + h / 2 - 16}" r="6" fill="#d83a2a" />
+        <!-- Clip / Trageband -->
+        <rect x="${x - 16}" y="${y - h / 2 - 22}" width="32" height="8" rx="2" fill="${ink}" />
+      </g>
+    `;
+  };
+}
+
+const iconCoWarn = makeWarngeraet("co");
+const iconExWarn = makeWarngeraet("ex");
+
+/** Auffangtrichter: konischer Trichter mit Auslaufrohr. */
+const iconAuffangtrichter: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Trichterbecken (Trapez) -->
+      <path d="M ${x - 70} ${y - 50} L ${x + 70} ${y - 50} L ${x + 16} ${y + 16} L ${x - 16} ${y + 16} Z" fill="${accent}" />
+      <!-- Oberer Rand (Ellipse) -->
+      <ellipse cx="${x}" cy="${y - 50}" rx="70" ry="12" fill="${accent}" />
+      <!-- Auslaufrohr -->
+      <rect x="${x - 12}" y="${y + 12}" width="24" height="38" fill="${accent}" />
+      <!-- Endkappe -->
+      <rect x="${x - 16}" y="${y + 50}" width="32" height="10" rx="2" fill="${ink}" />
+      <!-- Flüssigkeit oben -->
+      <ellipse cx="${x}" cy="${y - 46}" rx="60" ry="6" fill="#b8d8f0" />
+      <!-- Tropfen aus dem Rohr -->
+      <path d="M ${x - 2} ${y + 64} Q ${x} ${y + 74} ${x + 2} ${y + 64} Q ${x} ${y + 70} ${x - 2} ${y + 64} Z" fill="${ink}" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -1657,6 +1929,19 @@ ICON_REGISTRY.push(
   [/hygieneboard/, iconHygieneboard],
   [/stuetzkruemmer|stützkrümmer/, iconStuetzkruemmer],
   [/verteilerstueck|verteilerstück/, iconVerteilerstueck],
+  // Heck — spezifische vor generischen
+  [/kreiselpumpe|feuerloeschkreiselpumpe|feuerlöschkreiselpumpe/, iconKreiselpumpe],
+  [/druckbegrenzungsventil/, iconDruckbegrenzungsventil],
+  [/oelbindemittel|ölbindemittel/, iconOelbindemittel],
+  [/bindevlies/, iconBindevlies],
+  [/auffangwanne\s*klein/, iconAuffangwanneKlein],
+  [/auffangwanne\s*gross|auffangwanne\s*groß/, iconAuffangwanneGross],
+  [/leckdichtkissen/, iconLeckdichtkissen],
+  [/chemikalienschutzanzug|\bcsa\b/, iconCsa],
+  [/hitzeschutzanzug|hitzeschutz/, iconHitzeschutz],
+  [/co-warngeraet|co-warngerät/, iconCoWarn],
+  [/ex-warngeraet|ex-warngerät/, iconExWarn],
+  [/auffangtrichter/, iconAuffangtrichter],
 );
 
 generate();

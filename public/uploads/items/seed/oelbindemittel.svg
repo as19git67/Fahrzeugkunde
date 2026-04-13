@@ -36,16 +36,26 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f2b52f">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sackform -->
+      <path d="M 110 74 Q 130 60 160 60 Q 190 60 210 74 L 220 158 Q 220 164 212 164 L 108 164 Q 100 164 100 158 Z" fill="#f2b52f" />
+      <!-- Verschluss-Band oben -->
+      <rect x="130" y="60" width="60" height="10" rx="3" fill="#1a1a1a" />
+      <!-- Granulat (Punkte) -->
+      <circle cx="128" cy="100" r="2" fill="#1a1a1a" />
+      <circle cx="140" cy="106" r="2" fill="#1a1a1a" />
+      <circle cx="154" cy="96" r="2" fill="#1a1a1a" />
+      <circle cx="170" cy="104" r="2" fill="#1a1a1a" />
+      <circle cx="186" cy="94" r="2" fill="#1a1a1a" />
+      <circle cx="132" cy="122" r="2" fill="#1a1a1a" />
+      <circle cx="150" cy="128" r="2" fill="#1a1a1a" />
+      <circle cx="168" cy="124" r="2" fill="#1a1a1a" />
+      <circle cx="190" cy="118" r="2" fill="#1a1a1a" />
+      <circle cx="144" cy="146" r="2" fill="#1a1a1a" />
+      <circle cx="174" cy="144" r="2" fill="#1a1a1a" />
+      <!-- Etikett -->
+      <rect x="136" y="78" width="48" height="16" fill="#ffffff" />
+      <line x1="142" y1="86" x2="178" y2="86" stroke-width="1.6" />
     </g>
   
   </g>

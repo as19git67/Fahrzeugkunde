@@ -36,17 +36,28 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#9a5bd0">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
-    </g>
-  
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Gehäuse -->
+        <rect x="120" y="55" width="80" height="110" rx="8" fill="#9a5bd0" />
+        <!-- Display -->
+        <rect x="128" y="65" width="64" height="36" fill="#2a2a2a" />
+        
+          <!-- "CO"-Indikator (ohne Text: zwei Kreise) -->
+          <circle cx="146" cy="99" r="8" fill="none" stroke-width="2.4" />
+          <circle cx="174" cy="99" r="8" fill="none" stroke-width="2.4" />
+        
+        <!-- Sensorkopf oben -->
+        <rect x="136" y="39" width="48" height="16" rx="3" fill="#f5c330" />
+        <line x1="144" y1="47" x2="176" y2="47" stroke-width="1.6" />
+        <!-- Tasten -->
+        <circle cx="138" cy="122" r="6" fill="#1a1a1a" />
+        <circle cx="160" cy="122" r="6" fill="#1a1a1a" />
+        <circle cx="182" cy="122" r="6" fill="#1a1a1a" />
+        <!-- Alarm-LED -->
+        <circle cx="160" cy="149" r="6" fill="#d83a2a" />
+        <!-- Clip / Trageband -->
+        <rect x="144" y="33" width="32" height="8" rx="2" fill="#1a1a1a" />
+      </g>
+    
   </g>
 </svg>

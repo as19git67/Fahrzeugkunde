@@ -36,16 +36,19 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f2b52f">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Trichterbecken (Trapez) -->
+      <path d="M 90 60 L 230 60 L 176 126 L 144 126 Z" fill="#f2b52f" />
+      <!-- Oberer Rand (Ellipse) -->
+      <ellipse cx="160" cy="60" rx="70" ry="12" fill="#f2b52f" />
+      <!-- Auslaufrohr -->
+      <rect x="148" y="122" width="24" height="38" fill="#f2b52f" />
+      <!-- Endkappe -->
+      <rect x="144" y="160" width="32" height="10" rx="2" fill="#1a1a1a" />
+      <!-- Flüssigkeit oben -->
+      <ellipse cx="160" cy="64" rx="60" ry="6" fill="#b8d8f0" />
+      <!-- Tropfen aus dem Rohr -->
+      <path d="M 158 174 Q 160 184 162 174 Q 160 180 158 174 Z" fill="#1a1a1a" />
     </g>
   
   </g>

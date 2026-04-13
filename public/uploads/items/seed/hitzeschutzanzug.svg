@@ -36,17 +36,26 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f2b52f">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
-    </g>
-  
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Kapuze + Kopfbereich -->
+        <path d="M 138 50 Q 132 30 160 30 Q 188 30 182 50 Z" fill="#c9c9c9" />
+        <!-- Sichtfenster -->
+        <rect x="144" y="38" width="32" height="16" rx="3" fill="#ffffff" />
+        <!-- Rumpf + Beine -->
+        <path d="M 120 52 L 200 52 L 206 112 L 182 170 L 164 170 L 164 100 L 156 100 L 156 170 L 138 170 L 114 112 Z" fill="#c9c9c9" />
+        <!-- Arme -->
+        <rect x="98" y="66" width="22" height="56" rx="5" fill="#c9c9c9" />
+        <rect x="200" y="66" width="22" height="56" rx="5" fill="#c9c9c9" />
+        <!-- Handschuhe/Enden -->
+        <rect x="96" y="120" width="24" height="14" rx="3" fill="#1a1a1a" />
+        <rect x="200" y="120" width="24" height="14" rx="3" fill="#1a1a1a" />
+        
+          <!-- Reflex-Streifen für Hitzeschutz -->
+          <rect x="124" y="80" width="72" height="6" fill="#ffffff" />
+          <rect x="120" y="100" width="80" height="6" fill="#ffffff" />
+          <rect x="140" y="140" width="40" height="6" fill="#ffffff" />
+        
+      </g>
+    
   </g>
 </svg>

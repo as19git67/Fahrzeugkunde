@@ -36,16 +36,26 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#4a6fbf">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sockel -->
+      <rect x="90" y="154" width="140" height="14" rx="3" fill="#1a1a1a" />
+      <!-- Motor/Getriebeblock -->
+      <rect x="190" y="86" width="48" height="68" rx="4" fill="#4a6fbf" />
+      <line x1="198" y1="94" x2="198" y2="146" stroke-width="1.8" />
+      <line x1="210" y1="94" x2="210" y2="146" stroke-width="1.8" />
+      <line x1="222" y1="94" x2="222" y2="146" stroke-width="1.8" />
+      <!-- Pumpengehäuse (rund/spiralförmig) -->
+      <circle cx="150" cy="120" r="38" fill="#4a6fbf" />
+      <circle cx="150" cy="120" r="22" fill="#d0d0d0" />
+      <circle cx="150" cy="120" r="6" fill="#1a1a1a" />
+      <!-- Laufradspuren -->
+      <path d="M 150 114 Q 158 120 150 126 Q 142 120 150 114" fill="none" stroke-width="1.6" />
+      <!-- Saugflansch links -->
+      <rect x="80" y="104" width="34" height="32" fill="#4a6fbf" />
+      <rect x="74" y="98" width="14" height="44" rx="2" fill="#1a1a1a" />
+      <!-- Druckabgang oben -->
+      <rect x="140" y="66" width="24" height="26" fill="#4a6fbf" />
+      <rect x="134" y="56" width="36" height="14" rx="2" fill="#1a1a1a" />
     </g>
   
   </g>
