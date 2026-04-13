@@ -27,7 +27,10 @@ export default function CreatorPage() {
   const [renameValue, setRenameValue] = useState("");
 
   const loadVehicles = async () => {
-    const res = await fetch("/api/vehicles");
+    // cache: "no-store" verhindert, dass der Browser/Dev-Server die
+    // Fahrzeugliste nach einem Rename/Delete aus einem stale Cache liefert
+    // ("Leiche mit altem Namen").
+    const res = await fetch("/api/vehicles", { cache: "no-store" });
     const data = await res.json();
     setVehicles(data);
   };
@@ -154,7 +157,12 @@ export default function CreatorPage() {
         {selectedVehicle ? (
           <VehicleEditor
             vehicleId={selectedVehicle}
-            onBack={() => setSelectedVehicle(null)}
+            onBack={async () => {
+              // Liste neu laden, damit Umbenennungen im Editor direkt
+              // sichtbar werden und keine "Leiche" mit altem Namen bleibt.
+              setSelectedVehicle(null);
+              await loadVehicles();
+            }}
             onDeleted={async () => {
               setSelectedVehicle(null);
               await loadVehicles();

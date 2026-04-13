@@ -77,13 +77,15 @@ const SIDES = [
   { value: "front", label: "Vorne" },
 ];
 
-export function VehicleEditor({ vehicleId, onBack }: Props) {
+export function VehicleEditor({ vehicleId, onBack, onDeleted }: Props) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [activeTab, setActiveTab] = useState<"structure" | "items">("structure");
   const [loading, setLoading] = useState(true);
+  const [renamingVehicle, setRenamingVehicle] = useState(false);
+  const [vehicleRenameValue, setVehicleRenameValue] = useState("");
 
   const reload = async () => {
-    const res = await fetch(`/api/vehicles/${vehicleId}`);
+    const res = await fetch(`/api/vehicles/${vehicleId}`, { cache: "no-store" });
     const data = await res.json();
     setVehicle(data);
   };
@@ -96,11 +98,103 @@ export function VehicleEditor({ vehicleId, onBack }: Props) {
     return <div className="text-zinc-400 py-12 text-center">Lade...</div>;
   }
 
+  const startRenameVehicle = () => {
+    setVehicleRenameValue(vehicle.name);
+    setRenamingVehicle(true);
+  };
+  const cancelRenameVehicle = () => {
+    setRenamingVehicle(false);
+    setVehicleRenameValue("");
+  };
+  const submitRenameVehicle = async () => {
+    const name = vehicleRenameValue.trim();
+    if (!name || name === vehicle.name) {
+      cancelRenameVehicle();
+      return;
+    }
+    const res = await fetch(`/api/vehicles/${vehicleId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    if (res.ok) {
+      cancelRenameVehicle();
+      await reload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDeleteVehicle = async () => {
+    const ok = window.confirm(
+      `Fahrzeug "${vehicle.name}" wirklich löschen?\n\n` +
+      "Alle Ansichten, Fächer, Positionen, Kisten und Ausrüstungsgegenstände " +
+      "werden ebenfalls gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/vehicles/${vehicleId}`, { method: "DELETE" });
+    if (res.ok) {
+      if (onDeleted) onDeleted();
+      else onBack();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 flex-wrap">
         <button onClick={onBack} className="text-zinc-400 hover:text-white transition-colors">← Zurück</button>
-        <h2 className="text-2xl font-black">{vehicle.name}</h2>
+        {renamingVehicle ? (
+          <form
+            onSubmit={(e) => { e.preventDefault(); submitRenameVehicle(); }}
+            className="flex items-center gap-2 flex-1 min-w-0"
+          >
+            <input
+              type="text"
+              autoFocus
+              value={vehicleRenameValue}
+              onChange={(e) => setVehicleRenameValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape") cancelRenameVehicle(); }}
+              className="flex-1 bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-1.5 text-xl font-black text-white outline-none focus:border-red-400"
+            />
+            <button
+              type="submit"
+              className="bg-red-600 hover:bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-xl"
+            >
+              Speichern
+            </button>
+            <button
+              type="button"
+              onClick={cancelRenameVehicle}
+              className="text-zinc-400 hover:text-white px-2"
+            >
+              ✕
+            </button>
+          </form>
+        ) : (
+          <>
+            <h2 className="text-2xl font-black">{vehicle.name}</h2>
+            <button
+              onClick={startRenameVehicle}
+              title="Fahrzeug umbenennen"
+              aria-label="Fahrzeug umbenennen"
+              className="text-zinc-500 hover:text-white p-1 rounded transition-colors"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={handleDeleteVehicle}
+              title="Fahrzeug löschen"
+              aria-label="Fahrzeug löschen"
+              className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors"
+            >
+              🗑️
+            </button>
+          </>
+        )}
       </div>
 
       {/* Tabs */}
