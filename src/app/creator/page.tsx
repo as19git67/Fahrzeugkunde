@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginModal } from "@/components/ui/LoginModal";
 import { VehicleEditor } from "@/components/creator/VehicleEditor";
@@ -23,9 +23,14 @@ export default function CreatorPage() {
   const [creating, setCreating] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const loadVehicles = async () => {
-    const res = await fetch("/api/vehicles");
+    // cache: "no-store" verhindert, dass der Browser/Dev-Server die
+    // Fahrzeugliste nach einem Rename/Delete aus einem stale Cache liefert
+    // ("Leiche mit altem Namen").
+    const res = await fetch("/api/vehicles", { cache: "no-store" });
     const data = await res.json();
     setVehicles(data);
   };
@@ -74,6 +79,40 @@ export default function CreatorPage() {
     }
   };
 
+  const handleRenameSubmit = async (id: number) => {
+    const name = renameValue.trim();
+    if (!name) return;
+    const res = await fetch(`/api/vehicles/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    if (res.ok) {
+      await loadVehicles();
+      setRenamingId(null);
+      setRenameValue("");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDeleteVehicle = async (v: Vehicle) => {
+    const ok = window.confirm(
+      `Fahrzeug "${v.name}" wirklich löschen?\n\n` +
+      "Alle Ansichten, Fächer, Positionen, Kisten und Ausrüstungsgegenstände " +
+      "werden ebenfalls gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/vehicles/${v.id}`, { method: "DELETE" });
+    if (res.ok) {
+      await loadVehicles();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   if (loading) return null;
 
   if (!user) {
@@ -118,7 +157,16 @@ export default function CreatorPage() {
         {selectedVehicle ? (
           <VehicleEditor
             vehicleId={selectedVehicle}
-            onBack={() => setSelectedVehicle(null)}
+            onBack={async () => {
+              // Liste neu laden, damit Umbenennungen im Editor direkt
+              // sichtbar werden und keine "Leiche" mit altem Namen bleibt.
+              setSelectedVehicle(null);
+              await loadVehicles();
+            }}
+            onDeleted={async () => {
+              setSelectedVehicle(null);
+              await loadVehicles();
+            }}
           />
         ) : (
           <div className="flex flex-col gap-8">
@@ -180,20 +228,77 @@ export default function CreatorPage() {
                 <h2 className="text-lg font-bold mb-4">Bestehende Fahrzeuge</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {vehicles.map((v) => (
-                    <motion.button
+                    <div
                       key={v.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setSelectedVehicle(v.id)}
-                      className="bg-zinc-900 border border-zinc-800 hover:border-red-500/50 rounded-2xl p-5 text-left transition-all"
+                      className="bg-zinc-900 border border-zinc-800 hover:border-red-500/50 rounded-2xl p-5 flex flex-col gap-2 transition-all"
                     >
-                      <div className="text-3xl mb-2">🚒</div>
-                      <div className="font-bold text-white">{v.name}</div>
-                      {v.description && (
-                        <div className="text-zinc-500 text-sm mt-1">{v.description}</div>
+                      <div className="text-3xl">🚒</div>
+                      {renamingId === v.id ? (
+                        <form
+                          onSubmit={(e) => { e.preventDefault(); handleRenameSubmit(v.id); }}
+                          className="flex flex-col gap-2"
+                        >
+                          <input
+                            type="text"
+                            autoFocus
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-1.5 text-white text-sm outline-none focus:border-red-400"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="submit"
+                              className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-lg"
+                            >
+                              Speichern
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setRenamingId(null); setRenameValue(""); }}
+                              className="text-zinc-400 hover:text-white text-xs px-2"
+                            >
+                              Abbrechen
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="font-bold text-white">{v.name}</div>
+                          {v.description && (
+                            <div className="text-zinc-500 text-sm">{v.description}</div>
+                          )}
+                        </>
                       )}
-                      <div className="text-red-500 text-sm mt-3 font-semibold">Bearbeiten →</div>
-                    </motion.button>
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800">
+                        <motion.button
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => setSelectedVehicle(v.id)}
+                          className="text-red-500 text-sm font-semibold hover:text-red-400"
+                        >
+                          Bearbeiten →
+                        </motion.button>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => {
+                              setRenamingId(v.id);
+                              setRenameValue(v.name);
+                            }}
+                            title="Umbenennen"
+                            className="text-zinc-500 hover:text-white p-1 rounded transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => handleDeleteVehicle(v)}
+                            title="Löschen"
+                            className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

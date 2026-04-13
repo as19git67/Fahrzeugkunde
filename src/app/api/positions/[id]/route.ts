@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, compartments } from "@/db";
+import { db, positions } from "@/db";
 import { eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
@@ -12,8 +12,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const updates: Record<string, unknown> = {};
   if (typeof body.label === "string") updates.label = body.label;
-  if (typeof body.imagePath === "string" || body.imagePath === null)
-    updates.imagePath = body.imagePath;
   if (typeof body.hotspotX === "number" || body.hotspotX === null) updates.hotspotX = body.hotspotX;
   if (typeof body.hotspotY === "number" || body.hotspotY === null) updates.hotspotY = body.hotspotY;
   if (typeof body.hotspotW === "number" || body.hotspotW === null) updates.hotspotW = body.hotspotW;
@@ -24,12 +22,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "Keine Änderungen" }, { status: 400 });
   }
 
-  const [comp] = await db
-    .update(compartments)
+  const [pos] = await db
+    .update(positions)
     .set(updates)
-    .where(eq(compartments.id, parseInt(id)))
+    .where(eq(positions.id, parseInt(id)))
     .returning();
-  return NextResponse.json(comp);
+  return NextResponse.json(pos);
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -37,6 +35,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
 
   const { id } = await params;
-  await db.delete(compartments).where(eq(compartments.id, parseInt(id)));
+  await db.delete(positions).where(eq(positions.id, parseInt(id)));
   return NextResponse.json({ success: true });
 }

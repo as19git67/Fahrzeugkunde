@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -66,6 +67,7 @@ interface Vehicle {
 interface Props {
   vehicleId: number;
   onBack: () => void;
+  onDeleted?: () => void;
 }
 
 const SIDES = [
@@ -76,13 +78,15 @@ const SIDES = [
   { value: "front", label: "Vorne" },
 ];
 
-export function VehicleEditor({ vehicleId, onBack }: Props) {
+export function VehicleEditor({ vehicleId, onBack, onDeleted }: Props) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [activeTab, setActiveTab] = useState<"structure" | "items">("structure");
   const [loading, setLoading] = useState(true);
+  const [renamingVehicle, setRenamingVehicle] = useState(false);
+  const [vehicleRenameValue, setVehicleRenameValue] = useState("");
 
   const reload = async () => {
-    const res = await fetch(`/api/vehicles/${vehicleId}`);
+    const res = await fetch(`/api/vehicles/${vehicleId}`, { cache: "no-store" });
     const data = await res.json();
     setVehicle(data);
   };
@@ -95,11 +99,103 @@ export function VehicleEditor({ vehicleId, onBack }: Props) {
     return <div className="text-zinc-400 py-12 text-center">Lade...</div>;
   }
 
+  const startRenameVehicle = () => {
+    setVehicleRenameValue(vehicle.name);
+    setRenamingVehicle(true);
+  };
+  const cancelRenameVehicle = () => {
+    setRenamingVehicle(false);
+    setVehicleRenameValue("");
+  };
+  const submitRenameVehicle = async () => {
+    const name = vehicleRenameValue.trim();
+    if (!name || name === vehicle.name) {
+      cancelRenameVehicle();
+      return;
+    }
+    const res = await fetch(`/api/vehicles/${vehicleId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+    if (res.ok) {
+      cancelRenameVehicle();
+      await reload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDeleteVehicle = async () => {
+    const ok = window.confirm(
+      `Fahrzeug "${vehicle.name}" wirklich löschen?\n\n` +
+      "Alle Ansichten, Fächer, Positionen, Kisten und Ausrüstungsgegenstände " +
+      "werden ebenfalls gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/vehicles/${vehicleId}`, { method: "DELETE" });
+    if (res.ok) {
+      if (onDeleted) onDeleted();
+      else onBack();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 flex-wrap">
         <button onClick={onBack} className="text-zinc-400 hover:text-white transition-colors">← Zurück</button>
-        <h2 className="text-2xl font-black">{vehicle.name}</h2>
+        {renamingVehicle ? (
+          <form
+            onSubmit={(e) => { e.preventDefault(); submitRenameVehicle(); }}
+            className="flex items-center gap-2 flex-1 min-w-0"
+          >
+            <input
+              type="text"
+              autoFocus
+              value={vehicleRenameValue}
+              onChange={(e) => setVehicleRenameValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape") cancelRenameVehicle(); }}
+              className="flex-1 bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-1.5 text-xl font-black text-white outline-none focus:border-red-400"
+            />
+            <button
+              type="submit"
+              className="bg-red-600 hover:bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-xl"
+            >
+              Speichern
+            </button>
+            <button
+              type="button"
+              onClick={cancelRenameVehicle}
+              className="text-zinc-400 hover:text-white px-2"
+            >
+              ✕
+            </button>
+          </form>
+        ) : (
+          <>
+            <h2 className="text-2xl font-black">{vehicle.name}</h2>
+            <button
+              onClick={startRenameVehicle}
+              title="Fahrzeug umbenennen"
+              aria-label="Fahrzeug umbenennen"
+              className="text-zinc-500 hover:text-white p-1 rounded transition-colors"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={handleDeleteVehicle}
+              title="Fahrzeug löschen"
+              aria-label="Fahrzeug löschen"
+              className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors"
+            >
+              🗑️
+            </button>
+          </>
+        )}
       </div>
 
       {/* Tabs */}
@@ -142,6 +238,8 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
   const [newViewLabel, setNewViewLabel] = useState("Fahrzeug links");
   const [addingView, setAddingView] = useState(false);
   const [expandedView, setExpandedView] = useState<number | null>(null);
+  const [renamingViewId, setRenamingViewId] = useState<number | null>(null);
+  const [viewRenameValue, setViewRenameValue] = useState("");
 
   const handleAddView = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,11 +257,12 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
     fd.append("file", file);
     fd.append("folder", "views");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(`Upload fehlgeschlagen: ${data.error ?? res.statusText}`);
+      return;
+    }
     const { path } = await res.json();
-    await fetch(`/api/views/${viewId}/compartments`, {
-      // Nutze PATCH auf view direkt — wir patchen den View
-    });
-    // Für Einfachheit: View-Update via eigenen PATCH
     await fetch(`/api/vehicle-views/${viewId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -172,23 +271,118 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
     await onReload();
   };
 
+  const startRenameView = (id: number, label: string) => {
+    setRenamingViewId(id);
+    setViewRenameValue(label);
+  };
+  const cancelRenameView = () => {
+    setRenamingViewId(null);
+    setViewRenameValue("");
+  };
+  const submitRenameView = async (id: number) => {
+    const label = viewRenameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/vehicle-views/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRenameView();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDeleteView = async (view: VehicleView) => {
+    const ok = window.confirm(
+      `Fahrzeugseite "${view.label}" wirklich löschen?\n\n` +
+      "Alle zugehörigen Fächer, Positionen, Kisten und darin verorteten " +
+      "Gegenstände werden ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/vehicle-views/${view.id}`, { method: "DELETE" });
+    if (res.ok) {
+      if (expandedView === view.id) setExpandedView(null);
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Ansichten */}
       {vehicle.views.map((view) => (
         <div key={view.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          <button
-            onClick={() => setExpandedView(expandedView === view.id ? null : view.id)}
-            className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-white">{view.label}</span>
-              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                {view.compartments.length} Fächer
-              </span>
-            </div>
-            <span className="text-zinc-400">{expandedView === view.id ? "▲" : "▼"}</span>
-          </button>
+          <div className="flex items-center gap-2 p-4 hover:bg-zinc-800/50 transition-colors">
+            {renamingViewId === view.id ? (
+              <form
+                onSubmit={(e) => { e.preventDefault(); submitRenameView(view.id); }}
+                className="flex-1 flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  autoFocus
+                  value={viewRenameValue}
+                  onChange={(e) => setViewRenameValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") cancelRenameView(); }}
+                  className="flex-1 bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-1.5 text-white outline-none focus:border-red-400"
+                />
+                <button
+                  type="submit"
+                  className="bg-red-600 hover:bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-xl"
+                >
+                  Speichern
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelRenameView}
+                  className="text-zinc-400 hover:text-white px-2"
+                >
+                  ✕
+                </button>
+              </form>
+            ) : (
+              <>
+                <button
+                  onClick={() => setExpandedView(expandedView === view.id ? null : view.id)}
+                  className="flex-1 flex items-center gap-3 text-left"
+                >
+                  <span className="font-bold text-white">{view.label}</span>
+                  <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
+                    {view.compartments.length} Fächer
+                  </span>
+                </button>
+                <button
+                  onClick={() => startRenameView(view.id, view.label)}
+                  title="Fahrzeugseite umbenennen"
+                  aria-label="Fahrzeugseite umbenennen"
+                  className="text-zinc-500 hover:text-white p-1 rounded transition-colors"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => handleDeleteView(view)}
+                  title="Fahrzeugseite löschen"
+                  aria-label="Fahrzeugseite löschen"
+                  className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors"
+                >
+                  🗑️
+                </button>
+                <button
+                  onClick={() => setExpandedView(expandedView === view.id ? null : view.id)}
+                  className="text-zinc-400 p-1"
+                  aria-label={expandedView === view.id ? "Einklappen" : "Ausklappen"}
+                >
+                  {expandedView === view.id ? "▲" : "▼"}
+                </button>
+              </>
+            )}
+          </div>
 
           <AnimatePresence>
             {expandedView === view.id && (
@@ -204,6 +398,19 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
                     label="Fahrzeugseite Bild"
                     currentPath={view.imagePath}
                     onUpload={(file) => handleViewImage(view.id, file)}
+                    onRemove={async () => {
+                      const res = await fetch(`/api/vehicle-views/${view.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ imagePath: null }),
+                      });
+                      if (res.ok) {
+                        await onReload();
+                      } else {
+                        const data = await res.json().catch(() => ({}));
+                        alert(`Bild entfernen fehlgeschlagen: ${data.error ?? res.statusText}`);
+                      }
+                    }}
                   />
 
                   {/* Fächer */}
@@ -265,6 +472,8 @@ function CompartmentList({
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -283,6 +492,11 @@ function CompartmentList({
     fd.append("file", file);
     fd.append("folder", "compartments");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(`Upload fehlgeschlagen: ${data.error ?? res.statusText}`);
+      return;
+    }
     const { path } = await res.json();
     await fetch(`/api/compartments/${compId}`, {
       method: "PATCH",
@@ -292,18 +506,109 @@ function CompartmentList({
     await onReload();
   };
 
+  const startRename = (id: number, current: string) => {
+    setRenamingId(id);
+    setRenameValue(current);
+  };
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+  const submitRename = async (id: number) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/compartments/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRename();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDelete = async (comp: Compartment) => {
+    const ok = window.confirm(
+      `Fach "${comp.label}" wirklich löschen?\n\n` +
+      "Alle zugehörigen Positionen, Kisten und darin verorteten " +
+      "Gegenstände werden ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/compartments/${comp.id}`, { method: "DELETE" });
+    if (res.ok) {
+      if (expanded === comp.id) setExpanded(null);
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <h4 className="text-sm font-semibold text-zinc-400">Fächer / Rolladen</h4>
       {compartments.map((c) => (
         <div key={c.id} className="bg-zinc-800 rounded-xl overflow-hidden">
-          <button
-            onClick={() => setExpanded(expanded === c.id ? null : c.id)}
-            className="w-full flex items-center justify-between px-4 py-2 hover:bg-zinc-700/50 transition-colors text-left"
-          >
-            <span className="font-semibold text-white">{c.label}</span>
-            <span className="text-xs text-zinc-500">{c.positions.length} Positionen</span>
-          </button>
+          <div className="flex items-center gap-1 px-4 py-2 hover:bg-zinc-700/50 transition-colors">
+            {renamingId === c.id ? (
+              <form
+                onSubmit={(e) => { e.preventDefault(); submitRename(c.id); }}
+                className="flex-1 flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") cancelRename(); }}
+                  className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-sm outline-none focus:border-red-400"
+                />
+                <button
+                  type="submit"
+                  className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+                >
+                  Speichern
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelRename}
+                  className="text-zinc-400 hover:text-white text-xs px-1"
+                >
+                  ✕
+                </button>
+              </form>
+            ) : (
+              <>
+                <button
+                  onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                  className="flex-1 flex items-center justify-between text-left"
+                >
+                  <span className="font-semibold text-white">{c.label}</span>
+                  <span className="text-xs text-zinc-500">{c.positions.length} Positionen</span>
+                </button>
+                <button
+                  onClick={() => startRename(c.id, c.label)}
+                  title="Fach umbenennen"
+                  aria-label="Fach umbenennen"
+                  className="text-zinc-500 hover:text-white text-sm p-1 rounded transition-colors"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => handleDelete(c)}
+                  title="Fach löschen"
+                  aria-label="Fach löschen"
+                  className="text-zinc-500 hover:text-red-400 text-sm p-1 rounded transition-colors"
+                >
+                  🗑️
+                </button>
+              </>
+            )}
+          </div>
           <AnimatePresence>
             {expanded === c.id && (
               <motion.div
@@ -317,6 +622,19 @@ function CompartmentList({
                     label="Fach-Bild (geöffnet)"
                     currentPath={c.imagePath}
                     onUpload={(file) => handleCompImage(c.id, file)}
+                    onRemove={async () => {
+                      const res = await fetch(`/api/compartments/${c.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ imagePath: null }),
+                      });
+                      if (res.ok) {
+                        await onReload();
+                      } else {
+                        const data = await res.json().catch(() => ({}));
+                        alert(`Bild entfernen fehlgeschlagen: ${data.error ?? res.statusText}`);
+                      }
+                    }}
                   />
                   <PositionList compartmentId={c.id} positions={c.positions} onReload={onReload} />
                 </div>
@@ -359,6 +677,8 @@ function PositionList({
 }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -372,12 +692,100 @@ function PositionList({
     await onReload();
   };
 
+  const startRename = (id: number, current: string) => {
+    setRenamingId(id);
+    setRenameValue(current);
+  };
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+  const submitRename = async (id: number) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/positions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRename();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDelete = async (pos: Position) => {
+    const ok = window.confirm(
+      `Position "${pos.label}" wirklich löschen?\n\n` +
+      "Alle zugehörigen Kisten und darin verorteten Gegenstände werden " +
+      "ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/positions/${pos.id}`, { method: "DELETE" });
+    if (res.ok) {
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
       <h5 className="text-xs text-zinc-500 font-semibold">Positionen (Ort)</h5>
       {positions.map((p) => (
         <div key={p.id} className="flex flex-col gap-1 bg-zinc-700/50 rounded-lg px-2 py-1">
-          <div className="text-sm text-zinc-300">{p.label}</div>
+          {renamingId === p.id ? (
+            <form
+              onSubmit={(e) => { e.preventDefault(); submitRename(p.id); }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Escape") cancelRename(); }}
+                className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-red-400"
+              />
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+              >
+                OK
+              </button>
+              <button
+                type="button"
+                onClick={cancelRename}
+                className="text-zinc-400 hover:text-white text-xs px-1"
+              >
+                ✕
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-1">
+              <div className="flex-1 text-sm text-zinc-300">{p.label}</div>
+              <button
+                onClick={() => startRename(p.id, p.label)}
+                title="Position umbenennen"
+                aria-label="Position umbenennen"
+                className="text-zinc-500 hover:text-white text-xs p-0.5 rounded transition-colors"
+              >
+                ✏️
+              </button>
+              <button
+                onClick={() => handleDelete(p)}
+                title="Position löschen"
+                aria-label="Position löschen"
+                className="text-zinc-500 hover:text-red-400 text-xs p-0.5 rounded transition-colors"
+              >
+                🗑️
+              </button>
+            </div>
+          )}
           <BoxList positionId={p.id} boxes={p.boxes} onReload={onReload} />
         </div>
       ))}
@@ -414,6 +822,8 @@ function BoxList({
 }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -427,12 +837,98 @@ function BoxList({
     await onReload();
   };
 
+  const startRename = (id: number, current: string) => {
+    setRenamingId(id);
+    setRenameValue(current);
+  };
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+  const submitRename = async (id: number) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/boxes/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRename();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDelete = async (box: Box) => {
+    const ok = window.confirm(
+      `Kiste "${box.label}" wirklich löschen?\n\n` +
+      "Alle darin verorteten Gegenstände werden ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/boxes/${box.id}`, { method: "DELETE" });
+    if (res.ok) {
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1 pl-3 border-l border-zinc-600/60">
       {boxes.map((b) => (
-        <div key={b.id} className="text-xs text-zinc-400">
-          📦 {b.label}
-        </div>
+        renamingId === b.id ? (
+          <form
+            key={b.id}
+            onSubmit={(e) => { e.preventDefault(); submitRename(b.id); }}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="text"
+              autoFocus
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape") cancelRename(); }}
+              className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-orange-400"
+            />
+            <button
+              type="submit"
+              className="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+            >
+              OK
+            </button>
+            <button
+              type="button"
+              onClick={cancelRename}
+              className="text-zinc-400 hover:text-white text-xs px-1"
+            >
+              ✕
+            </button>
+          </form>
+        ) : (
+          <div key={b.id} className="flex items-center gap-1 text-xs text-zinc-400">
+            <span className="flex-1">📦 {b.label}</span>
+            <button
+              onClick={() => startRename(b.id, b.label)}
+              title="Kiste umbenennen"
+              aria-label="Kiste umbenennen"
+              className="text-zinc-500 hover:text-white p-0.5 rounded transition-colors"
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => handleDelete(b)}
+              title="Kiste löschen"
+              aria-label="Kiste löschen"
+              className="text-zinc-500 hover:text-red-400 p-0.5 rounded transition-colors"
+            >
+              🗑️
+            </button>
+          </div>
+        )
       ))}
       {adding ? (
         <form onSubmit={handleAdd} className="flex gap-2">
@@ -498,9 +994,11 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
             onClick={() => { setEditingItem(item); setShowForm(true); }}
           >
             {item.imagePath ? (
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
-                <Image src={item.imagePath} alt={item.name} fill className="object-contain p-1" sizes="64px" />
-              </div>
+              <HoverPreviewImage src={item.imagePath} alt={item.name}>
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+                  <Image src={item.imagePath} alt={item.name} fill className="object-contain p-1" sizes="64px" />
+                </div>
+              </HoverPreviewImage>
             ) : (
               <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
             )}
@@ -764,6 +1262,7 @@ function ItemForm({
             label=""
             currentPath={imagePath}
             onUpload={handleImageUpload}
+            onRemove={() => setImagePath("")}
             uploading={uploading}
           />
         </div>
@@ -795,11 +1294,13 @@ function ImageUpload({
   label,
   currentPath,
   onUpload,
+  onRemove,
   uploading = false,
 }: {
   label: string;
   currentPath: string | null;
   onUpload: (file: File) => void;
+  onRemove?: () => void;
   uploading?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -812,17 +1313,35 @@ function ImageUpload({
         className="border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl p-3 cursor-pointer transition-colors flex items-center gap-3"
       >
         {currentPath ? (
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
-            <Image src={currentPath} alt="Vorschau" fill className="object-contain" sizes="48px" />
-          </div>
+          <HoverPreviewImage src={currentPath} alt="Vorschau">
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+              <Image src={currentPath} alt="Vorschau" fill className="object-contain" sizes="48px" />
+            </div>
+          </HoverPreviewImage>
         ) : (
           <div className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500 text-xl flex-shrink-0">
             📷
           </div>
         )}
-        <span className="text-zinc-500 text-sm">
+        <span className="text-zinc-500 text-sm flex-1">
           {uploading ? "Lade hoch..." : currentPath ? "Bild ersetzen" : "Bild hochladen"}
         </span>
+        {currentPath && onRemove && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm("Bild wirklich entfernen?")) {
+                onRemove();
+              }
+            }}
+            title="Bild entfernen"
+            aria-label="Bild entfernen"
+            className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors flex-shrink-0"
+          >
+            🗑️
+          </button>
+        )}
       </div>
       <input
         ref={inputRef}
@@ -835,5 +1354,67 @@ function ImageUpload({
         }}
       />
     </div>
+  );
+}
+
+// Zeigt beim Hover über ein Thumbnail eine größere Vorschau als Portal-Overlay.
+// Portal, damit die Vorschau nicht von `overflow-hidden`-Parents (Karten,
+// Ansichten, Akkordeons) abgeschnitten wird.
+function HoverPreviewImage({
+  src,
+  alt,
+  children,
+}: {
+  src: string;
+  alt: string;
+  children: React.ReactNode;
+}) {
+  const [hover, setHover] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  const PREVIEW = 384;
+  const MARGIN = 16;
+
+  let left = pos.x + MARGIN;
+  let top = pos.y + MARGIN;
+  if (typeof window !== "undefined") {
+    if (left + PREVIEW > window.innerWidth) left = pos.x - PREVIEW - MARGIN;
+    if (top + PREVIEW > window.innerHeight) top = pos.y - PREVIEW - MARGIN;
+    if (left < 8) left = 8;
+    if (top < 8) top = 8;
+  }
+
+  return (
+    <>
+      <span
+        onMouseEnter={(e) => {
+          setPos({ x: e.clientX, y: e.clientY });
+          setHover(true);
+        }}
+        onMouseMove={(e) => setPos({ x: e.clientX, y: e.clientY })}
+        onMouseLeave={() => setHover(false)}
+        className="inline-block cursor-zoom-in"
+      >
+        {children}
+      </span>
+      {hover &&
+        createPortal(
+          <div
+            className="fixed z-[100] pointer-events-none"
+            style={{ top, left, width: PREVIEW, height: PREVIEW }}
+          >
+            <div className="relative w-full h-full bg-zinc-900 border border-zinc-600 rounded-xl shadow-2xl overflow-hidden">
+              <Image
+                src={src}
+                alt={alt}
+                fill
+                className="object-contain"
+                sizes={`${PREVIEW}px`}
+              />
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
