@@ -36,16 +36,18 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#78a82f">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Leiter (vertikal) -->
+      
+    <polygon points="173.0,170.0 173.0,70.0 147.0,70.0 147.0,170.0" fill="#78a82f" />
+  <line x1="171.0" y1="155.7" x2="149.0" y2="155.7" stroke="#1a1a1a" stroke-width="2.4" /><line x1="171.0" y1="141.4" x2="149.0" y2="141.4" stroke="#1a1a1a" stroke-width="2.4" /><line x1="171.0" y1="127.1" x2="149.0" y2="127.1" stroke="#1a1a1a" stroke-width="2.4" /><line x1="171.0" y1="112.9" x2="149.0" y2="112.9" stroke="#1a1a1a" stroke-width="2.4" /><line x1="171.0" y1="98.6" x2="149.0" y2="98.6" stroke="#1a1a1a" stroke-width="2.4" /><line x1="171.0" y1="84.3" x2="149.0" y2="84.3" stroke="#1a1a1a" stroke-width="2.4" />
+      <!-- Großer Haken oben -->
+      <path d="M 148 70 L 148 40 Q 148 28 160 28 Q 196 28 196 64 L 184 64 Q 184 40 160 40 L 160 70 Z" fill="#1a1a1a" />
+      <!-- Haken-Dornen (Zähne) -->
+      <path d="M 196 52 L 204 48 L 200 58 Z" fill="#1a1a1a" />
+      <path d="M 196 60 L 204 62 L 198 66 Z" fill="#1a1a1a" />
+      <!-- Fußkappen -->
+      <rect x="144" y="168" width="32" height="8" rx="2" fill="#1a1a1a" />
     </g>
   
   </g>

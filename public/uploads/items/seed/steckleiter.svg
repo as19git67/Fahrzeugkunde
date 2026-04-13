@@ -36,16 +36,22 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#78a82f">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      
+    <polygon points="76.0,76.0 244.0,76.0 244.0,60.0 76.0,60.0" fill="#78a82f" />
+  <line x1="104.0" y1="74.0" x2="104.0" y2="62.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="132.0" y1="74.0" x2="132.0" y2="62.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="160.0" y1="74.0" x2="160.0" y2="62.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="188.0" y1="74.0" x2="188.0" y2="62.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="216.0" y1="74.0" x2="216.0" y2="62.0" stroke="#1a1a1a" stroke-width="2.4" />
+      
+    <polygon points="76.0,100.0 244.0,100.0 244.0,84.0 76.0,84.0" fill="#78a82f" />
+  <line x1="104.0" y1="98.0" x2="104.0" y2="86.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="132.0" y1="98.0" x2="132.0" y2="86.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="160.0" y1="98.0" x2="160.0" y2="86.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="188.0" y1="98.0" x2="188.0" y2="86.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="216.0" y1="98.0" x2="216.0" y2="86.0" stroke="#1a1a1a" stroke-width="2.4" />
+      
+    <polygon points="76.0,124.0 244.0,124.0 244.0,108.0 76.0,108.0" fill="#78a82f" />
+  <line x1="104.0" y1="122.0" x2="104.0" y2="110.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="132.0" y1="122.0" x2="132.0" y2="110.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="160.0" y1="122.0" x2="160.0" y2="110.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="188.0" y1="122.0" x2="188.0" y2="110.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="216.0" y1="122.0" x2="216.0" y2="110.0" stroke="#1a1a1a" stroke-width="2.4" />
+      
+    <polygon points="76.0,148.0 244.0,148.0 244.0,132.0 76.0,132.0" fill="#78a82f" />
+  <line x1="104.0" y1="146.0" x2="104.0" y2="134.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="132.0" y1="146.0" x2="132.0" y2="134.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="160.0" y1="146.0" x2="160.0" y2="134.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="188.0" y1="146.0" x2="188.0" y2="134.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="216.0" y1="146.0" x2="216.0" y2="134.0" stroke="#1a1a1a" stroke-width="2.4" />
+      <!-- Verbindungsklammern rechts -->
+      <rect x="242" y="64" width="8" height="84" rx="2" fill="#1a1a1a" />
+      <rect x="70" y="64" width="8" height="84" rx="2" fill="#1a1a1a" />
     </g>
   
   </g>

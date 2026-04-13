@@ -2035,6 +2035,137 @@ const iconSignalpfeife: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- Dach Icons --------------------------------------------------------------
+
+/** Leiter-Helfer: Zwei parallele Holme mit Sprossen dazwischen. */
+function ladderRungs(
+  x1: number, y1: number, x2: number, y2: number,
+  width: number, rungs: number, ink: string, color: string,
+): string {
+  // Leiter als horizontales Rechteck entlang Hauptachse,
+  // rungs = Anzahl Sprossen
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const ux = dx / len, uy = dy / len;      // unit along axis
+  const nx = -uy, ny = ux;                  // unit normal
+  const h = width / 2;
+  // Holme
+  const ax = x1 + nx * h, ay = y1 + ny * h;
+  const bx = x2 + nx * h, by = y2 + ny * h;
+  const cx = x1 - nx * h, cy = y1 - ny * h;
+  const dxa = x2 - nx * h, dya = y2 - ny * h;
+  let svg = `
+    <polygon points="${ax.toFixed(1)},${ay.toFixed(1)} ${bx.toFixed(1)},${by.toFixed(1)} ${dxa.toFixed(1)},${dya.toFixed(1)} ${cx.toFixed(1)},${cy.toFixed(1)}" fill="${color}" />
+  `;
+  for (let i = 0; i < rungs; i++) {
+    const t = (i + 1) / (rungs + 1);
+    const mx = x1 + dx * t, my = y1 + dy * t;
+    const rx1 = mx + nx * (h - 2), ry1 = my + ny * (h - 2);
+    const rx2 = mx - nx * (h - 2), ry2 = my - ny * (h - 2);
+    svg += `<line x1="${rx1.toFixed(1)}" y1="${ry1.toFixed(1)}" x2="${rx2.toFixed(1)}" y2="${ry2.toFixed(1)}" stroke="${ink}" stroke-width="2.4" />`;
+  }
+  return svg;
+}
+
+/** Steckleiter: 4 Leiterteile gestapelt nebeneinander. */
+const iconSteckleiter: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      ${ladderRungs(x - 84, y - 42, x + 84, y - 42, 16, 5, ink, accent)}
+      ${ladderRungs(x - 84, y - 18, x + 84, y - 18, 16, 5, ink, accent)}
+      ${ladderRungs(x - 84, y + 6, x + 84, y + 6, 16, 5, ink, accent)}
+      ${ladderRungs(x - 84, y + 30, x + 84, y + 30, 16, 5, ink, accent)}
+      <!-- Verbindungsklammern rechts -->
+      <rect x="${x + 82}" y="${y - 46}" width="8" height="84" rx="2" fill="${ink}" />
+      <rect x="${x - 90}" y="${y - 46}" width="8" height="84" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Schiebleiter: 3 ineinandergeschobene Teile (versetzt) mit Seilzug. */
+const iconSchiebleiter: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Hauptleiter (unten, lang) -->
+      ${ladderRungs(x - 90, y + 30, x + 90, y + 30, 22, 8, ink, accent)}
+      <!-- Ausziehteil 1 (versetzt hochgezogen) -->
+      ${ladderRungs(x - 70, y + 4, x + 90, y + 4, 18, 7, ink, accent)}
+      <!-- Ausziehteil 2 (weiter hochgezogen) -->
+      ${ladderRungs(x - 50, y - 22, x + 90, y - 22, 14, 6, ink, accent)}
+      <!-- Seilzug-Rolle oben rechts -->
+      <circle cx="${x + 90}" cy="${y - 30}" r="6" fill="${ink}" />
+      <!-- Seil -->
+      <path d="M ${x + 84} ${y - 30} L ${x - 60} ${y + 36}" stroke-width="1.6" />
+      <!-- Stützen -->
+      <rect x="${x - 94}" y="${y + 20}" width="8" height="28" rx="2" fill="${ink}" />
+      <rect x="${x + 86}" y="${y + 20}" width="8" height="28" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Klappleiter: A-förmige Klappleiter mit Scharnier und Spreize. */
+const iconKlappleiter: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Linke Seite -->
+      ${ladderRungs(x - 50, y + 54, x - 10, y - 58, 14, 5, ink, accent)}
+      <!-- Rechte Seite -->
+      ${ladderRungs(x + 50, y + 54, x + 10, y - 58, 14, 5, ink, accent)}
+      <!-- Scharnier oben -->
+      <circle cx="${x}" cy="${y - 58}" r="6" fill="${ink}" />
+      <!-- Spreizsicherung (Kette/Strebe) -->
+      <path d="M ${x - 26} ${y + 14} L ${x + 26} ${y + 14}" stroke-width="2" stroke-dasharray="4 3" />
+      <!-- Füße -->
+      <rect x="${x - 58}" y="${y + 54}" width="14" height="8" rx="2" fill="${ink}" />
+      <rect x="${x + 44}" y="${y + 54}" width="14" height="8" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Hakenleiter: schmale Leiter mit großem Haken am oberen Ende. */
+const iconHakenleiter: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Leiter (vertikal) -->
+      ${ladderRungs(x, y + 60, x, y - 40, 26, 6, ink, accent)}
+      <!-- Großer Haken oben -->
+      <path d="M ${x - 12} ${y - 40} L ${x - 12} ${y - 70} Q ${x - 12} ${y - 82} ${x} ${y - 82} Q ${x + 36} ${y - 82} ${x + 36} ${y - 46} L ${x + 24} ${y - 46} Q ${x + 24} ${y - 70} ${x} ${y - 70} L ${x} ${y - 40} Z" fill="${ink}" />
+      <!-- Haken-Dornen (Zähne) -->
+      <path d="M ${x + 36} ${y - 58} L ${x + 44} ${y - 62} L ${x + 40} ${y - 52} Z" fill="${ink}" />
+      <path d="M ${x + 36} ${y - 50} L ${x + 44} ${y - 48} L ${x + 38} ${y - 44} Z" fill="${ink}" />
+      <!-- Fußkappen -->
+      <rect x="${x - 16}" y="${y + 58}" width="32" height="8" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Sprungpolster: großes rechteckiges Polster mit Warnkreuz. */
+const iconSprungpolster: IconFn = ({ ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Unterer Kern (dicker) -->
+      <rect x="${x - 88}" y="${y - 10}" width="176" height="54" rx="14" fill="#d83a2a" />
+      <!-- Oberer Kern (dünner) -->
+      <rect x="${x - 82}" y="${y - 36}" width="164" height="28" rx="10" fill="#d83a2a" />
+      <!-- Zielkreuz obere Mitte -->
+      <rect x="${x - 8}" y="${y - 30}" width="16" height="60" fill="#ffffff" />
+      <rect x="${x - 30}" y="${y - 6}" width="60" height="14" fill="#ffffff" />
+      <!-- Kantenriffelung -->
+      <line x1="${x - 82}" y1="${y - 10}" x2="${x + 82}" y2="${y - 10}" stroke-width="1.8" />
+      <line x1="${x - 72}" y1="${y + 8}" x2="${x + 72}" y2="${y + 8}" stroke-width="1.4" stroke-dasharray="5 4" />
+      <line x1="${x - 72}" y1="${y + 28}" x2="${x + 72}" y2="${y + 28}" stroke-width="1.4" stroke-dasharray="5 4" />
+      <!-- Tragegriffe -->
+      <path d="M ${x - 92} ${y + 8} Q ${x - 108} ${y + 16} ${x - 92} ${y + 24}" fill="none" stroke-width="4" />
+      <path d="M ${x + 92} ${y + 8} Q ${x + 108} ${y + 16} ${x + 92} ${y + 24}" fill="none" stroke-width="4" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -2267,6 +2398,12 @@ ICON_REGISTRY.push(
   [/handfunkgeraet|handfunkgerät/, iconHandfunk],
   [/waermebildkamera|wärmebildkamera/, iconWaermebildkamera],
   [/signalpfeife/, iconSignalpfeife],
+  // Dach — spezifische Leitern vor generischem "leiter"
+  [/steckleiter/, iconSteckleiter],
+  [/schiebleiter/, iconSchiebleiter],
+  [/klappleiter/, iconKlappleiter],
+  [/hakenleiter/, iconHakenleiter],
+  [/sprungpolster/, iconSprungpolster],
 );
 
 generate();
