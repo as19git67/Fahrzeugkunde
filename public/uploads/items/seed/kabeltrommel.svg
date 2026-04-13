@@ -36,16 +36,23 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f5c330">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rahmen -->
+      <path d="M 100 144 L 110 76 L 210 76 L 220 144" fill="none" stroke-width="4" />
+      <line x1="96" y1="144" x2="224" y2="144" stroke-width="4" />
+      <!-- Tragegriff oben -->
+      <path d="M 140 76 Q 160 56 180 76" fill="none" stroke-width="4" />
+      <!-- Trommel (Seitenscheibe) -->
+      <circle cx="160" cy="114" r="36" fill="#f5c330" />
+      <circle cx="160" cy="114" r="28" fill="none" stroke-width="1.6" />
+      <circle cx="160" cy="114" r="18" fill="none" stroke-width="1.6" />
+      <!-- Nabe/Kurbel -->
+      <circle cx="160" cy="114" r="6" fill="#1a1a1a" />
+      <line x1="160" y1="114" x2="178" y2="104" stroke-width="3" />
+      <circle cx="178" cy="104" r="3.5" fill="#1a1a1a" />
+      <!-- Steckdose -->
+      <rect x="106" y="102" width="16" height="22" rx="2" fill="#1a1a1a" />
+      <circle cx="114" cy="113" r="2" fill="#f5c330" />
     </g>
   
   </g>
