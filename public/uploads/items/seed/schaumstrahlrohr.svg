@@ -36,16 +36,27 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#6aa0ff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kupplung links -->
+      <rect x="80" y="96" width="14" height="28" rx="2" fill="#1a1a1a" />
+      <!-- Rohrstück schmal -->
+      <rect x="94" y="100" width="30" height="20" fill="#6aa0ff" />
+      <!-- Hebel/Absperrung -->
+      <rect x="110" y="82" width="8" height="18" fill="#1a1a1a" />
+      <!-- Mischkammer (breiter) -->
+      <rect x="124" y="92" width="30" height="36" rx="4" fill="#6aa0ff" />
+      <!-- Luftansaugöffnungen -->
+      <circle cx="136" cy="106" r="3" fill="#1a1a1a" />
+      <circle cx="146" cy="106" r="3" fill="#1a1a1a" />
+      <circle cx="136" cy="118" r="3" fill="#1a1a1a" />
+      <circle cx="146" cy="118" r="3" fill="#1a1a1a" />
+      <!-- Konus nach rechts -->
+      <path d="M 154 92 L 220 70 L 220 150 L 154 128 Z" fill="#6aa0ff" />
+      <!-- Sprühmuster / Schaum-Blasen -->
+      <circle cx="230" cy="80" r="6" fill="none" stroke-width="2.4" />
+      <circle cx="240" cy="96" r="5" fill="none" stroke-width="2.4" />
+      <circle cx="244" cy="116" r="7" fill="none" stroke-width="2.4" />
+      <circle cx="234" cy="136" r="5" fill="none" stroke-width="2.4" />
     </g>
   
   </g>

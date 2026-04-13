@@ -36,16 +36,22 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#d83a2a">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Eimer (leicht konisch) -->
+      <path d="M 114 116 L 124 166 L 196 166 L 206 116 Z" fill="#d83a2a" />
+      <!-- Eimer-Rand -->
+      <rect x="112" y="110" width="96" height="10" rx="3" fill="#1a1a1a" />
+      <!-- Tragebügel -->
+      <path d="M 120 114 Q 160 80 200 114" fill="none" stroke-width="3.5" />
+      <!-- Handpumpe (Zylinder) -->
+      <rect x="150" y="50" width="20" height="50" fill="#1a1a1a" />
+      <!-- Pumpenkolben-Griff -->
+      <rect x="142" y="40" width="36" height="10" rx="3" fill="#d83a2a" />
+      <!-- Sprühlanze -->
+      <path d="M 170 80 L 230 72" stroke-width="4" />
+      <path d="M 224 66 L 244 72 L 224 78 Z" fill="#1a1a1a" />
+      <!-- Wasserlinie -->
+      <line x1="120" y1="142" x2="200" y2="142" stroke-width="1.6" stroke-dasharray="5 4" />
     </g>
   
   </g>

@@ -1077,6 +1077,209 @@ const iconSammelstueck: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- G4 Icons ----------------------------------------------------------------
+
+/** Schaummittelbehälter: Kanister 20 L mit Schraubverschluss und Griff. */
+const iconSchaummittel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus (Kanister) -->
+      <path d="M ${x - 44} ${y - 32} L ${x - 44} ${y + 54} L ${x + 44} ${y + 54} L ${x + 44} ${y - 32} L ${x + 20} ${y - 32} L ${x + 20} ${y - 50} L ${x - 4} ${y - 50} L ${x - 4} ${y - 32} Z" fill="${accent}" />
+      <!-- Schraubverschluss -->
+      <rect x="${x - 6}" y="${y - 60}" width="28" height="12" rx="2" fill="${ink}" />
+      <line x1="${x - 4}" y1="${y - 54}" x2="${x + 20}" y2="${y - 54}" stroke-width="1.6" />
+      <!-- Tragegriff integriert (Öffnung) -->
+      <rect x="${x - 36}" y="${y - 22}" width="24" height="10" rx="3" fill="#f7f1e1" />
+      <!-- Etikett -->
+      <rect x="${x - 32}" y="${y + 6}" width="64" height="32" fill="#ffffff" />
+      <!-- Schaum-Blasen auf Etikett -->
+      <circle cx="${x - 14}" cy="${y + 22}" r="6" fill="none" stroke-width="2.4" />
+      <circle cx="${x + 2}" cy="${y + 16}" r="5" fill="none" stroke-width="2.4" />
+      <circle cx="${x + 14}" cy="${y + 26}" r="4" fill="none" stroke-width="2.4" />
+    </g>
+  `;
+};
+
+/** Feuerlöscher-Factory. */
+function makeLoescher(body: string, horn: "nozzle" | "co2" | "water"): IconFn {
+  return ({ ink, cx, cy }) => {
+    const x = cx, y = cy;
+    const hornMarkup = horn === "co2"
+      ? `
+          <!-- CO2-Schneehorn -->
+          <path d="M ${x + 24} ${y - 38} L ${x + 58} ${y - 18} L ${x + 58} ${y - 2} L ${x + 78} ${y + 10} L ${x + 60} ${y + 14} L ${x + 52} ${y - 4} L ${x + 22} ${y - 20} Z" fill="${ink}" />
+        `
+      : horn === "water"
+      ? `
+          <!-- Schlauch mit Sprühkopf -->
+          <path d="M ${x + 22} ${y - 30} Q ${x + 50} ${y - 20} ${x + 62} ${y + 10}" fill="none" stroke-width="4" />
+          <rect x="${x + 54}" y="${y + 8}" width="16" height="12" rx="2" fill="${ink}" />
+        `
+      : `
+          <!-- Pulver-Düse -->
+          <path d="M ${x + 22} ${y - 30} Q ${x + 46} ${y - 22} ${x + 56} ${y - 2}" fill="none" stroke-width="4" />
+          <path d="M ${x + 50} ${y - 6} L ${x + 64} ${y + 2} L ${x + 52} ${y + 6} Z" fill="${ink}" />
+        `;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Flaschenkörper -->
+        <path d="M ${x - 30} ${y - 30} Q ${x - 30} ${y - 42} ${x - 18} ${y - 42} L ${x + 18} ${y - 42} Q ${x + 30} ${y - 42} ${x + 30} ${y - 30} L ${x + 30} ${y + 52} Q ${x + 30} ${y + 60} ${x + 22} ${y + 60} L ${x - 22} ${y + 60} Q ${x - 30} ${y + 60} ${x - 30} ${y + 52} Z" fill="${body}" />
+        <!-- Etikett -->
+        <rect x="${x - 24}" y="${y + 6}" width="48" height="28" fill="#ffffff" />
+        <line x1="${x - 20}" y1="${y + 14}" x2="${x + 20}" y2="${y + 14}" stroke-width="1.4" />
+        <line x1="${x - 20}" y1="${y + 22}" x2="${x + 10}" y2="${y + 22}" stroke-width="1.4" />
+        <!-- Ventilkopf -->
+        <rect x="${x - 14}" y="${y - 50}" width="28" height="12" rx="2" fill="${ink}" />
+        <!-- Handhebel -->
+        <path d="M ${x - 10} ${y - 50} L ${x + 20} ${y - 60} L ${x + 22} ${y - 54}" fill="${ink}" />
+        <!-- Manometer -->
+        <circle cx="${x - 20}" cy="${y - 32}" r="6" fill="#ffffff" />
+        ${hornMarkup}
+      </g>
+    `;
+  };
+}
+
+const iconPulverloescher = makeLoescher("#d83a2a", "nozzle");
+const iconCo2loescher = makeLoescher("#1a1a1a", "co2");
+const iconWasserloescher = makeLoescher("#2e8bff", "water");
+
+/** Kübelspritze: Eimer mit Handpumpe. */
+const iconKuebelspritze: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Eimer (leicht konisch) -->
+      <path d="M ${x - 46} ${y + 6} L ${x - 36} ${y + 56} L ${x + 36} ${y + 56} L ${x + 46} ${y + 6} Z" fill="${accent}" />
+      <!-- Eimer-Rand -->
+      <rect x="${x - 48}" y="${y}" width="96" height="10" rx="3" fill="${ink}" />
+      <!-- Tragebügel -->
+      <path d="M ${x - 40} ${y + 4} Q ${x} ${y - 30} ${x + 40} ${y + 4}" fill="none" stroke-width="3.5" />
+      <!-- Handpumpe (Zylinder) -->
+      <rect x="${x - 10}" y="${y - 60}" width="20" height="50" fill="${ink}" />
+      <!-- Pumpenkolben-Griff -->
+      <rect x="${x - 18}" y="${y - 70}" width="36" height="10" rx="3" fill="${accent}" />
+      <!-- Sprühlanze -->
+      <path d="M ${x + 10} ${y - 30} L ${x + 70} ${y - 38}" stroke-width="4" />
+      <path d="M ${x + 64} ${y - 44} L ${x + 84} ${y - 38} L ${x + 64} ${y - 32} Z" fill="${ink}" />
+      <!-- Wasserlinie -->
+      <line x1="${x - 40}" y1="${y + 32}" x2="${x + 40}" y2="${y + 32}" stroke-width="1.6" stroke-dasharray="5 4" />
+    </g>
+  `;
+};
+
+/** Überdrucklüfter: großer Motor mit Ventilator-Gitter. */
+const iconUeberdrucklueft: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rahmen -->
+      <rect x="${x - 70}" y="${y - 50}" width="140" height="100" rx="10" fill="${accent}" />
+      <!-- Bodenkufen -->
+      <rect x="${x - 76}" y="${y + 50}" width="40" height="10" rx="2" fill="${ink}" />
+      <rect x="${x + 36}" y="${y + 50}" width="40" height="10" rx="2" fill="${ink}" />
+      <!-- Schutzgitter (Kreis) -->
+      <circle cx="${x}" cy="${y}" r="42" fill="#d0d0d0" />
+      <!-- Gitter-Streben -->
+      <line x1="${x - 42}" y1="${y}" x2="${x + 42}" y2="${y}" stroke-width="1.8" />
+      <line x1="${x}" y1="${y - 42}" x2="${x}" y2="${y + 42}" stroke-width="1.8" />
+      <line x1="${x - 30}" y1="${y - 30}" x2="${x + 30}" y2="${y + 30}" stroke-width="1.8" />
+      <line x1="${x - 30}" y1="${y + 30}" x2="${x + 30}" y2="${y - 30}" stroke-width="1.8" />
+      <!-- Nabe mit Lüfterflügeln -->
+      <circle cx="${x}" cy="${y}" r="8" fill="${ink}" />
+      <path d="M ${x} ${y - 8} Q ${x + 30} ${y - 20} ${x + 34} ${y - 4}" fill="${accent}" />
+      <path d="M ${x + 8} ${y} Q ${x + 20} ${y + 30} ${x + 4} ${y + 34}" fill="${accent}" />
+      <path d="M ${x} ${y + 8} Q ${x - 30} ${y + 20} ${x - 34} ${y + 4}" fill="${accent}" />
+      <path d="M ${x - 8} ${y} Q ${x - 20} ${y - 30} ${x - 4} ${y - 34}" fill="${accent}" />
+      <!-- Motor-Bügel oben -->
+      <rect x="${x - 20}" y="${y - 60}" width="40" height="10" rx="3" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Zumischer-Factory: Inline-Mixer mit Dreh-Dosierring (N Ringe = Z-Nummer/2). */
+function makeZumischer(grade: 2 | 4): IconFn {
+  return ({ accent, ink, cx, cy }) => {
+    const x = cx, y = cy;
+    const rings = grade === 2 ? 2 : 4;
+    const ringMarks = Array.from({ length: rings }, (_, i) =>
+      `<line x1="${x - 4 + i * 2}" y1="${y - 26}" x2="${x - 4 + i * 2}" y2="${y - 18}" stroke-width="2" />`
+    ).join("");
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Durchlauf-Rohr -->
+        <rect x="${x - 80}" y="${y - 12}" width="160" height="36" rx="6" fill="${accent}" />
+        <!-- Kupplung links -->
+        <rect x="${x - 86}" y="${y - 18}" width="14" height="48" rx="2" fill="${ink}" />
+        <!-- Kupplung rechts -->
+        <rect x="${x + 72}" y="${y - 18}" width="14" height="48" rx="2" fill="${ink}" />
+        <!-- Dosierring oben (abgesetzter Ring) -->
+        <rect x="${x - 20}" y="${y - 34}" width="40" height="24" rx="4" fill="${accent}" />
+        <circle cx="${x}" cy="${y - 22}" r="14" fill="#d0d0d0" />
+        <circle cx="${x}" cy="${y - 22}" r="4" fill="${ink}" />
+        <!-- Skalenstriche am Ring entsprechend Z-Zahl -->
+        ${ringMarks}
+        <!-- Zumisch-Stutzen unten -->
+        <rect x="${x - 10}" y="${y + 24}" width="20" height="18" fill="${ink}" />
+        <circle cx="${x}" cy="${y + 50}" r="10" fill="none" stroke-width="3" />
+      </g>
+    `;
+  };
+}
+
+const iconZumischerZ2 = makeZumischer(2);
+const iconZumischerZ4 = makeZumischer(4);
+
+/** Schaumstrahlrohr: große konische Schaumdüse mit Lufteinlass. */
+const iconSchaumstrahlrohr: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kupplung links -->
+      <rect x="${x - 80}" y="${y - 14}" width="14" height="28" rx="2" fill="${ink}" />
+      <!-- Rohrstück schmal -->
+      <rect x="${x - 66}" y="${y - 10}" width="30" height="20" fill="${accent}" />
+      <!-- Hebel/Absperrung -->
+      <rect x="${x - 50}" y="${y - 28}" width="8" height="18" fill="${ink}" />
+      <!-- Mischkammer (breiter) -->
+      <rect x="${x - 36}" y="${y - 18}" width="30" height="36" rx="4" fill="${accent}" />
+      <!-- Luftansaugöffnungen -->
+      <circle cx="${x - 24}" cy="${y - 4}" r="3" fill="${ink}" />
+      <circle cx="${x - 14}" cy="${y - 4}" r="3" fill="${ink}" />
+      <circle cx="${x - 24}" cy="${y + 8}" r="3" fill="${ink}" />
+      <circle cx="${x - 14}" cy="${y + 8}" r="3" fill="${ink}" />
+      <!-- Konus nach rechts -->
+      <path d="M ${x - 6} ${y - 18} L ${x + 60} ${y - 40} L ${x + 60} ${y + 40} L ${x - 6} ${y + 18} Z" fill="${accent}" />
+      <!-- Sprühmuster / Schaum-Blasen -->
+      <circle cx="${x + 70}" cy="${y - 30}" r="6" fill="none" stroke-width="2.4" />
+      <circle cx="${x + 80}" cy="${y - 14}" r="5" fill="none" stroke-width="2.4" />
+      <circle cx="${x + 84}" cy="${y + 6}" r="7" fill="none" stroke-width="2.4" />
+      <circle cx="${x + 74}" cy="${y + 26}" r="5" fill="none" stroke-width="2.4" />
+    </g>
+  `;
+};
+
+/** Fluchthaube: Kopfhaube mit Filter für zu Rettende. */
+const iconFluchthaube: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Haube (Kopfform) -->
+      <path d="M ${x - 50} ${y + 40} Q ${x - 60} ${y - 40} ${x} ${y - 50} Q ${x + 60} ${y - 40} ${x + 50} ${y + 40} Z" fill="${accent}" />
+      <!-- Sichtscheibe -->
+      <path d="M ${x - 38} ${y - 10} Q ${x - 40} ${y - 30} ${x} ${y - 32} Q ${x + 40} ${y - 30} ${x + 38} ${y - 10} L ${x + 34} ${y + 14} Q ${x} ${y + 20} ${x - 34} ${y + 14} Z" fill="#b8d8f0" />
+      <!-- Filter / Ventil (seitlich rechts) -->
+      <rect x="${x + 44}" y="${y + 2}" width="22" height="22" rx="4" fill="${ink}" />
+      <circle cx="${x + 55}" cy="${y + 13}" r="5" fill="${accent}" />
+      <!-- Halsgummi -->
+      <rect x="${x - 40}" y="${y + 34}" width="80" height="12" rx="3" fill="${ink}" />
+      <!-- Reflex am Visier -->
+      <path d="M ${x - 30} ${y - 6} L ${x - 14} ${y - 18}" stroke="#ffffff" stroke-width="3" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -1258,6 +1461,17 @@ ICON_REGISTRY.push(
   [/kupplungsschluessel|kupplungsschlüssel/, iconKupplungsschluessel],
   [/schlauchbruecke|schlauchbrücke/, iconSchlauchbruecke],
   [/sammelstueck|sammelstück/, iconSammelstueck],
+  // G4 — spezifische Löscher vor generischen Treffern
+  [/schaummittel/, iconSchaummittel],
+  [/pulverloescher|pulverlöscher/, iconPulverloescher],
+  [/co2-loescher|co2-löscher/, iconCo2loescher],
+  [/wasserloescher|wasserlöscher/, iconWasserloescher],
+  [/kuebelspritze|kübelspritze/, iconKuebelspritze],
+  [/ueberdrucklueft|überdrucklüft/, iconUeberdrucklueft],
+  [/zumischer\s*z2/, iconZumischerZ2],
+  [/zumischer\s*z4/, iconZumischerZ4],
+  [/schaumstrahlrohr/, iconSchaumstrahlrohr],
+  [/fluchthaube/, iconFluchthaube],
 );
 
 generate();
