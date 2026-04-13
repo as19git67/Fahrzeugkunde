@@ -36,16 +36,20 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#b47a30">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus -->
+      <path d="M 120 92 L 180 92 L 180 124 L 140 124 L 148 148 L 122 148 L 114 124 L 120 124 Z" fill="#b47a30" />
+      <!-- Akkupack unten -->
+      <rect x="116" y="148" width="38" height="16" rx="3" fill="#1a1a1a" />
+      <!-- Bohrfutter -->
+      <rect x="180" y="100" width="20" height="20" rx="2" fill="#1a1a1a" />
+      <!-- Bohrer -->
+      <line x1="200" y1="110" x2="236" y2="110" stroke-width="4" />
+      <path d="M 210 107 l 4 3 l -4 3 m 6 -6 l 4 3 l -4 3 m 6 -6 l 4 3 l -4 3" stroke-width="1.6" fill="none" />
+      <!-- Auslöser -->
+      <path d="M 142 124 L 142 136 L 150 136" fill="none" stroke-width="3" />
+      <!-- Drehrichtungs-Wahl -->
+      <circle cx="150" cy="104" r="4" fill="#1a1a1a" />
     </g>
   
   </g>

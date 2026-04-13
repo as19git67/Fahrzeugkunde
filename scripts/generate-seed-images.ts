@@ -356,6 +356,290 @@ const iconUmlenkrolle: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- G3 Icons ----------------------------------------------------------------
+
+/** Pressluftflasche: stehende Druckflasche mit Ventilkopf. */
+const iconPressluftflasche: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Flaschenkörper -->
+      <path d="M ${x - 24} ${y - 30} Q ${x - 24} ${y - 44} ${x - 12} ${y - 44} L ${x + 12} ${y - 44} Q ${x + 24} ${y - 44} ${x + 24} ${y - 30} L ${x + 24} ${y + 48} Q ${x + 24} ${y + 56} ${x + 16} ${y + 56} L ${x - 16} ${y + 56} Q ${x - 24} ${y + 56} ${x - 24} ${y + 48} Z" fill="${accent}" />
+      <!-- Schulter-Rille -->
+      <line x1="${x - 24}" y1="${y - 20}" x2="${x + 24}" y2="${y - 20}" stroke-width="2" />
+      <!-- Ventilkopf -->
+      <rect x="${x - 12}" y="${y - 60}" width="24" height="18" rx="3" fill="${ink}" />
+      <!-- Handrad -->
+      <circle cx="${x}" cy="${y - 64}" r="10" fill="${accent}" />
+      <line x1="${x - 10}" y1="${y - 64}" x2="${x + 10}" y2="${y - 64}" stroke-width="2" />
+      <line x1="${x}" y1="${y - 74}" x2="${x}" y2="${y - 54}" stroke-width="2" />
+      <!-- Manometer-Anschluss -->
+      <path d="M ${x + 10} ${y - 50} L ${x + 22} ${y - 42}" stroke-width="3" />
+      <circle cx="${x + 26}" cy="${y - 38}" r="5" fill="#ffffff" />
+      <!-- Standfuß -->
+      <rect x="${x - 28}" y="${y + 54}" width="56" height="6" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Motorkettensäge: Motorgehäuse + Schwert mit Kette. */
+const iconKettensaege: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Motorgehäuse -->
+      <rect x="${x - 75}" y="${y - 20}" width="60" height="40" rx="6" fill="${accent}" />
+      <!-- Tankdeckel -->
+      <circle cx="${x - 65}" cy="${y - 12}" r="5" fill="${ink}" />
+      <!-- Griffbügel oben -->
+      <path d="M ${x - 60} ${y - 20} Q ${x - 60} ${y - 40} ${x - 30} ${y - 40} Q ${x - 12} ${y - 40} ${x - 12} ${y - 20}" fill="none" stroke-width="3.5" />
+      <!-- Hinterer Griff -->
+      <path d="M ${x - 76} ${y + 8} Q ${x - 84} ${y + 14} ${x - 74} ${y + 20} L ${x - 60} ${y + 20} L ${x - 60} ${y + 8}" fill="${accent}" />
+      <!-- Schwert -->
+      <path d="M ${x - 15} ${y - 8} L ${x + 70} ${y - 10} Q ${x + 82} ${y} ${x + 70} ${y + 10} L ${x - 15} ${y + 8} Z" fill="#d0d0d0" />
+      <!-- Kette: kurze Striche -->
+      <line x1="${x - 8}" y1="${y - 10}" x2="${x + 66}" y2="${y - 12}" stroke-width="1.4" stroke-dasharray="4 3" />
+      <line x1="${x - 8}" y1="${y + 10}" x2="${x + 66}" y2="${y + 12}" stroke-width="1.4" stroke-dasharray="4 3" />
+      <!-- Schwertnase -->
+      <circle cx="${x + 72}" cy="${y}" r="5" fill="#d0d0d0" />
+    </g>
+  `;
+};
+
+/** Schnittschutzausrüstung: PSA-Hose mit Beinen. */
+const iconSchnittschutz: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Bund -->
+      <rect x="${x - 40}" y="${y - 50}" width="80" height="18" rx="3" fill="${ink}" />
+      <!-- Hosenteil -->
+      <path d="M ${x - 40} ${y - 32} L ${x + 40} ${y - 32} L ${x + 40} ${y + 56} L ${x + 16} ${y + 56} L ${x + 6} ${y - 10} L ${x - 6} ${y - 10} L ${x - 16} ${y + 56} L ${x - 40} ${y + 56} Z" fill="${accent}" />
+      <!-- Reflex-Streifen -->
+      <rect x="${x - 40}" y="${y + 20}" width="22" height="8" fill="#ffffff" />
+      <rect x="${x + 18}" y="${y + 20}" width="22" height="8" fill="#ffffff" />
+      <!-- Taschen -->
+      <rect x="${x - 34}" y="${y - 18}" width="20" height="18" fill="none" stroke-width="2" />
+      <rect x="${x + 14}" y="${y - 18}" width="20" height="18" fill="none" stroke-width="2" />
+      <!-- Gürtelschnalle -->
+      <rect x="${x - 6}" y="${y - 48}" width="12" height="14" fill="${accent}" />
+    </g>
+  `;
+};
+
+/** Trennschleifer: Kompakt-Motor mit großer Trennscheibe. */
+const iconTrennschleifer: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Motor -->
+      <rect x="${x - 78}" y="${y - 22}" width="60" height="44" rx="6" fill="${accent}" />
+      <!-- Kühlrippen -->
+      <line x1="${x - 66}" y1="${y - 22}" x2="${x - 66}" y2="${y + 22}" stroke-width="1.8" />
+      <line x1="${x - 56}" y1="${y - 22}" x2="${x - 56}" y2="${y + 22}" stroke-width="1.8" />
+      <line x1="${x - 46}" y1="${y - 22}" x2="${x - 46}" y2="${y + 22}" stroke-width="1.8" />
+      <!-- Griffbügel oben -->
+      <path d="M ${x - 60} ${y - 22} Q ${x - 50} ${y - 42} ${x - 30} ${y - 42} Q ${x - 24} ${y - 42} ${x - 24} ${y - 22}" fill="none" stroke-width="3.5" />
+      <!-- Verbindungsarm zur Scheibe -->
+      <rect x="${x - 18}" y="${y - 10}" width="30" height="20" fill="${accent}" />
+      <!-- Schutzhaube (halbkreis oben) -->
+      <path d="M ${x + 8} ${y + 4} Q ${x + 10} ${y - 46} ${x + 56} ${y - 34}" fill="none" stroke-width="4" />
+      <!-- Trennscheibe -->
+      <circle cx="${x + 40}" cy="${y + 6}" r="36" fill="#d0d0d0" />
+      <circle cx="${x + 40}" cy="${y + 6}" r="6" fill="${ink}" />
+      <circle cx="${x + 40}" cy="${y + 6}" r="22" fill="none" stroke-width="1.4" stroke-dasharray="5 5" />
+    </g>
+  `;
+};
+
+/** Tauchpumpe: zylindrisches Gehäuse mit Druckschlauch oben und Saugfuß. */
+const iconTauchpumpe: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Druckstutzen oben mit Schlauch -->
+      <rect x="${x - 10}" y="${y - 56}" width="20" height="18" fill="${ink}" />
+      <path d="M ${x} ${y - 58} Q ${x + 34} ${y - 70} ${x + 60} ${y - 50}" fill="none" stroke-width="5" stroke="${accent}" />
+      <path d="M ${x} ${y - 58} Q ${x + 34} ${y - 70} ${x + 60} ${y - 50}" fill="none" stroke-width="5" />
+      <!-- Griffring -->
+      <circle cx="${x}" cy="${y - 38}" r="10" fill="none" stroke-width="3" />
+      <!-- Pumpengehäuse -->
+      <rect x="${x - 36}" y="${y - 32}" width="72" height="66" rx="8" fill="${accent}" />
+      <!-- Kabelanschluss -->
+      <path d="M ${x - 30} ${y - 32} Q ${x - 50} ${y - 30} ${x - 60} ${y - 10}" fill="none" stroke-width="3" />
+      <!-- Saugfuß (unten mit Schlitzen) -->
+      <path d="M ${x - 44} ${y + 34} L ${x + 44} ${y + 34} L ${x + 34} ${y + 54} L ${x - 34} ${y + 54} Z" fill="${ink}" />
+      <line x1="${x - 20}" y1="${y + 40}" x2="${x - 20}" y2="${y + 50}" stroke="#f7f1e1" stroke-width="2" />
+      <line x1="${x - 8}" y1="${y + 40}" x2="${x - 8}" y2="${y + 50}" stroke="#f7f1e1" stroke-width="2" />
+      <line x1="${x + 4}" y1="${y + 40}" x2="${x + 4}" y2="${y + 50}" stroke="#f7f1e1" stroke-width="2" />
+      <line x1="${x + 16}" y1="${y + 40}" x2="${x + 16}" y2="${y + 50}" stroke="#f7f1e1" stroke-width="2" />
+    </g>
+  `;
+};
+
+/** Verlängerungskabel / Kabeltrommel: Trommel mit Steckdose. */
+const iconKabel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rahmen -->
+      <path d="M ${x - 60} ${y + 34} L ${x - 50} ${y - 34} L ${x + 50} ${y - 34} L ${x + 60} ${y + 34}" fill="none" stroke-width="4" />
+      <line x1="${x - 64}" y1="${y + 34}" x2="${x + 64}" y2="${y + 34}" stroke-width="4" />
+      <!-- Tragegriff oben -->
+      <path d="M ${x - 20} ${y - 34} Q ${x} ${y - 54} ${x + 20} ${y - 34}" fill="none" stroke-width="4" />
+      <!-- Trommel (Seitenscheibe) -->
+      <circle cx="${x}" cy="${y + 4}" r="36" fill="${accent}" />
+      <circle cx="${x}" cy="${y + 4}" r="28" fill="none" stroke-width="1.6" />
+      <circle cx="${x}" cy="${y + 4}" r="18" fill="none" stroke-width="1.6" />
+      <!-- Nabe/Kurbel -->
+      <circle cx="${x}" cy="${y + 4}" r="6" fill="${ink}" />
+      <line x1="${x}" y1="${y + 4}" x2="${x + 18}" y2="${y - 6}" stroke-width="3" />
+      <circle cx="${x + 18}" cy="${y - 6}" r="3.5" fill="${ink}" />
+      <!-- Steckdose -->
+      <rect x="${x - 54}" y="${y - 8}" width="16" height="22" rx="2" fill="${ink}" />
+      <circle cx="${x - 46}" cy="${y + 3}" r="2" fill="${accent}" />
+    </g>
+  `;
+};
+
+/** Brechstange: Nageleisen mit gebogenem Kuhfuß-Ende. */
+const iconBrechstange: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Stange (diagonal) -->
+      <path d="M ${x - 60} ${y + 40} L ${x + 50} ${y - 40}" stroke-width="10" stroke="${accent}" />
+      <path d="M ${x - 60} ${y + 40} L ${x + 50} ${y - 40}" stroke-width="10" fill="none" />
+      <!-- Flaches Ende oben rechts -->
+      <path d="M ${x + 48} ${y - 38} L ${x + 76} ${y - 60} L ${x + 70} ${y - 46} L ${x + 80} ${y - 48} L ${x + 68} ${y - 30} Z" fill="${ink}" />
+      <!-- Kuhfuß-Ende unten links: gebogen mit Kerbe -->
+      <path d="M ${x - 58} ${y + 42} Q ${x - 76} ${y + 50} ${x - 74} ${y + 64} L ${x - 68} ${y + 58} L ${x - 60} ${y + 66} L ${x - 56} ${y + 58} Z" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Bolzenschneider: lange Griffe mit kurzen Schneidebacken. */
+const iconBolzenschneider: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Oberer Griff -->
+      <path d="M ${x - 80} ${y - 26} L ${x - 4} ${y - 12} L ${x} ${y - 4}" stroke-width="10" stroke="${accent}" fill="none" />
+      <!-- Unterer Griff -->
+      <path d="M ${x - 80} ${y + 26} L ${x - 4} ${y + 12} L ${x} ${y + 4}" stroke-width="10" stroke="${accent}" fill="none" />
+      <!-- Griff-Überzüge -->
+      <rect x="${x - 82}" y="${y - 34}" width="30" height="12" rx="3" fill="${ink}" transform="rotate(-8 ${x - 68} ${y - 28})" />
+      <rect x="${x - 82}" y="${y + 22}" width="30" height="12" rx="3" fill="${ink}" transform="rotate(8 ${x - 68} ${y + 28})" />
+      <!-- Gelenk -->
+      <circle cx="${x - 4}" cy="${y}" r="9" fill="${accent}" />
+      <circle cx="${x - 4}" cy="${y}" r="3" fill="${ink}" />
+      <!-- Schneidebacken -->
+      <path d="M ${x - 4} ${y - 6} L ${x + 40} ${y - 18} L ${x + 60} ${y - 2} L ${x + 10} ${y + 2} Z" fill="${ink}" />
+      <path d="M ${x - 4} ${y + 6} L ${x + 40} ${y + 18} L ${x + 60} ${y + 2} L ${x + 10} ${y - 2} Z" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Feuerwehraxt: Axt mit Kopf und Stiel. */
+const iconAxt: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Stiel (diagonal) -->
+      <path d="M ${x - 60} ${y + 52} L ${x + 40} ${y - 40}" stroke-width="10" stroke="#c9a068" />
+      <path d="M ${x - 60} ${y + 52} L ${x + 40} ${y - 40}" stroke-width="10" fill="none" />
+      <!-- Knauf -->
+      <circle cx="${x - 60}" cy="${y + 52}" r="7" fill="${ink}" />
+      <!-- Axtkopf -->
+      <path d="M ${x + 30} ${y - 50} L ${x + 66} ${y - 40} L ${x + 78} ${y - 22} L ${x + 72} ${y - 10} L ${x + 44} ${y - 20} L ${x + 30} ${y - 30} Z" fill="${accent}" />
+      <!-- Pickel-Spitze hinten -->
+      <path d="M ${x + 34} ${y - 40} L ${x + 12} ${y - 62} L ${x + 24} ${y - 30} Z" fill="${ink}" />
+      <!-- Schneide-Kante -->
+      <line x1="${x + 66}" y1="${y - 40}" x2="${x + 78}" y2="${y - 22}" stroke-width="2" />
+    </g>
+  `;
+};
+
+/** Halligan-Tool: Stange mit Gabel, Spitze und Adze. */
+const iconHalligan: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Stange (diagonal) -->
+      <path d="M ${x - 50} ${y + 50} L ${x + 40} ${y - 40}" stroke-width="9" stroke="${accent}" />
+      <path d="M ${x - 50} ${y + 50} L ${x + 40} ${y - 40}" stroke-width="9" fill="none" />
+      <!-- Gabel oben (forked claw) -->
+      <path d="M ${x + 38} ${y - 42} L ${x + 64} ${y - 66} L ${x + 52} ${y - 52} L ${x + 70} ${y - 54} L ${x + 54} ${y - 40} Z" fill="${ink}" />
+      <!-- Adze (Kreuz-Klinge) in der Mitte -->
+      <path d="M ${x + 40} ${y - 40} L ${x + 30} ${y - 60} L ${x + 46} ${y - 46} Z" fill="${ink}" />
+      <!-- Spitze/Pike unten links -->
+      <path d="M ${x - 50} ${y + 50} L ${x - 72} ${y + 58} L ${x - 60} ${y + 62} L ${x - 76} ${y + 72} L ${x - 56} ${y + 66} Z" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Säbelsäge: Akku-Gerät mit langem Sägeblatt. */
+const iconSaebelsaege: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus -->
+      <rect x="${x - 70}" y="${y - 18}" width="60" height="36" rx="8" fill="${accent}" />
+      <!-- Griff oben -->
+      <path d="M ${x - 60} ${y - 18} Q ${x - 52} ${y - 38} ${x - 32} ${y - 38} Q ${x - 14} ${y - 38} ${x - 14} ${y - 18}" fill="${accent}" />
+      <!-- Akku hinten -->
+      <rect x="${x - 86}" y="${y + 18}" width="30" height="20" rx="3" fill="${ink}" />
+      <!-- Schuh (Anschlag) -->
+      <rect x="${x - 16}" y="${y - 8}" width="12" height="18" rx="2" fill="${ink}" />
+      <!-- Sägeblatt mit Zähnen -->
+      <rect x="${x - 4}" y="${y - 4}" width="70" height="10" fill="#d0d0d0" />
+      <path d="M ${x - 4} ${y + 6} l 5 5 l 5 -5 l 5 5 l 5 -5 l 5 5 l 5 -5 l 5 5 l 5 -5 l 5 5 l 5 -5 l 5 5 l 5 -5 l 5 5 l 5 -5" fill="${ink}" stroke-width="1.2" />
+      <!-- Auslöser -->
+      <path d="M ${x - 42} ${y + 18} L ${x - 42} ${y + 30} L ${x - 34} ${y + 30}" fill="none" stroke-width="3" />
+    </g>
+  `;
+};
+
+/** Akku-Bohrmaschine: Pistolenform mit Bohrfutter und Akkupack. */
+const iconBohrmaschine: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus -->
+      <path d="M ${x - 40} ${y - 18} L ${x + 20} ${y - 18} L ${x + 20} ${y + 14} L ${x - 20} ${y + 14} L ${x - 12} ${y + 38} L ${x - 38} ${y + 38} L ${x - 46} ${y + 14} L ${x - 40} ${y + 14} Z" fill="${accent}" />
+      <!-- Akkupack unten -->
+      <rect x="${x - 44}" y="${y + 38}" width="38" height="16" rx="3" fill="${ink}" />
+      <!-- Bohrfutter -->
+      <rect x="${x + 20}" y="${y - 10}" width="20" height="20" rx="2" fill="${ink}" />
+      <!-- Bohrer -->
+      <line x1="${x + 40}" y1="${y}" x2="${x + 76}" y2="${y}" stroke-width="4" />
+      <path d="M ${x + 50} ${y - 3} l 4 3 l -4 3 m 6 -6 l 4 3 l -4 3 m 6 -6 l 4 3 l -4 3" stroke-width="1.6" fill="none" />
+      <!-- Auslöser -->
+      <path d="M ${x - 18} ${y + 14} L ${x - 18} ${y + 26} L ${x - 10} ${y + 26}" fill="none" stroke-width="3" />
+      <!-- Drehrichtungs-Wahl -->
+      <circle cx="${x - 10}" cy="${y - 6}" r="4" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Einreißhaken: lange Stange mit Spitze und seitlichem Haken. */
+const iconEinreisshaken: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Stange (diagonal) -->
+      <path d="M ${x - 70} ${y + 46} L ${x + 52} ${y - 40}" stroke-width="8" stroke="#c9a068" />
+      <path d="M ${x - 70} ${y + 46} L ${x + 52} ${y - 40}" stroke-width="8" fill="none" />
+      <!-- Knauf unten -->
+      <circle cx="${x - 70}" cy="${y + 46}" r="6" fill="${ink}" />
+      <!-- Spitze oben -->
+      <path d="M ${x + 52} ${y - 40} L ${x + 76} ${y - 62} L ${x + 68} ${y - 46} Z" fill="${ink}" />
+      <!-- Seitlicher Haken (90° zur Stange) -->
+      <path d="M ${x + 40} ${y - 28} Q ${x + 58} ${y - 16} ${x + 46} ${y - 4} Q ${x + 36} ${y - 14} ${x + 34} ${y - 22}" fill="${accent}" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -500,6 +784,20 @@ ICON_REGISTRY.push(
   [/mehrzweckzug/, iconMehrzweckzug],
   [/seilwinde/, iconSeilwinde],
   [/umlenkrolle/, iconUmlenkrolle],
+  // G3 — spezifische Keywords vor generischen
+  [/kettensaege|kettensäge/, iconKettensaege],
+  [/saebelsaege|säbelsäge/, iconSaebelsaege],
+  [/pressluftflasche/, iconPressluftflasche],
+  [/schnittschutz/, iconSchnittschutz],
+  [/trennschleifer/, iconTrennschleifer],
+  [/tauchpumpe/, iconTauchpumpe],
+  [/verlaengerungskabel|verlängerungskabel|kabeltrommel/, iconKabel],
+  [/brechstange/, iconBrechstange],
+  [/bolzenschneider/, iconBolzenschneider],
+  [/feuerwehraxt|\baxt\b/, iconAxt],
+  [/halligan/, iconHalligan],
+  [/akku-bohrmaschine|bohrmaschine/, iconBohrmaschine],
+  [/einreisshaken|einreißhaken/, iconEinreisshaken],
 );
 
 generate();

@@ -36,16 +36,16 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#b47a30">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Stange (diagonal) -->
+      <path d="M 110 160 L 200 70" stroke-width="9" stroke="#b47a30" />
+      <path d="M 110 160 L 200 70" stroke-width="9" fill="none" />
+      <!-- Gabel oben (forked claw) -->
+      <path d="M 198 68 L 224 44 L 212 58 L 230 56 L 214 70 Z" fill="#1a1a1a" />
+      <!-- Adze (Kreuz-Klinge) in der Mitte -->
+      <path d="M 200 70 L 190 50 L 206 64 Z" fill="#1a1a1a" />
+      <!-- Spitze/Pike unten links -->
+      <path d="M 110 160 L 88 168 L 100 172 L 84 182 L 104 176 Z" fill="#1a1a1a" />
     </g>
   
   </g>
