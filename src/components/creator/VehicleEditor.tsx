@@ -398,6 +398,19 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
                     label="Fahrzeugseite Bild"
                     currentPath={view.imagePath}
                     onUpload={(file) => handleViewImage(view.id, file)}
+                    onRemove={async () => {
+                      const res = await fetch(`/api/vehicle-views/${view.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ imagePath: null }),
+                      });
+                      if (res.ok) {
+                        await onReload();
+                      } else {
+                        const data = await res.json().catch(() => ({}));
+                        alert(`Bild entfernen fehlgeschlagen: ${data.error ?? res.statusText}`);
+                      }
+                    }}
                   />
 
                   {/* Fächer */}
@@ -609,6 +622,19 @@ function CompartmentList({
                     label="Fach-Bild (geöffnet)"
                     currentPath={c.imagePath}
                     onUpload={(file) => handleCompImage(c.id, file)}
+                    onRemove={async () => {
+                      const res = await fetch(`/api/compartments/${c.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ imagePath: null }),
+                      });
+                      if (res.ok) {
+                        await onReload();
+                      } else {
+                        const data = await res.json().catch(() => ({}));
+                        alert(`Bild entfernen fehlgeschlagen: ${data.error ?? res.statusText}`);
+                      }
+                    }}
                   />
                   <PositionList compartmentId={c.id} positions={c.positions} onReload={onReload} />
                 </div>
@@ -1236,6 +1262,7 @@ function ItemForm({
             label=""
             currentPath={imagePath}
             onUpload={handleImageUpload}
+            onRemove={() => setImagePath("")}
             uploading={uploading}
           />
         </div>
@@ -1267,11 +1294,13 @@ function ImageUpload({
   label,
   currentPath,
   onUpload,
+  onRemove,
   uploading = false,
 }: {
   label: string;
   currentPath: string | null;
   onUpload: (file: File) => void;
+  onRemove?: () => void;
   uploading?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1294,9 +1323,25 @@ function ImageUpload({
             📷
           </div>
         )}
-        <span className="text-zinc-500 text-sm">
+        <span className="text-zinc-500 text-sm flex-1">
           {uploading ? "Lade hoch..." : currentPath ? "Bild ersetzen" : "Bild hochladen"}
         </span>
+        {currentPath && onRemove && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm("Bild wirklich entfernen?")) {
+                onRemove();
+              }
+            }}
+            title="Bild entfernen"
+            aria-label="Bild entfernen"
+            className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors flex-shrink-0"
+          >
+            🗑️
+          </button>
+        )}
       </div>
       <input
         ref={inputRef}
