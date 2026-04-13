@@ -11,22 +11,56 @@ const DATABASE_URL =
   process.env.DATABASE_URL ||
   "postgres://postgres:postgres@localhost:5432/fahrzeugkunde";
 
+// Kopiert rekursiv nur Dateien, die im Ziel noch nicht existieren.
+// So bleiben User-Uploads im Volume unverändert, fehlende Seed-Assets
+// werden aus dem Image aber wieder aufgefüllt.
+function copyMissing(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return 0;
+  fs.mkdirSync(destDir, { recursive: true });
+  let added = 0;
+  for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
+    const src = path.join(srcDir, entry.name);
+    const dest = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      added += copyMissing(src, dest);
+    } else if (entry.isFile() || entry.isSymbolicLink()) {
+      if (!fs.existsSync(dest)) {
+        fs.copyFileSync(src, dest);
+        added++;
+      }
+    }
+  }
+  return added;
+}
+
 // --- Uploads-Verzeichnis vorbereiten (Docker-Volume) ---
 function setupUploads() {
   const dataAssets = "/data/assets";
   const publicUploads = path.join(__dirname, "public", "uploads");
+  const bundledUploads = path.join(__dirname, "bundled-uploads");
 
   // Nur im Container mit /data Volume
   if (fs.existsSync("/data")) {
     fs.mkdirSync(dataAssets, { recursive: true });
-    // Symlink nur setzen, wenn noch nicht korrekt vorhanden
+
+    // Fehlende Seed-Assets (aus dem gebakten Image-Snapshot) ins persistente
+    // Volume spiegeln. Ohne diesen Schritt liefert /_next/image?url=/uploads/...
+    // nach dem ersten Deploy 404, weil der Symlink das public/uploads/-Verzeichnis
+    // aus dem Image überdeckt.
+    if (fs.existsSync(bundledUploads)) {
+      const added = copyMissing(bundledUploads, dataAssets);
+      if (added > 0) console.log(`📦 ${added} Seed-Asset(s) ins Volume kopiert`);
+    }
+
+    // Prüfen, ob public/uploads bereits ein Symlink auf dataAssets ist
+    let alreadyLinked = false;
     try {
-      const target = fs.readlinkSync(publicUploads);
-      if (target !== dataAssets) {
-        fs.rmSync(publicUploads, { recursive: true, force: true });
-        fs.symlinkSync(dataAssets, publicUploads);
-      }
+      alreadyLinked = fs.readlinkSync(publicUploads) === dataAssets;
     } catch {
+      // kein Symlink
+    }
+
+    if (!alreadyLinked) {
       fs.rmSync(publicUploads, { recursive: true, force: true });
       fs.symlinkSync(dataAssets, publicUploads);
     }
