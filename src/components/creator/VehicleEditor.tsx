@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -967,9 +968,11 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
             onClick={() => { setEditingItem(item); setShowForm(true); }}
           >
             {item.imagePath ? (
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
-                <Image src={item.imagePath} alt={item.name} fill className="object-contain p-1" sizes="64px" />
-              </div>
+              <HoverPreviewImage src={item.imagePath} alt={item.name}>
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+                  <Image src={item.imagePath} alt={item.name} fill className="object-contain p-1" sizes="64px" />
+                </div>
+              </HoverPreviewImage>
             ) : (
               <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
             )}
@@ -1281,9 +1284,11 @@ function ImageUpload({
         className="border-2 border-dashed border-zinc-700 hover:border-zinc-500 rounded-xl p-3 cursor-pointer transition-colors flex items-center gap-3"
       >
         {currentPath ? (
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
-            <Image src={currentPath} alt="Vorschau" fill className="object-contain" sizes="48px" />
-          </div>
+          <HoverPreviewImage src={currentPath} alt="Vorschau">
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+              <Image src={currentPath} alt="Vorschau" fill className="object-contain" sizes="48px" />
+            </div>
+          </HoverPreviewImage>
         ) : (
           <div className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-500 text-xl flex-shrink-0">
             📷
@@ -1304,5 +1309,67 @@ function ImageUpload({
         }}
       />
     </div>
+  );
+}
+
+// Zeigt beim Hover über ein Thumbnail eine größere Vorschau als Portal-Overlay.
+// Portal, damit die Vorschau nicht von `overflow-hidden`-Parents (Karten,
+// Ansichten, Akkordeons) abgeschnitten wird.
+function HoverPreviewImage({
+  src,
+  alt,
+  children,
+}: {
+  src: string;
+  alt: string;
+  children: React.ReactNode;
+}) {
+  const [hover, setHover] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  const PREVIEW = 384;
+  const MARGIN = 16;
+
+  let left = pos.x + MARGIN;
+  let top = pos.y + MARGIN;
+  if (typeof window !== "undefined") {
+    if (left + PREVIEW > window.innerWidth) left = pos.x - PREVIEW - MARGIN;
+    if (top + PREVIEW > window.innerHeight) top = pos.y - PREVIEW - MARGIN;
+    if (left < 8) left = 8;
+    if (top < 8) top = 8;
+  }
+
+  return (
+    <>
+      <span
+        onMouseEnter={(e) => {
+          setPos({ x: e.clientX, y: e.clientY });
+          setHover(true);
+        }}
+        onMouseMove={(e) => setPos({ x: e.clientX, y: e.clientY })}
+        onMouseLeave={() => setHover(false)}
+        className="inline-block cursor-zoom-in"
+      >
+        {children}
+      </span>
+      {hover &&
+        createPortal(
+          <div
+            className="fixed z-[100] pointer-events-none"
+            style={{ top, left, width: PREVIEW, height: PREVIEW }}
+          >
+            <div className="relative w-full h-full bg-zinc-900 border border-zinc-600 rounded-xl shadow-2xl overflow-hidden">
+              <Image
+                src={src}
+                alt={alt}
+                fill
+                className="object-contain"
+                sizes={`${PREVIEW}px`}
+              />
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
