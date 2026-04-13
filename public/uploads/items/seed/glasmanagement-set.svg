@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="das Glasmanagement-Set">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="343" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="346" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Glassäge: Griff -->
+      <rect x="90" y="116" width="50" height="18" rx="4" fill="#f25c4a" />
+      <!-- Glassäge: Blatt mit Zähnen -->
+      <path d="M 140 120 L 210 120 L 210 130 L 140 130 Z" fill="#d0d0d0" />
+      <path d="M 144 130 l 6 6 l 6 -6 l 6 6 l 6 -6 l 6 6 l 6 -6 l 6 6 l 6 -6 l 6 6 l 6 -6" fill="#1a1a1a" stroke-width="1.6" />
+      <!-- Federkörner oben -->
+      <rect x="142" y="72" width="50" height="14" rx="3" fill="#f25c4a" />
+      <path d="M 192 79 L 218 79" stroke-width="4" />
+      <path d="M 218 74 L 230 79 L 218 84 Z" fill="#1a1a1a" />
+    </g>
+  
+  </g>
+</svg>

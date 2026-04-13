@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="die Schnittschutzausrüstung">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="290" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="293" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Bund -->
+      <rect x="120" y="60" width="80" height="18" rx="3" fill="#1a1a1a" />
+      <!-- Hosenteil -->
+      <path d="M 120 78 L 200 78 L 200 166 L 176 166 L 166 100 L 154 100 L 144 166 L 120 166 Z" fill="#b47a30" />
+      <!-- Reflex-Streifen -->
+      <rect x="120" y="130" width="22" height="8" fill="#ffffff" />
+      <rect x="178" y="130" width="22" height="8" fill="#ffffff" />
+      <!-- Taschen -->
+      <rect x="126" y="92" width="20" height="18" fill="none" stroke-width="2" />
+      <rect x="174" y="92" width="20" height="18" fill="none" stroke-width="2" />
+      <!-- Gürtelschnalle -->
+      <rect x="154" y="62" width="12" height="14" fill="#b47a30" />
+    </g>
+  
+  </g>
+</svg>

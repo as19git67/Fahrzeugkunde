@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="die Klappleiter">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="489" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="492" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Linke Seite -->
+      
+    <polygon points="116.6,166.4 156.6,54.4 143.4,49.6 103.4,161.6" fill="#78a82f" />
+  <line x1="121.4" y1="147.0" x2="112.0" y2="143.7" stroke="#1a1a1a" stroke-width="2.4" /><line x1="128.0" y1="128.3" x2="118.6" y2="125.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="134.7" y1="109.7" x2="125.3" y2="106.3" stroke="#1a1a1a" stroke-width="2.4" /><line x1="141.4" y1="91.0" x2="132.0" y2="87.7" stroke="#1a1a1a" stroke-width="2.4" /><line x1="148.0" y1="72.3" x2="138.6" y2="69.0" stroke="#1a1a1a" stroke-width="2.4" />
+      <!-- Rechte Seite -->
+      
+    <polygon points="216.6,161.6 176.6,49.6 163.4,54.4 203.4,166.4" fill="#78a82f" />
+  <line x1="208.0" y1="143.7" x2="198.6" y2="147.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="201.4" y1="125.0" x2="192.0" y2="128.3" stroke="#1a1a1a" stroke-width="2.4" /><line x1="194.7" y1="106.3" x2="185.3" y2="109.7" stroke="#1a1a1a" stroke-width="2.4" /><line x1="188.0" y1="87.7" x2="178.6" y2="91.0" stroke="#1a1a1a" stroke-width="2.4" /><line x1="181.4" y1="69.0" x2="172.0" y2="72.3" stroke="#1a1a1a" stroke-width="2.4" />
+      <!-- Scharnier oben -->
+      <circle cx="160" cy="52" r="6" fill="#1a1a1a" />
+      <!-- Spreizsicherung (Kette/Strebe) -->
+      <path d="M 134 124 L 186 124" stroke-width="2" stroke-dasharray="4 3" />
+      <!-- Füße -->
+      <rect x="102" y="164" width="14" height="8" rx="2" fill="#1a1a1a" />
+      <rect x="204" y="164" width="14" height="8" rx="2" fill="#1a1a1a" />
+    </g>
+  
+  </g>
+</svg>

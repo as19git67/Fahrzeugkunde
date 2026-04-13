@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="das Hygieneboard">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="173" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="176" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Board-Rahmen -->
+      <rect x="80" y="56" width="160" height="110" rx="6" fill="#e05a85" />
+      <rect x="86" y="62" width="148" height="98" fill="#ffffff" />
+      <!-- Spender 1 (Desinfektion, links) -->
+      <rect x="100" y="72" width="24" height="40" rx="3" fill="#e05a85" />
+      <rect x="102" y="108" width="20" height="8" fill="#1a1a1a" />
+      <rect x="105" y="116" width="14" height="8" fill="#1a1a1a" />
+      <!-- Spender 2 (Seife, mitte) -->
+      <rect x="148" y="72" width="24" height="40" rx="3" fill="#e05a85" />
+      <rect x="150" y="108" width="20" height="8" fill="#1a1a1a" />
+      <rect x="153" y="116" width="14" height="8" fill="#1a1a1a" />
+      <!-- Handtuchspender rechts -->
+      <rect x="194" y="72" width="32" height="30" rx="3" fill="#e05a85" />
+      <line x1="198" y1="82" x2="222" y2="82" stroke-width="1.6" />
+      <line x1="198" y1="88" x2="222" y2="88" stroke-width="1.6" />
+      <line x1="198" y1="94" x2="222" y2="94" stroke-width="1.6" />
+      <!-- Papier hängt heraus -->
+      <rect x="204" y="102" width="12" height="16" fill="#1a1a1a" />
+      <!-- Waschbecken unten -->
+      <path d="M 104 134 L 216 134 L 208 156 L 112 156 Z" fill="#e05a85" />
+      <circle cx="160" cy="130" r="4" fill="#1a1a1a" />
+      <rect x="158" y="124" width="4" height="10" fill="#1a1a1a" />
+    </g>
+  
+  </g>
+</svg>

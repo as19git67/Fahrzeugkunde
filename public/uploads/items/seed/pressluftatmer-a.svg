@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="der Pressluftatmer A">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="282" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="285" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Tragegestell/Rückenplatte -->
+        <rect x="114" y="56" width="92" height="110" rx="8" fill="#3aa0ff" />
+        <!-- Flasche (stehend) -->
+        <rect x="142" y="66" width="36" height="80" rx="8" fill="#2a2a2a" />
+        <!-- Ventilkopf -->
+        <rect x="150" y="56" width="20" height="14" fill="#1a1a1a" />
+        <circle cx="160" cy="52" r="6" fill="#3aa0ff" />
+        <!-- Manometer mit Hochdruckschlauch -->
+        <path d="M 170 64 Q 194 64 198 90" fill="none" stroke-width="3" />
+        <circle cx="198" cy="98" r="8" fill="#ffffff" />
+        <!-- Lungenautomat -->
+        <rect x="120" y="90" width="18" height="22" rx="3" fill="#1a1a1a" />
+        <!-- Gurte links/rechts oben -->
+        <path d="M 114 56 Q 100 80 116 120" fill="none" stroke-width="4" />
+        <path d="M 206 56 Q 220 80 204 120" fill="none" stroke-width="4" />
+        <!-- Label mit Sitz-Punkten -->
+        <rect x="138" y="150" width="44" height="14" fill="#ffffff" />
+        <circle cx="142" cy="157" r="3" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="1.2" /><circle cx="151" cy="157" r="3" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.2" /><circle cx="160" cy="157" r="3" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.2" /><circle cx="169" cy="157" r="3" fill="#ffffff" stroke="#1a1a1a" stroke-width="1.2" />
+      </g>
+    
+  </g>
+</svg>

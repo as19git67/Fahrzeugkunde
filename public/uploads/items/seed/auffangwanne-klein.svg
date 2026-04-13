@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="die Auffangwanne klein">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="362" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="365" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Oberer Rand (Ellipse für Perspektive) -->
+        <ellipse cx="160" cy="85" rx="55" ry="10" fill="#f2b52f" />
+        <!-- Wannenkorpus -->
+        <path d="M 105 85 L 121 135 L 199 135 L 215 85 Z" fill="#f2b52f" />
+        <!-- Boden-Ellipse -->
+        <ellipse cx="160" cy="135" rx="39" ry="6" fill="#d0d0d0" />
+        <!-- Stütz-Streben am Rand -->
+        <rect x="101" y="71" width="10" height="22" rx="2" fill="#1a1a1a" />
+        <rect x="209" y="71" width="10" height="22" rx="2" fill="#1a1a1a" />
+        <rect x="154" y="71" width="12" height="20" rx="2" fill="#1a1a1a" />
+        <!-- Innere Flüssigkeitslinie -->
+        <ellipse cx="160" cy="89" rx="45" ry="7" fill="#b8d8f0" />
+        <ellipse cx="160" cy="89" rx="45" ry="7" fill="none" stroke-width="1.6" />
+      </g>
+    
+  </g>
+</svg>

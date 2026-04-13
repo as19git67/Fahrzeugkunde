@@ -130,7 +130,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
       <div className="flex items-center gap-2 text-sm text-zinc-400 flex-wrap">
         <button
           onClick={() => { setStep("view"); setSelectedView(null); setSelectedComp(null); setSelectedPos(null); }}
-          className="hover:text-white transition-colors"
+          className="underline underline-offset-2 decoration-zinc-600 hover:text-white hover:decoration-white transition-colors"
         >
           Fahrzeug
         </button>
@@ -139,7 +139,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
             <span>/</span>
             <button
               onClick={() => { setStep("compartment"); setSelectedComp(null); setSelectedPos(null); }}
-              className="hover:text-white transition-colors"
+              className="underline underline-offset-2 decoration-zinc-600 hover:text-white hover:decoration-white transition-colors"
             >
               {SIDE_LABELS[currentView?.side ?? ""] ?? currentView?.label}
             </button>
@@ -150,7 +150,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
             <span>/</span>
             <button
               onClick={() => { setStep("position"); setSelectedPos(null); }}
-              className="hover:text-white transition-colors"
+              className="underline underline-offset-2 decoration-zinc-600 hover:text-white hover:decoration-white transition-colors"
             >
               {currentComp?.label}
             </button>
@@ -258,7 +258,22 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
       })()}
 
       {/* Schritt 3: Position wählen */}
-      {step === "position" && currentComp && (() => {
+      {step === "position" && currentComp && currentComp.positions.length === 0 && (
+        <div className="w-full flex flex-col items-center gap-4 py-8">
+          <div className="text-zinc-300 text-center">
+            Hier ist nichts verstaut —{" "}
+            <span className="text-zinc-400">{currentComp.label}</span> ist leer.
+          </div>
+          <button
+            onClick={() => { setStep("compartment"); setSelectedComp(null); }}
+            className="px-4 py-2 rounded-xl bg-zinc-800 border-2 border-zinc-600 hover:border-yellow-400 text-white font-semibold transition-all"
+          >
+            ← Zurück
+          </button>
+        </div>
+      )}
+
+      {step === "position" && currentComp && currentComp.positions.length > 0 && (() => {
         const hasHotspots = currentComp.positions.some((p) => p.hotspotX != null);
         return (
         <div className="w-full">

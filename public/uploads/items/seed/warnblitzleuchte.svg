@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="die Warnblitzleuchte">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="803" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="806" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sockel -->
+      <rect x="126" y="134" width="68" height="18" rx="3" fill="#1a1a1a" />
+      <!-- Leuchtenkuppel -->
+      <path d="M 130 134 L 130 104 Q 130 70 160 70 Q 190 70 190 104 L 190 134 Z" fill="#f0a030" />
+      <!-- Kuppel-Rippen -->
+      <line x1="136" y1="82" x2="136" y2="134" stroke-width="1.6" />
+      <line x1="160" y1="70" x2="160" y2="134" stroke-width="1.6" />
+      <line x1="184" y1="82" x2="184" y2="134" stroke-width="1.6" />
+      <!-- Blitzsymbol -->
+      <path d="M 154 82 L 168 100 L 158 102 L 168 124 L 152 106 L 162 104 Z" fill="#1a1a1a" />
+      <!-- Lichtstrahlen -->
+      <line x1="124" y1="78" x2="108" y2="66" stroke-width="2" opacity="0.55" />
+      <line x1="160" y1="62" x2="160" y2="48" stroke-width="2" opacity="0.55" />
+      <line x1="196" y1="78" x2="212" y2="66" stroke-width="2" opacity="0.55" />
+    </g>
+  
+  </g>
+</svg>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="der Überdrucklüfter">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="201" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="204" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rahmen -->
+      <rect x="90" y="60" width="140" height="100" rx="10" fill="#50b8d8" />
+      <!-- Bodenkufen -->
+      <rect x="84" y="160" width="40" height="10" rx="2" fill="#1a1a1a" />
+      <rect x="196" y="160" width="40" height="10" rx="2" fill="#1a1a1a" />
+      <!-- Schutzgitter (Kreis) -->
+      <circle cx="160" cy="110" r="42" fill="#d0d0d0" />
+      <!-- Gitter-Streben -->
+      <line x1="118" y1="110" x2="202" y2="110" stroke-width="1.8" />
+      <line x1="160" y1="68" x2="160" y2="152" stroke-width="1.8" />
+      <line x1="130" y1="80" x2="190" y2="140" stroke-width="1.8" />
+      <line x1="130" y1="140" x2="190" y2="80" stroke-width="1.8" />
+      <!-- Nabe mit Lüfterflügeln -->
+      <circle cx="160" cy="110" r="8" fill="#1a1a1a" />
+      <path d="M 160 102 Q 190 90 194 106" fill="#50b8d8" />
+      <path d="M 168 110 Q 180 140 164 144" fill="#50b8d8" />
+      <path d="M 160 118 Q 130 130 126 114" fill="#50b8d8" />
+      <path d="M 152 110 Q 140 80 156 76" fill="#50b8d8" />
+      <!-- Motor-Bügel oben -->
+      <rect x="140" y="50" width="40" height="10" rx="3" fill="#1a1a1a" />
+    </g>
+  
+  </g>
+</svg>

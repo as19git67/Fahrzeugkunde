@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="die Leitkegel-Tasche">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="113" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="116" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kegelspitzen heraus -->
+      <path d="M 124 102 L 132 68 L 140 102 Z" fill="#f0a030" />
+      <path d="M 152 102 L 160 62 L 168 102 Z" fill="#f0a030" />
+      <path d="M 180 102 L 188 68 L 196 102 Z" fill="#f0a030" />
+      <!-- Tasche (Trapez) -->
+      <path d="M 104 102 L 216 102 L 224 154 L 96 154 Z" fill="#6a5638" />
+      <path d="M 104 102 L 216 102 L 224 154 L 96 154 Z" fill="none" stroke-width="3.5" />
+      <!-- Trageriemen -->
+      <path d="M 120 102 Q 110 74 140 70" fill="none" stroke-width="4" />
+      <path d="M 200 102 Q 210 74 180 70" fill="none" stroke-width="4" />
+      <!-- Naht -->
+      <line x1="102" y1="114" x2="218" y2="114" stroke-width="1.6" stroke-dasharray="4 3" />
+    </g>
+  
+  </g>
+</svg>

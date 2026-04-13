@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" role="img" aria-label="der Zumischer Z4">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="372" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="375" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <!-- Papier-Hintergrund -->
+  <rect width="320" height="220" fill="url(#paper)" />
+
+  <!-- Doppel-Rahmen, leicht verzittert -->
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="300" height="200" stroke-width="2.4" rx="4" />
+    <rect x="15" y="15" width="290" height="190" stroke-width="1.2" rx="3" />
+  </g>
+
+  <!-- Pencil-Shading neben der Haupt-Silhouette -->
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="38" y1="180" x2="78" y2="180" />
+    <line x1="38" y1="186" x2="88" y2="186" />
+    <line x1="38" y1="192" x2="70" y2="192" />
+    <line x1="244" y1="46" x2="282" y2="46" />
+    <line x1="244" y1="52" x2="276" y2="52" />
+  </g>
+
+  <!-- Haupt-Icon mit Sketch-Filter -->
+  <g filter="url(#sketch)">
+    
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Durchlauf-Rohr -->
+        <rect x="80" y="98" width="160" height="36" rx="6" fill="#6aa0ff" />
+        <!-- Kupplung links -->
+        <rect x="74" y="92" width="14" height="48" rx="2" fill="#1a1a1a" />
+        <!-- Kupplung rechts -->
+        <rect x="232" y="92" width="14" height="48" rx="2" fill="#1a1a1a" />
+        <!-- Dosierring oben (abgesetzter Ring) -->
+        <rect x="140" y="76" width="40" height="24" rx="4" fill="#6aa0ff" />
+        <circle cx="160" cy="88" r="14" fill="#d0d0d0" />
+        <circle cx="160" cy="88" r="4" fill="#1a1a1a" />
+        <!-- Skalenstriche am Ring entsprechend Z-Zahl -->
+        <line x1="156" y1="84" x2="156" y2="92" stroke-width="2" /><line x1="158" y1="84" x2="158" y2="92" stroke-width="2" /><line x1="160" y1="84" x2="160" y2="92" stroke-width="2" /><line x1="162" y1="84" x2="162" y2="92" stroke-width="2" />
+        <!-- Zumisch-Stutzen unten -->
+        <rect x="150" y="134" width="20" height="18" fill="#1a1a1a" />
+        <circle cx="160" cy="160" r="10" fill="none" stroke-width="3" />
+      </g>
+    
+  </g>
+</svg>
