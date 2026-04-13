@@ -1,5 +1,5 @@
 /**
- * Startup-Skript: Führt beim Container-Start die Migration durch,
+ * Startup-Skript: Führt beim Container-Start Migration und Seed durch,
  * dann startet den Next.js Server. Alle Operationen sind idempotent.
  */
 const { Client } = require("pg");
@@ -130,6 +130,26 @@ async function migrate(client) {
   console.log("✅ Migration abgeschlossen");
 }
 
+// --- Seed: Demo-Fahrzeug HLF 20 (idempotent, aktuell ohne Beladung) ---
+async function seed(client) {
+  const existing = await client.query(
+    "SELECT id FROM vehicles WHERE name = $1",
+    ["HLF 20"]
+  );
+  if (existing.rows.length > 0) {
+    console.log("✅ Seed: HLF 20 bereits vorhanden (id:", existing.rows[0].id, ")");
+    return;
+  }
+
+  const vehicleRes = await client.query(
+    "INSERT INTO vehicles (name, description) VALUES ($1, $2) RETURNING id",
+    ["HLF 20", "Hilfeleistungslöschgruppenfahrzeug 20"]
+  );
+  const vId = vehicleRes.rows[0].id;
+
+  console.log(`✅ Seed: HLF 20 angelegt (id: ${vId}, ohne Beladung)`);
+}
+
 // --- Main ---
 async function main() {
   setupUploads();
@@ -139,6 +159,7 @@ async function main() {
 
   try {
     await migrate(client);
+    await seed(client);
   } finally {
     await client.end();
   }
