@@ -36,16 +36,20 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f25c4a">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Haspelrahmen -->
+      <rect x="96" y="138" width="128" height="14" rx="3" fill="#1a1a1a" />
+      <path d="M 110 138 L 104 68" stroke-width="4" />
+      <path d="M 210 138 L 216 68" stroke-width="4" />
+      <!-- Trommel -->
+      <circle cx="160" cy="100" r="42" fill="#f25c4a" />
+      <circle cx="160" cy="100" r="30" fill="#e6d8b8" />
+      <circle cx="160" cy="100" r="18" fill="#f25c4a" />
+      <!-- Kurbel -->
+      <line x1="202" y1="100" x2="220" y2="90" stroke-width="4" />
+      <circle cx="220" cy="90" r="5" fill="#1a1a1a" />
+      <!-- Schlauchende unten -->
+      <path d="M 122 132 Q 112 150 100 148" fill="none" stroke-width="4" />
     </g>
   
   </g>

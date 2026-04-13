@@ -36,16 +36,16 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f25c4a">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Glassäge: Griff -->
+      <rect x="90" y="116" width="50" height="18" rx="4" fill="#f25c4a" />
+      <!-- Glassäge: Blatt mit Zähnen -->
+      <path d="M 140 120 L 210 120 L 210 130 L 140 130 Z" fill="#d0d0d0" />
+      <path d="M 144 130 l 6 6 l 6 -6 l 6 6 l 6 -6 l 6 6 l 6 -6 l 6 6 l 6 -6 l 6 6 l 6 -6" fill="#1a1a1a" stroke-width="1.6" />
+      <!-- Federkörner oben -->
+      <rect x="142" y="72" width="50" height="14" rx="3" fill="#f25c4a" />
+      <path d="M 192 79 L 218 79" stroke-width="4" />
+      <path d="M 218 74 L 230 79 L 218 84 Z" fill="#1a1a1a" />
     </g>
   
   </g>

@@ -36,16 +36,18 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#b47a30">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kastenkorpus -->
+      <rect x="90" y="90" width="140" height="60" rx="4" fill="#b47a30" />
+      <!-- Deckelkante -->
+      <line x1="90" y1="108" x2="230" y2="108" stroke-width="3" />
+      <!-- Griff -->
+      <rect x="136" y="70" width="48" height="10" rx="4" fill="#b47a30" />
+      <path d="M 146 70 L 146 90" stroke-width="3" />
+      <path d="M 174 70 L 174 90" stroke-width="3" />
+      <!-- Verschlüsse -->
+      <rect x="110" y="102" width="12" height="14" fill="#1a1a1a" />
+      <rect x="198" y="102" width="12" height="14" fill="#1a1a1a" />
     </g>
   
   </g>

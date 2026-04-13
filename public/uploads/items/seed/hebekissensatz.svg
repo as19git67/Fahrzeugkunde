@@ -36,16 +36,17 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f25c4a">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kissen 3 (unten groß) -->
+      <rect x="90" y="124" width="140" height="26" rx="12" fill="#f25c4a" />
+      <!-- Kissen 2 (mitte) -->
+      <rect x="102" y="100" width="116" height="22" rx="10" fill="#f25c4a" />
+      <!-- Kissen 1 (oben klein) -->
+      <rect x="116" y="78" width="88" height="20" rx="9" fill="#f25c4a" />
+      <!-- Luftanschlüsse -->
+      <line x1="96" y1="136" x2="80" y2="136" stroke-width="4" />
+      <line x1="108" y1="112" x2="82" y2="112" stroke-width="4" />
+      <line x1="122" y1="88" x2="84" y2="88" stroke-width="4" />
     </g>
   
   </g>
