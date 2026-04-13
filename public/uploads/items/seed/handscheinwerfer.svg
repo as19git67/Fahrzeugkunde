@@ -36,16 +36,22 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f5c330">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Reflektorkopf (trapezartig) -->
+      <path d="M 130 72 L 200 80 L 200 140 L 130 148 Z" fill="#f5c330" />
+      <!-- Linse -->
+      <path d="M 200 80 L 210 84 L 210 136 L 200 140 Z" fill="#ffffff" />
+      <!-- Griff (unten) -->
+      <rect x="140" y="142" width="30" height="24" rx="4" fill="#1a1a1a" />
+      <!-- Trigger -->
+      <path d="M 150 142 L 150 132 L 160 132" fill="none" stroke-width="3" />
+      <!-- Lichtstrahlen -->
+      <line x1="216" y1="90" x2="232" y2="84" stroke-width="2" opacity="0.5" />
+      <line x1="216" y1="110" x2="234" y2="110" stroke-width="2" opacity="0.5" />
+      <line x1="216" y1="130" x2="232" y2="136" stroke-width="2" opacity="0.5" />
+      <!-- Hängeöse hinten -->
+      <path d="M 130 90 L 120 96" stroke-width="3" />
+      <circle cx="118" cy="100" r="5" fill="none" stroke-width="3" />
     </g>
   
   </g>

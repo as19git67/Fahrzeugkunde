@@ -36,16 +36,21 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f0a030">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sockel -->
+      <rect x="126" y="134" width="68" height="18" rx="3" fill="#1a1a1a" />
+      <!-- Leuchtenkuppel -->
+      <path d="M 130 134 L 130 104 Q 130 70 160 70 Q 190 70 190 104 L 190 134 Z" fill="#f0a030" />
+      <!-- Kuppel-Rippen -->
+      <line x1="136" y1="82" x2="136" y2="134" stroke-width="1.6" />
+      <line x1="160" y1="70" x2="160" y2="134" stroke-width="1.6" />
+      <line x1="184" y1="82" x2="184" y2="134" stroke-width="1.6" />
+      <!-- Blitzsymbol -->
+      <path d="M 154 82 L 168 100 L 158 102 L 168 124 L 152 106 L 162 104 Z" fill="#1a1a1a" />
+      <!-- Lichtstrahlen -->
+      <line x1="124" y1="78" x2="108" y2="66" stroke-width="2" opacity="0.55" />
+      <line x1="160" y1="62" x2="160" y2="48" stroke-width="2" opacity="0.55" />
+      <line x1="196" y1="78" x2="212" y2="66" stroke-width="2" opacity="0.55" />
     </g>
   
   </g>

@@ -36,16 +36,19 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f0a030">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kegelspitzen heraus -->
+      <path d="M 124 102 L 132 68 L 140 102 Z" fill="#f0a030" />
+      <path d="M 152 102 L 160 62 L 168 102 Z" fill="#f0a030" />
+      <path d="M 180 102 L 188 68 L 196 102 Z" fill="#f0a030" />
+      <!-- Tasche (Trapez) -->
+      <path d="M 104 102 L 216 102 L 224 154 L 96 154 Z" fill="#6a5638" />
+      <path d="M 104 102 L 216 102 L 224 154 L 96 154 Z" fill="none" stroke-width="3.5" />
+      <!-- Trageriemen -->
+      <path d="M 120 102 Q 110 74 140 70" fill="none" stroke-width="4" />
+      <path d="M 200 102 Q 210 74 180 70" fill="none" stroke-width="4" />
+      <!-- Naht -->
+      <line x1="102" y1="114" x2="218" y2="114" stroke-width="1.6" stroke-dasharray="4 3" />
     </g>
   
   </g>

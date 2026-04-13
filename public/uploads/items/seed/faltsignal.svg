@@ -36,16 +36,17 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#f0a030">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Standfuß -->
+      <rect x="120" y="148" width="80" height="10" rx="2" fill="#1a1a1a" />
+      <rect x="154" y="134" width="12" height="20" fill="#1a1a1a" />
+      <!-- 3 Tafel-Segmente im Fächer-Look -->
+      <path d="M 94 80 L 94 140 L 124 144 L 124 76 Z" fill="#f0a030" />
+      <path d="M 140 70 L 140 148 L 180 148 L 180 70 Z" fill="#f0a030" />
+      <path d="M 196 76 L 196 144 L 226 140 L 226 80 Z" fill="#f0a030" />
+      <!-- diagonale Streifen (Warnmarkierung) -->
+      <line x1="144" y1="74" x2="176" y2="144" stroke-width="2.5" stroke="#ffffff" />
+      <line x1="144" y1="90" x2="176" y2="160" stroke-width="2.5" stroke="#ffffff" />
     </g>
   
   </g>

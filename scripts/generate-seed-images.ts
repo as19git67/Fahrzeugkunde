@@ -640,6 +640,243 @@ const iconEinreisshaken: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- G2 Icons ----------------------------------------------------------------
+
+/** Stromerzeuger: Aggregatkasten mit Tank, Griff, Steckdose. */
+const iconStromerzeuger: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus -->
+      <rect x="${x - 70}" y="${y - 20}" width="140" height="60" rx="6" fill="${accent}" />
+      <!-- Tankdeckel oben -->
+      <rect x="${x - 50}" y="${y - 38}" width="100" height="18" rx="4" fill="${accent}" />
+      <circle cx="${x}" cy="${y - 29}" r="6" fill="${ink}" />
+      <!-- Tragebügel -->
+      <path d="M ${x - 40} ${y - 38} Q ${x} ${y - 60} ${x + 40} ${y - 38}" fill="none" stroke-width="4" />
+      <!-- Kühlschlitze -->
+      <line x1="${x - 56}" y1="${y - 10}" x2="${x - 20}" y2="${y - 10}" stroke-width="2" />
+      <line x1="${x - 56}" y1="${y - 2}" x2="${x - 20}" y2="${y - 2}" stroke-width="2" />
+      <line x1="${x - 56}" y1="${y + 6}" x2="${x - 20}" y2="${y + 6}" stroke-width="2" />
+      <line x1="${x - 56}" y1="${y + 14}" x2="${x - 20}" y2="${y + 14}" stroke-width="2" />
+      <!-- Steckdosen -->
+      <rect x="${x + 8}" y="${y - 10}" width="22" height="28" rx="2" fill="${ink}" />
+      <circle cx="${x + 19}" cy="${y + 4}" r="3" fill="${accent}" />
+      <rect x="${x + 38}" y="${y - 10}" width="22" height="28" rx="2" fill="${ink}" />
+      <circle cx="${x + 49}" cy="${y + 4}" r="3" fill="${accent}" />
+      <!-- Standfüße -->
+      <rect x="${x - 60}" y="${y + 40}" width="14" height="8" fill="${ink}" />
+      <rect x="${x + 46}" y="${y + 40}" width="14" height="8" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Flutlichtstrahler: LED-Strahler auf Stativ. */
+const iconFlutlicht: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Strahlergehäuse -->
+      <rect x="${x - 50}" y="${y - 42}" width="100" height="40" rx="4" fill="${accent}" />
+      <!-- Reflektor innen -->
+      <rect x="${x - 42}" y="${y - 36}" width="84" height="28" fill="#ffffff" />
+      <line x1="${x - 20}" y1="${y - 36}" x2="${x - 20}" y2="${y - 8}" stroke-width="1.6" />
+      <line x1="${x}" y1="${y - 36}" x2="${x}" y2="${y - 8}" stroke-width="1.6" />
+      <line x1="${x + 20}" y1="${y - 36}" x2="${x + 20}" y2="${y - 8}" stroke-width="1.6" />
+      <!-- Bügel -->
+      <path d="M ${x - 50} ${y - 22} L ${x - 60} ${y - 22}" stroke-width="3" />
+      <path d="M ${x + 50} ${y - 22} L ${x + 60} ${y - 22}" stroke-width="3" />
+      <!-- Mittelstange -->
+      <rect x="${x - 4}" y="${y - 2}" width="8" height="40" fill="${ink}" />
+      <!-- Stativ (drei Beine) -->
+      <path d="M ${x} ${y + 38} L ${x - 50} ${y + 58}" stroke-width="4" />
+      <path d="M ${x} ${y + 38} L ${x} ${y + 62}" stroke-width="4" />
+      <path d="M ${x} ${y + 38} L ${x + 50} ${y + 58}" stroke-width="4" />
+      <!-- Lichtstrahlen -->
+      <line x1="${x - 36}" y1="${y - 2}" x2="${x - 52}" y2="${y + 10}" stroke-width="1.6" opacity="0.5" />
+      <line x1="${x}" y1="${y - 2}" x2="${x}" y2="${y + 14}" stroke-width="1.6" opacity="0.5" />
+      <line x1="${x + 36}" y1="${y - 2}" x2="${x + 52}" y2="${y + 10}" stroke-width="1.6" opacity="0.5" />
+    </g>
+  `;
+};
+
+/** Teleskopmast: ausfahrbarer Lichtmast mit Scheinwerferkopf. */
+const iconTeleskopmast: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Fußplatte -->
+      <rect x="${x - 40}" y="${y + 42}" width="80" height="12" rx="2" fill="${ink}" />
+      <!-- Basis-Segment -->
+      <rect x="${x - 18}" y="${y + 14}" width="36" height="32" fill="${accent}" />
+      <!-- Mitte-Segment -->
+      <rect x="${x - 12}" y="${y - 14}" width="24" height="32" fill="${accent}" />
+      <!-- Top-Segment -->
+      <rect x="${x - 7}" y="${y - 38}" width="14" height="28" fill="${accent}" />
+      <!-- Scheinwerferkopf (quer) -->
+      <rect x="${x - 50}" y="${y - 52}" width="100" height="18" rx="3" fill="${ink}" />
+      <rect x="${x - 44}" y="${y - 48}" width="88" height="10" fill="#ffffff" />
+      <line x1="${x - 22}" y1="${y - 48}" x2="${x - 22}" y2="${y - 38}" stroke-width="1.4" />
+      <line x1="${x}" y1="${y - 48}" x2="${x}" y2="${y - 38}" stroke-width="1.4" />
+      <line x1="${x + 22}" y1="${y - 48}" x2="${x + 22}" y2="${y - 38}" stroke-width="1.4" />
+      <!-- Segmenttrennlinien -->
+      <line x1="${x - 18}" y1="${y + 14}" x2="${x + 18}" y2="${y + 14}" stroke-width="1.6" />
+      <line x1="${x - 12}" y1="${y - 14}" x2="${x + 12}" y2="${y - 14}" stroke-width="1.6" />
+    </g>
+  `;
+};
+
+/** Handscheinwerfer: Handlampe mit breitem Reflektor und Griff. */
+const iconHandscheinwerfer: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Reflektorkopf (trapezartig) -->
+      <path d="M ${x - 30} ${y - 38} L ${x + 40} ${y - 30} L ${x + 40} ${y + 30} L ${x - 30} ${y + 38} Z" fill="${accent}" />
+      <!-- Linse -->
+      <path d="M ${x + 40} ${y - 30} L ${x + 50} ${y - 26} L ${x + 50} ${y + 26} L ${x + 40} ${y + 30} Z" fill="#ffffff" />
+      <!-- Griff (unten) -->
+      <rect x="${x - 20}" y="${y + 32}" width="30" height="24" rx="4" fill="${ink}" />
+      <!-- Trigger -->
+      <path d="M ${x - 10} ${y + 32} L ${x - 10} ${y + 22} L ${x} ${y + 22}" fill="none" stroke-width="3" />
+      <!-- Lichtstrahlen -->
+      <line x1="${x + 56}" y1="${y - 20}" x2="${x + 72}" y2="${y - 26}" stroke-width="2" opacity="0.5" />
+      <line x1="${x + 56}" y1="${y}" x2="${x + 74}" y2="${y}" stroke-width="2" opacity="0.5" />
+      <line x1="${x + 56}" y1="${y + 20}" x2="${x + 72}" y2="${y + 26}" stroke-width="2" opacity="0.5" />
+      <!-- Hängeöse hinten -->
+      <path d="M ${x - 30} ${y - 20} L ${x - 40} ${y - 14}" stroke-width="3" />
+      <circle cx="${x - 42}" cy="${y - 10}" r="5" fill="none" stroke-width="3" />
+    </g>
+  `;
+};
+
+/** Stab-Taschenlampe: zylindrische lange Lampe. */
+const iconTaschenlampe: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kopfstück (dicker) -->
+      <rect x="${x - 70}" y="${y - 16}" width="34" height="32" rx="3" fill="${ink}" />
+      <!-- Linse vorne -->
+      <rect x="${x - 78}" y="${y - 14}" width="10" height="28" fill="#ffffff" />
+      <!-- Schaft -->
+      <rect x="${x - 36}" y="${y - 10}" width="86" height="20" fill="${accent}" />
+      <!-- Griff-Riffel -->
+      <line x1="${x - 20}" y1="${y - 10}" x2="${x - 20}" y2="${y + 10}" stroke-width="1.6" />
+      <line x1="${x - 8}" y1="${y - 10}" x2="${x - 8}" y2="${y + 10}" stroke-width="1.6" />
+      <line x1="${x + 4}" y1="${y - 10}" x2="${x + 4}" y2="${y + 10}" stroke-width="1.6" />
+      <line x1="${x + 16}" y1="${y - 10}" x2="${x + 16}" y2="${y + 10}" stroke-width="1.6" />
+      <line x1="${x + 28}" y1="${y - 10}" x2="${x + 28}" y2="${y + 10}" stroke-width="1.6" />
+      <!-- Endkappe -->
+      <rect x="${x + 50}" y="${y - 12}" width="14" height="24" rx="2" fill="${ink}" />
+      <!-- Schlaufe -->
+      <circle cx="${x + 72}" cy="${y}" r="6" fill="none" stroke-width="3" />
+      <!-- Lichtstrahlen -->
+      <line x1="${x - 80}" y1="${y - 8}" x2="${x - 90}" y2="${y - 12}" stroke-width="1.6" opacity="0.5" />
+      <line x1="${x - 82}" y1="${y}" x2="${x - 94}" y2="${y}" stroke-width="1.6" opacity="0.5" />
+      <line x1="${x - 80}" y1="${y + 8}" x2="${x - 90}" y2="${y + 12}" stroke-width="1.6" opacity="0.5" />
+    </g>
+  `;
+};
+
+/** Warnblitzleuchte: gelbe Leuchte mit Blitzsymbol auf Sockel. */
+const iconWarnblitz: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sockel -->
+      <rect x="${x - 34}" y="${y + 24}" width="68" height="18" rx="3" fill="${ink}" />
+      <!-- Leuchtenkuppel -->
+      <path d="M ${x - 30} ${y + 24} L ${x - 30} ${y - 6} Q ${x - 30} ${y - 40} ${x} ${y - 40} Q ${x + 30} ${y - 40} ${x + 30} ${y - 6} L ${x + 30} ${y + 24} Z" fill="${accent}" />
+      <!-- Kuppel-Rippen -->
+      <line x1="${x - 24}" y1="${y - 28}" x2="${x - 24}" y2="${y + 24}" stroke-width="1.6" />
+      <line x1="${x}" y1="${y - 40}" x2="${x}" y2="${y + 24}" stroke-width="1.6" />
+      <line x1="${x + 24}" y1="${y - 28}" x2="${x + 24}" y2="${y + 24}" stroke-width="1.6" />
+      <!-- Blitzsymbol -->
+      <path d="M ${x - 6} ${y - 28} L ${x + 8} ${y - 10} L ${x - 2} ${y - 8} L ${x + 8} ${y + 14} L ${x - 8} ${y - 4} L ${x + 2} ${y - 6} Z" fill="${ink}" />
+      <!-- Lichtstrahlen -->
+      <line x1="${x - 36}" y1="${y - 32}" x2="${x - 52}" y2="${y - 44}" stroke-width="2" opacity="0.55" />
+      <line x1="${x}" y1="${y - 48}" x2="${x}" y2="${y - 62}" stroke-width="2" opacity="0.55" />
+      <line x1="${x + 36}" y1="${y - 32}" x2="${x + 52}" y2="${y - 44}" stroke-width="2" opacity="0.55" />
+    </g>
+  `;
+};
+
+/** Verkehrsleitkegel: Pylon mit Reflexstreifen. */
+const iconLeitkegel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Bodenplatte -->
+      <rect x="${x - 60}" y="${y + 36}" width="120" height="16" rx="3" fill="${ink}" />
+      <!-- Kegelkörper -->
+      <path d="M ${x - 44} ${y + 36} L ${x - 10} ${y - 44} L ${x + 10} ${y - 44} L ${x + 44} ${y + 36} Z" fill="${accent}" />
+      <!-- Reflexstreifen breit -->
+      <rect x="${x - 38}" y="${y + 18}" width="76" height="10" fill="#ffffff" />
+      <!-- Reflexstreifen schmal -->
+      <rect x="${x - 28}" y="${y - 4}" width="56" height="8" fill="#ffffff" />
+      <!-- Spitze -->
+      <rect x="${x - 10}" y="${y - 50}" width="20" height="8" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Warndreieck: rotes Dreieck auf Standfuß. */
+const iconWarndreieck: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Standkreuz -->
+      <rect x="${x - 60}" y="${y + 36}" width="120" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 6}" y="${y + 20}" width="12" height="26" fill="${ink}" />
+      <!-- Äußeres Dreieck (rot) -->
+      <path d="M ${x} ${y - 50} L ${x + 56} ${y + 24} L ${x - 56} ${y + 24} Z" fill="${accent}" />
+      <!-- Inneres Dreieck (ausgeschnitten) -->
+      <path d="M ${x} ${y - 30} L ${x + 38} ${y + 16} L ${x - 38} ${y + 16} Z" fill="#f7f1e1" />
+    </g>
+  `;
+};
+
+/** Faltsignal: Absperrtafel mit mehreren Flächen. */
+const iconFaltsignal: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Standfuß -->
+      <rect x="${x - 40}" y="${y + 38}" width="80" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 6}" y="${y + 24}" width="12" height="20" fill="${ink}" />
+      <!-- 3 Tafel-Segmente im Fächer-Look -->
+      <path d="M ${x - 66} ${y - 30} L ${x - 66} ${y + 30} L ${x - 36} ${y + 34} L ${x - 36} ${y - 34} Z" fill="${accent}" />
+      <path d="M ${x - 20} ${y - 40} L ${x - 20} ${y + 38} L ${x + 20} ${y + 38} L ${x + 20} ${y - 40} Z" fill="${accent}" />
+      <path d="M ${x + 36} ${y - 34} L ${x + 36} ${y + 34} L ${x + 66} ${y + 30} L ${x + 66} ${y - 30} Z" fill="${accent}" />
+      <!-- diagonale Streifen (Warnmarkierung) -->
+      <line x1="${x - 16}" y1="${y - 36}" x2="${x + 16}" y2="${y + 34}" stroke-width="2.5" stroke="#ffffff" />
+      <line x1="${x - 16}" y1="${y - 20}" x2="${x + 16}" y2="${y + 50}" stroke-width="2.5" stroke="#ffffff" />
+    </g>
+  `;
+};
+
+/** Leitkegel-Tasche: Tragetasche mit herausragenden Kegelspitzen. */
+const iconLeitkegelTasche: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kegelspitzen heraus -->
+      <path d="M ${x - 36} ${y - 8} L ${x - 28} ${y - 42} L ${x - 20} ${y - 8} Z" fill="${accent}" />
+      <path d="M ${x - 8} ${y - 8} L ${x} ${y - 48} L ${x + 8} ${y - 8} Z" fill="${accent}" />
+      <path d="M ${x + 20} ${y - 8} L ${x + 28} ${y - 42} L ${x + 36} ${y - 8} Z" fill="${accent}" />
+      <!-- Tasche (Trapez) -->
+      <path d="M ${x - 56} ${y - 8} L ${x + 56} ${y - 8} L ${x + 64} ${y + 44} L ${x - 64} ${y + 44} Z" fill="#6a5638" />
+      <path d="M ${x - 56} ${y - 8} L ${x + 56} ${y - 8} L ${x + 64} ${y + 44} L ${x - 64} ${y + 44} Z" fill="none" stroke-width="3.5" />
+      <!-- Trageriemen -->
+      <path d="M ${x - 40} ${y - 8} Q ${x - 50} ${y - 36} ${x - 20} ${y - 40}" fill="none" stroke-width="4" />
+      <path d="M ${x + 40} ${y - 8} Q ${x + 50} ${y - 36} ${x + 20} ${y - 40}" fill="none" stroke-width="4" />
+      <!-- Naht -->
+      <line x1="${x - 58}" y1="${y + 4}" x2="${x + 58}" y2="${y + 4}" stroke-width="1.6" stroke-dasharray="4 3" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -798,6 +1035,17 @@ ICON_REGISTRY.push(
   [/halligan/, iconHalligan],
   [/akku-bohrmaschine|bohrmaschine/, iconBohrmaschine],
   [/einreisshaken|einreißhaken/, iconEinreisshaken],
+  // G2 — spezifische vor generischen Keywords
+  [/stromerzeuger/, iconStromerzeuger],
+  [/flutlicht/, iconFlutlicht],
+  [/teleskopmast/, iconTeleskopmast],
+  [/handscheinwerfer/, iconHandscheinwerfer],
+  [/taschenlampe/, iconTaschenlampe],
+  [/warnblitz/, iconWarnblitz],
+  [/leitkegel-tasche/, iconLeitkegelTasche],
+  [/verkehrsleitkegel|leitkegel|pylon/, iconLeitkegel],
+  [/warndreieck/, iconWarndreieck],
+  [/faltsignal/, iconFaltsignal],
 );
 
 generate();
