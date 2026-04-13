@@ -66,6 +66,7 @@ interface Vehicle {
 interface Props {
   vehicleId: number;
   onBack: () => void;
+  onDeleted?: () => void;
 }
 
 const SIDES = [
@@ -142,6 +143,8 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
   const [newViewLabel, setNewViewLabel] = useState("Fahrzeug links");
   const [addingView, setAddingView] = useState(false);
   const [expandedView, setExpandedView] = useState<number | null>(null);
+  const [renamingViewId, setRenamingViewId] = useState<number | null>(null);
+  const [viewRenameValue, setViewRenameValue] = useState("");
 
   const handleAddView = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,11 +162,12 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
     fd.append("file", file);
     fd.append("folder", "views");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(`Upload fehlgeschlagen: ${data.error ?? res.statusText}`);
+      return;
+    }
     const { path } = await res.json();
-    await fetch(`/api/views/${viewId}/compartments`, {
-      // Nutze PATCH auf view direkt — wir patchen den View
-    });
-    // Für Einfachheit: View-Update via eigenen PATCH
     await fetch(`/api/vehicle-views/${viewId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -172,23 +176,118 @@ function StructureEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: ()
     await onReload();
   };
 
+  const startRenameView = (id: number, label: string) => {
+    setRenamingViewId(id);
+    setViewRenameValue(label);
+  };
+  const cancelRenameView = () => {
+    setRenamingViewId(null);
+    setViewRenameValue("");
+  };
+  const submitRenameView = async (id: number) => {
+    const label = viewRenameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/vehicle-views/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRenameView();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDeleteView = async (view: VehicleView) => {
+    const ok = window.confirm(
+      `Fahrzeugseite "${view.label}" wirklich löschen?\n\n` +
+      "Alle zugehörigen Fächer, Positionen, Kisten und darin verorteten " +
+      "Gegenstände werden ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/vehicle-views/${view.id}`, { method: "DELETE" });
+    if (res.ok) {
+      if (expandedView === view.id) setExpandedView(null);
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* Ansichten */}
       {vehicle.views.map((view) => (
         <div key={view.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-          <button
-            onClick={() => setExpandedView(expandedView === view.id ? null : view.id)}
-            className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <span className="font-bold text-white">{view.label}</span>
-              <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                {view.compartments.length} Fächer
-              </span>
-            </div>
-            <span className="text-zinc-400">{expandedView === view.id ? "▲" : "▼"}</span>
-          </button>
+          <div className="flex items-center gap-2 p-4 hover:bg-zinc-800/50 transition-colors">
+            {renamingViewId === view.id ? (
+              <form
+                onSubmit={(e) => { e.preventDefault(); submitRenameView(view.id); }}
+                className="flex-1 flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  autoFocus
+                  value={viewRenameValue}
+                  onChange={(e) => setViewRenameValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") cancelRenameView(); }}
+                  className="flex-1 bg-zinc-800 border border-zinc-600 rounded-xl px-3 py-1.5 text-white outline-none focus:border-red-400"
+                />
+                <button
+                  type="submit"
+                  className="bg-red-600 hover:bg-red-500 text-white text-sm font-bold px-3 py-1.5 rounded-xl"
+                >
+                  Speichern
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelRenameView}
+                  className="text-zinc-400 hover:text-white px-2"
+                >
+                  ✕
+                </button>
+              </form>
+            ) : (
+              <>
+                <button
+                  onClick={() => setExpandedView(expandedView === view.id ? null : view.id)}
+                  className="flex-1 flex items-center gap-3 text-left"
+                >
+                  <span className="font-bold text-white">{view.label}</span>
+                  <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
+                    {view.compartments.length} Fächer
+                  </span>
+                </button>
+                <button
+                  onClick={() => startRenameView(view.id, view.label)}
+                  title="Fahrzeugseite umbenennen"
+                  aria-label="Fahrzeugseite umbenennen"
+                  className="text-zinc-500 hover:text-white p-1 rounded transition-colors"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => handleDeleteView(view)}
+                  title="Fahrzeugseite löschen"
+                  aria-label="Fahrzeugseite löschen"
+                  className="text-zinc-500 hover:text-red-400 p-1 rounded transition-colors"
+                >
+                  🗑️
+                </button>
+                <button
+                  onClick={() => setExpandedView(expandedView === view.id ? null : view.id)}
+                  className="text-zinc-400 p-1"
+                  aria-label={expandedView === view.id ? "Einklappen" : "Ausklappen"}
+                >
+                  {expandedView === view.id ? "▲" : "▼"}
+                </button>
+              </>
+            )}
+          </div>
 
           <AnimatePresence>
             {expandedView === view.id && (
