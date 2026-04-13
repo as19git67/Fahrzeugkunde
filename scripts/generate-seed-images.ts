@@ -877,6 +877,206 @@ const iconLeitkegelTasche: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- G5 Icons ----------------------------------------------------------------
+
+/** Druckschlauch-Factory: aufgerollter Schlauch in Größenfarbe (B/C/D). */
+function makeDruckschlauch(color: string): IconFn {
+  return ({ ink, cx, cy }) => {
+    const x = cx, y = cy;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Aufgerollter Schlauch: konzentrische Wülste -->
+        <circle cx="${x}" cy="${y + 4}" r="54" fill="${color}" />
+        <circle cx="${x}" cy="${y + 4}" r="44" fill="#e6d8b8" />
+        <circle cx="${x}" cy="${y + 4}" r="36" fill="${color}" />
+        <circle cx="${x}" cy="${y + 4}" r="26" fill="#e6d8b8" />
+        <circle cx="${x}" cy="${y + 4}" r="18" fill="${color}" />
+        <circle cx="${x}" cy="${y + 4}" r="10" fill="#e6d8b8" />
+        <!-- Abgehendes Schlauchende mit Kupplung -->
+        <path d="M ${x + 50} ${y + 22} Q ${x + 74} ${y + 40} ${x + 58} ${y + 58}" fill="none" stroke-width="10" stroke="${color}" />
+        <path d="M ${x + 50} ${y + 22} Q ${x + 74} ${y + 40} ${x + 58} ${y + 58}" fill="none" stroke-width="10" />
+        <!-- Kupplung -->
+        <rect x="${x + 46}" y="${y + 54}" width="28" height="12" rx="2" fill="${ink}" transform="rotate(18 ${x + 58} ${y + 58})" />
+      </g>
+    `;
+  };
+}
+
+const iconBSchlauch = makeDruckschlauch("#2e8bff");
+const iconCSchlauch = makeDruckschlauch("#d83a2a");
+const iconDSchlauch = makeDruckschlauch("#f5c330");
+
+/** Saugschlauch: geriffelter A-Schlauch mit zwei dicken Kupplungen. */
+const iconSaugschlauch: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Schlauchkörper (leicht geschwungen) -->
+      <path d="M ${x - 60} ${y - 20} Q ${x} ${y - 40} ${x + 60} ${y + 20}" stroke-width="26" stroke="${accent}" fill="none" />
+      <path d="M ${x - 60} ${y - 20} Q ${x} ${y - 40} ${x + 60} ${y + 20}" stroke-width="26" fill="none" />
+      <!-- Riffelung (kurze Querstriche entlang des Bogens) -->
+      <line x1="${x - 50}" y1="${y - 34}" x2="${x - 50}" y2="${y - 14}" stroke-width="1.8" />
+      <line x1="${x - 34}" y1="${y - 38}" x2="${x - 34}" y2="${y - 18}" stroke-width="1.8" />
+      <line x1="${x - 16}" y1="${y - 40}" x2="${x - 14}" y2="${y - 20}" stroke-width="1.8" />
+      <line x1="${x + 2}" y1="${y - 38}" x2="${x + 6}" y2="${y - 18}" stroke-width="1.8" />
+      <line x1="${x + 18}" y1="${y - 34}" x2="${x + 24}" y2="${y - 14}" stroke-width="1.8" />
+      <line x1="${x + 34}" y1="${y - 26}" x2="${x + 40}" y2="${y - 6}" stroke-width="1.8" />
+      <line x1="${x + 46}" y1="${y - 14}" x2="${x + 52}" y2="${y + 4}" stroke-width="1.8" />
+      <!-- Kupplung links -->
+      <rect x="${x - 78}" y="${y - 30}" width="24" height="26" rx="2" fill="${ink}" />
+      <rect x="${x - 84}" y="${y - 32}" width="10" height="30" rx="2" fill="${ink}" />
+      <!-- Kupplung rechts -->
+      <rect x="${x + 54}" y="${y + 10}" width="24" height="26" rx="2" fill="${ink}" transform="rotate(45 ${x + 66} ${y + 23})" />
+    </g>
+  `;
+};
+
+/** Saugkorb: Siebtrichter mit Rückschlagklappe. */
+const iconSaugkorb: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Oberer Anschlussstutzen -->
+      <rect x="${x - 18}" y="${y - 54}" width="36" height="20" fill="${ink}" />
+      <rect x="${x - 22}" y="${y - 34}" width="44" height="10" fill="${ink}" />
+      <!-- Siebkorb (gerundeter Kegel) -->
+      <path d="M ${x - 50} ${y - 24} Q ${x - 56} ${y + 10} ${x - 30} ${y + 40} L ${x + 30} ${y + 40} Q ${x + 56} ${y + 10} ${x + 50} ${y - 24} Z" fill="${accent}" />
+      <!-- Gitter: vertikale Striche -->
+      <line x1="${x - 36}" y1="${y - 20}" x2="${x - 26}" y2="${y + 36}" stroke-width="2" />
+      <line x1="${x - 18}" y1="${y - 22}" x2="${x - 14}" y2="${y + 38}" stroke-width="2" />
+      <line x1="${x}" y1="${y - 24}" x2="${x}" y2="${y + 40}" stroke-width="2" />
+      <line x1="${x + 18}" y1="${y - 22}" x2="${x + 14}" y2="${y + 38}" stroke-width="2" />
+      <line x1="${x + 36}" y1="${y - 20}" x2="${x + 26}" y2="${y + 36}" stroke-width="2" />
+      <!-- Gitter: horizontale Striche -->
+      <path d="M ${x - 48} ${y - 8} Q ${x} ${y - 2} ${x + 48} ${y - 8}" fill="none" stroke-width="2" />
+      <path d="M ${x - 52} ${y + 10} Q ${x} ${y + 18} ${x + 52} ${y + 10}" fill="none" stroke-width="2" />
+      <path d="M ${x - 42} ${y + 28} Q ${x} ${y + 34} ${x + 42} ${y + 28}" fill="none" stroke-width="2" />
+    </g>
+  `;
+};
+
+/** Standrohr: T-förmiges Standrohr mit Handrad und Auslässen. */
+const iconStandrohr: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Vertikales Steigrohr -->
+      <rect x="${x - 12}" y="${y - 54}" width="24" height="90" fill="${accent}" />
+      <!-- Bodenflansch -->
+      <rect x="${x - 26}" y="${y + 36}" width="52" height="12" rx="2" fill="${ink}" />
+      <!-- Kopfstück (T-quer) -->
+      <rect x="${x - 60}" y="${y - 40}" width="120" height="24" rx="4" fill="${accent}" />
+      <!-- Zwei Auslässe mit Ventilen -->
+      <rect x="${x - 70}" y="${y - 36}" width="14" height="16" fill="${ink}" />
+      <rect x="${x + 56}" y="${y - 36}" width="14" height="16" fill="${ink}" />
+      <!-- Handrad oben -->
+      <circle cx="${x}" cy="${y - 54}" r="14" fill="none" stroke-width="4" />
+      <circle cx="${x}" cy="${y - 54}" r="4" fill="${ink}" />
+      <line x1="${x - 14}" y1="${y - 54}" x2="${x + 14}" y2="${y - 54}" stroke-width="2" />
+      <line x1="${x}" y1="${y - 68}" x2="${x}" y2="${y - 40}" stroke-width="2" />
+    </g>
+  `;
+};
+
+/** Überflurhydrantenschlüssel: langer Vierkantschlüssel mit Kreuzgriff. */
+const iconUeberflurschluessel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kreuzgriff oben -->
+      <rect x="${x - 44}" y="${y - 52}" width="88" height="10" rx="2" fill="${accent}" />
+      <rect x="${x - 5}" y="${y - 66}" width="10" height="40" fill="${accent}" />
+      <!-- Schaft lang nach unten -->
+      <rect x="${x - 6}" y="${y - 42}" width="12" height="80" fill="${accent}" />
+      <!-- Vierkantnuss am Ende -->
+      <rect x="${x - 14}" y="${y + 38}" width="28" height="20" fill="${ink}" />
+      <!-- Innerer Vierkant-Schnitt -->
+      <rect x="${x - 6}" y="${y + 44}" width="12" height="10" fill="#f7f1e1" />
+    </g>
+  `;
+};
+
+/** Unterflurhydrantenschlüssel: Hakenschlüssel mit T-Griff. */
+const iconUnterflurschluessel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- T-Griff quer oben -->
+      <rect x="${x - 50}" y="${y - 50}" width="100" height="12" rx="3" fill="${accent}" />
+      <!-- Schaft (lang) -->
+      <rect x="${x - 6}" y="${y - 38}" width="12" height="76" fill="${accent}" />
+      <!-- Unten gebogener Haken -->
+      <path d="M ${x - 6} ${y + 36} L ${x - 6} ${y + 50} Q ${x - 6} ${y + 60} ${x - 18} ${y + 60} L ${x - 30} ${y + 60} L ${x - 30} ${y + 48}" fill="${accent}" />
+      <!-- Unten rechts kleiner Haken-Fortsatz -->
+      <rect x="${x + 6}" y="${y + 36}" width="10" height="16" fill="${accent}" />
+    </g>
+  `;
+};
+
+/** Kupplungsschlüssel: kurzer Schlüssel mit zwei Haken-Maulöffnungen. */
+const iconKupplungsschluessel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Schaft -->
+      <rect x="${x - 70}" y="${y - 8}" width="140" height="16" rx="3" fill="${accent}" />
+      <!-- Linkes Maul -->
+      <path d="M ${x - 70} ${y - 16} L ${x - 86} ${y - 24} L ${x - 92} ${y + 4} L ${x - 80} ${y + 20} L ${x - 70} ${y + 16} Z" fill="${accent}" />
+      <circle cx="${x - 80}" cy="${y - 2}" r="6" fill="#f7f1e1" />
+      <!-- Rechtes Maul -->
+      <path d="M ${x + 70} ${y - 16} L ${x + 86} ${y - 24} L ${x + 92} ${y + 4} L ${x + 80} ${y + 20} L ${x + 70} ${y + 16} Z" fill="${accent}" />
+      <circle cx="${x + 80}" cy="${y - 2}" r="6" fill="#f7f1e1" />
+      <!-- Aufhänge-Loch mittig -->
+      <circle cx="${x}" cy="${y}" r="5" fill="#f7f1e1" />
+    </g>
+  `;
+};
+
+/** Schlauchbrücke: Rampe mit Kanälen für Schläuche. */
+const iconSchlauchbruecke: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rampenkörper (Trapez) -->
+      <path d="M ${x - 90} ${y + 30} L ${x - 60} ${y - 20} L ${x + 60} ${y - 20} L ${x + 90} ${y + 30} Z" fill="${accent}" />
+      <!-- Fahrflächen-Oberseite -->
+      <rect x="${x - 60}" y="${y - 24}" width="120" height="8" rx="2" fill="${ink}" />
+      <!-- Schlauch-Rinnen -->
+      <rect x="${x - 40}" y="${y - 18}" width="22" height="10" rx="3" fill="#f7f1e1" />
+      <rect x="${x - 10}" y="${y - 18}" width="22" height="10" rx="3" fill="#f7f1e1" />
+      <rect x="${x + 20}" y="${y - 18}" width="22" height="10" rx="3" fill="#f7f1e1" />
+      <!-- Bodenlinie -->
+      <line x1="${x - 90}" y1="${y + 30}" x2="${x + 90}" y2="${y + 30}" stroke-width="2" />
+      <!-- Schrägstreifen -->
+      <line x1="${x - 80}" y1="${y + 16}" x2="${x - 68}" y2="${y}" stroke-width="1.8" />
+      <line x1="${x - 70}" y1="${y + 26}" x2="${x - 54}" y2="${y + 4}" stroke-width="1.8" />
+      <line x1="${x + 80}" y1="${y + 16}" x2="${x + 68}" y2="${y}" stroke-width="1.8" />
+      <line x1="${x + 70}" y1="${y + 26}" x2="${x + 54}" y2="${y + 4}" stroke-width="1.8" />
+    </g>
+  `;
+};
+
+/** Sammelstück: Y-förmiger Sammler A aus 2×B. */
+const iconSammelstueck: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Zwei Eingangsarme (B) -->
+      <path d="M ${x - 70} ${y - 40} L ${x - 50} ${y - 40} L ${x - 10} ${y - 4} L ${x - 30} ${y + 4} Z" fill="${accent}" />
+      <path d="M ${x - 70} ${y + 40} L ${x - 50} ${y + 40} L ${x - 10} ${y + 4} L ${x - 30} ${y - 4} Z" fill="${accent}" />
+      <!-- Gehäusemitte (Klappen) -->
+      <circle cx="${x - 18}" cy="${y}" r="14" fill="${ink}" />
+      <!-- Sammelrohr (A) -->
+      <rect x="${x - 10}" y="${y - 16}" width="76" height="32" rx="4" fill="${accent}" />
+      <!-- Kupplung am Auslass -->
+      <rect x="${x + 66}" y="${y - 22}" width="14" height="44" rx="2" fill="${ink}" />
+      <!-- Kupplungen Eingänge -->
+      <rect x="${x - 82}" y="${y - 50}" width="14" height="24" rx="2" fill="${ink}" />
+      <rect x="${x - 82}" y="${y + 26}" width="14" height="24" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -1046,6 +1246,18 @@ ICON_REGISTRY.push(
   [/verkehrsleitkegel|leitkegel|pylon/, iconLeitkegel],
   [/warndreieck/, iconWarndreieck],
   [/faltsignal/, iconFaltsignal],
+  // G5 — Schläuche spezifisch vor saugschlauch, standrohr vor rohr
+  [/b-druckschlauch/, iconBSchlauch],
+  [/c-druckschlauch/, iconCSchlauch],
+  [/d-druckschlauch/, iconDSchlauch],
+  [/saugschlauch/, iconSaugschlauch],
+  [/saugkorb/, iconSaugkorb],
+  [/standrohr/, iconStandrohr],
+  [/ueberflurhydrantenschluessel|überflurhydrantenschlüssel/, iconUeberflurschluessel],
+  [/unterflurhydrantenschluessel|unterflurhydrantenschlüssel/, iconUnterflurschluessel],
+  [/kupplungsschluessel|kupplungsschlüssel/, iconKupplungsschluessel],
+  [/schlauchbruecke|schlauchbrücke/, iconSchlauchbruecke],
+  [/sammelstueck|sammelstück/, iconSammelstueck],
 );
 
 generate();

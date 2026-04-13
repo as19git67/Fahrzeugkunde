@@ -36,16 +36,15 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#2e8bff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- T-Griff quer oben -->
+      <rect x="110" y="60" width="100" height="12" rx="3" fill="#2e8bff" />
+      <!-- Schaft (lang) -->
+      <rect x="154" y="72" width="12" height="76" fill="#2e8bff" />
+      <!-- Unten gebogener Haken -->
+      <path d="M 154 146 L 154 160 Q 154 170 142 170 L 130 170 L 130 158" fill="#2e8bff" />
+      <!-- Unten rechts kleiner Haken-Fortsatz -->
+      <rect x="166" y="146" width="10" height="16" fill="#2e8bff" />
     </g>
   
   </g>

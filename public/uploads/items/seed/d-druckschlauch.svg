@@ -36,17 +36,20 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#2e8bff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
-    </g>
-  
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Aufgerollter Schlauch: konzentrische Wülste -->
+        <circle cx="160" cy="114" r="54" fill="#f5c330" />
+        <circle cx="160" cy="114" r="44" fill="#e6d8b8" />
+        <circle cx="160" cy="114" r="36" fill="#f5c330" />
+        <circle cx="160" cy="114" r="26" fill="#e6d8b8" />
+        <circle cx="160" cy="114" r="18" fill="#f5c330" />
+        <circle cx="160" cy="114" r="10" fill="#e6d8b8" />
+        <!-- Abgehendes Schlauchende mit Kupplung -->
+        <path d="M 210 132 Q 234 150 218 168" fill="none" stroke-width="10" stroke="#f5c330" />
+        <path d="M 210 132 Q 234 150 218 168" fill="none" stroke-width="10" />
+        <!-- Kupplung -->
+        <rect x="206" y="164" width="28" height="12" rx="2" fill="#1a1a1a" transform="rotate(18 218 168)" />
+      </g>
+    
   </g>
 </svg>

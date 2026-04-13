@@ -36,16 +36,23 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#2e8bff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Schlauchkörper (leicht geschwungen) -->
+      <path d="M 100 90 Q 160 70 220 130" stroke-width="26" stroke="#2e8bff" fill="none" />
+      <path d="M 100 90 Q 160 70 220 130" stroke-width="26" fill="none" />
+      <!-- Riffelung (kurze Querstriche entlang des Bogens) -->
+      <line x1="110" y1="76" x2="110" y2="96" stroke-width="1.8" />
+      <line x1="126" y1="72" x2="126" y2="92" stroke-width="1.8" />
+      <line x1="144" y1="70" x2="146" y2="90" stroke-width="1.8" />
+      <line x1="162" y1="72" x2="166" y2="92" stroke-width="1.8" />
+      <line x1="178" y1="76" x2="184" y2="96" stroke-width="1.8" />
+      <line x1="194" y1="84" x2="200" y2="104" stroke-width="1.8" />
+      <line x1="206" y1="96" x2="212" y2="114" stroke-width="1.8" />
+      <!-- Kupplung links -->
+      <rect x="82" y="80" width="24" height="26" rx="2" fill="#1a1a1a" />
+      <rect x="76" y="78" width="10" height="30" rx="2" fill="#1a1a1a" />
+      <!-- Kupplung rechts -->
+      <rect x="214" y="120" width="24" height="26" rx="2" fill="#1a1a1a" transform="rotate(45 226 133)" />
     </g>
   
   </g>

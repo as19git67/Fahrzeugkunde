@@ -36,16 +36,22 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#2e8bff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Rampenkörper (Trapez) -->
+      <path d="M 70 140 L 100 90 L 220 90 L 250 140 Z" fill="#2e8bff" />
+      <!-- Fahrflächen-Oberseite -->
+      <rect x="100" y="86" width="120" height="8" rx="2" fill="#1a1a1a" />
+      <!-- Schlauch-Rinnen -->
+      <rect x="120" y="92" width="22" height="10" rx="3" fill="#f7f1e1" />
+      <rect x="150" y="92" width="22" height="10" rx="3" fill="#f7f1e1" />
+      <rect x="180" y="92" width="22" height="10" rx="3" fill="#f7f1e1" />
+      <!-- Bodenlinie -->
+      <line x1="70" y1="140" x2="250" y2="140" stroke-width="2" />
+      <!-- Schrägstreifen -->
+      <line x1="80" y1="126" x2="92" y2="110" stroke-width="1.8" />
+      <line x1="90" y1="136" x2="106" y2="114" stroke-width="1.8" />
+      <line x1="240" y1="126" x2="228" y2="110" stroke-width="1.8" />
+      <line x1="230" y1="136" x2="214" y2="114" stroke-width="1.8" />
     </g>
   
   </g>
