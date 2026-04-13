@@ -21,8 +21,6 @@ export default function CreatorPage() {
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
-  const [resetting, setResetting] = useState(false);
-  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const loadVehicles = async () => {
     const res = await fetch("/api/vehicles");
@@ -31,28 +29,6 @@ export default function CreatorPage() {
   };
 
   useEffect(() => { loadVehicles(); }, []);
-
-  const handleResetSeed = async () => {
-    const ok = window.confirm(
-      "Datenbank wirklich zurücksetzen und mit der HLF-20-Beispielbeladung neu befüllen?\n\n" +
-      "Alle angelegten Fahrzeuge und Highscores gehen dabei verloren."
-    );
-    if (!ok) return;
-    setResetting(true);
-    setResetMessage(null);
-    try {
-      const res = await fetch("/api/admin/reset-seed", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Unbekannter Fehler");
-      setResetMessage(`✅ DB zurückgesetzt – HLF 20 mit ${data.itemCount} Gegenständen angelegt.`);
-      setSelectedVehicle(null);
-      await loadVehicles();
-    } catch (err) {
-      setResetMessage("❌ " + (err instanceof Error ? err.message : "Fehler beim Zurücksetzen"));
-    } finally {
-      setResetting(false);
-    }
-  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,29 +98,6 @@ export default function CreatorPage() {
           />
         ) : (
           <div className="flex flex-col gap-8">
-            {/* DB zurücksetzen + Seed laden */}
-            <div className="bg-zinc-900 border border-yellow-500/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-yellow-300 mb-1">
-                  ⚠️ Datenbank zurücksetzen
-                </h2>
-                <p className="text-sm text-zinc-400">
-                  Löscht alle Fahrzeuge, Beladungen und Highscores und füllt die DB
-                  mit der Beispielbeladung eines HLF 20 (ca. 100 Gegenstände inkl. Bildern).
-                </p>
-                {resetMessage && (
-                  <p className="text-sm mt-2 text-zinc-300">{resetMessage}</p>
-                )}
-              </div>
-              <button
-                onClick={handleResetSeed}
-                disabled={resetting}
-                className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-700 disabled:text-zinc-400 text-black font-bold px-5 py-3 rounded-xl transition-colors whitespace-nowrap"
-              >
-                {resetting ? "Setze zurück..." : "DB zurücksetzen & seeden"}
-              </button>
-            </div>
-
             {/* Neues Fahrzeug */}
             <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
               <h2 className="text-lg font-bold mb-4">Neues Fahrzeug anlegen</h2>

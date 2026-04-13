@@ -4,7 +4,6 @@
 import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "@/db/schema";
-import { seedDemoVehicle, type SeedResult } from "@/db/seed-data";
 import { describe } from "vitest";
 
 const TEST_DATABASE_URL =
@@ -58,14 +57,4 @@ export async function closeDb() {
   if (pool) {
     await pool.end();
   }
-}
-
-/**
- * Leert die DB und befüllt sie frisch mit dem Demo-HLF 20 Seed.
- * Nützlich für Integrationstests, die auf einer realistischen Beladung aufbauen.
- */
-export async function resetAndSeedDb(): Promise<SeedResult> {
-  await cleanDb();
-  const p = await getTestPool();
-  return seedDemoVehicle(p);
 }

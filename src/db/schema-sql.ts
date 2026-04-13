@@ -1,6 +1,6 @@
 /**
  * Zentrale DDL-Anweisungen zum Anlegen bzw. Nachziehen des DB-Schemas.
- * Wird von `src/db/migrate.ts` (CLI) und von der Reset-Seed-Route genutzt, damit
+ * Wird von `src/db/migrate.ts` (CLI) genutzt, damit
  * die App sich nach einem frischen Postgres-Setup selbst initialisieren kann.
  */
 export const SCHEMA_SQL = `

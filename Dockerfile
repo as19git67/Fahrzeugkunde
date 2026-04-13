@@ -33,7 +33,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Startup-Skript: Migration + Seed + Server
+# Startup-Skript: Migration + Server
 COPY --chown=nextjs:nodejs startup.js ./
 
 # /data wird als Volume gemountet (gemeinsam mit PostgreSQL)
