@@ -36,16 +36,22 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#e05a85">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Flaschenkörper (etwas schlanker) -->
+      <path d="M 138 76 Q 138 64 148 64 L 172 64 Q 182 64 182 76 L 182 162 Q 182 170 174 170 L 146 170 Q 138 170 138 162 Z" fill="#ffffff" />
+      <!-- Grünes Schulterband -->
+      <rect x="138" y="74" width="44" height="14" fill="#2ea86a" />
+      <!-- Ventil -->
+      <rect x="150" y="52" width="20" height="14" fill="#1a1a1a" />
+      <!-- Druckminderer -->
+      <rect x="156" y="40" width="28" height="12" fill="#1a1a1a" />
+      <circle cx="180" cy="54" r="8" fill="#ffffff" />
+      <!-- Label mit Kreuz -->
+      <rect x="146" y="116" width="28" height="36" fill="#2ea86a" />
+      <rect x="156" y="124" width="8" height="20" fill="#ffffff" />
+      <rect x="150" y="130" width="20" height="8" fill="#ffffff" />
+      <!-- Standfuß -->
+      <rect x="136" y="168" width="48" height="6" fill="#1a1a1a" />
     </g>
   
   </g>

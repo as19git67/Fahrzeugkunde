@@ -36,16 +36,25 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#e05a85">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Unterster Falz -->
+      <rect x="90" y="140" width="140" height="16" rx="2" fill="#e05a85" />
+      <!-- Mittlerer Falz -->
+      <rect x="94" y="118" width="132" height="20" rx="2" fill="#e05a85" />
+      <!-- Oberer Falz -->
+      <rect x="98" y="92" width="124" height="24" rx="3" fill="#e05a85" />
+      <!-- Oberste Seite (gefaltet) -->
+      <path d="M 102 92 L 120 62 L 200 62 L 218 92 Z" fill="#e05a85" />
+      <!-- Querstreifen als Muster -->
+      <line x1="104" y1="76" x2="216" y2="76" stroke-width="2" />
+      <line x1="98" y1="102" x2="222" y2="102" stroke-width="2" />
+      <line x1="94" y1="128" x2="226" y2="128" stroke-width="2" />
+      <line x1="90" y1="148" x2="230" y2="148" stroke-width="2" />
+      <!-- Textur-Tupfer -->
+      <circle cx="130" cy="84" r="1.4" fill="#1a1a1a" />
+      <circle cx="170" cy="80" r="1.4" fill="#1a1a1a" />
+      <circle cx="150" cy="110" r="1.4" fill="#1a1a1a" />
+      <circle cx="192" cy="112" r="1.4" fill="#1a1a1a" />
     </g>
   
   </g>

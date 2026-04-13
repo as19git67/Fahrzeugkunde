@@ -1728,6 +1728,313 @@ const iconAuffangtrichter: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- Mannschaftsraum Icons ---------------------------------------------------
+
+/** Sitzplatz-Indikator (a/b/c/d → 1–4 gefüllte Punkte neben dem Label). */
+function seatDots(x: number, y: number, seat: "a" | "b" | "c" | "d", ink: string): string {
+  const count = { a: 1, b: 2, c: 3, d: 4 }[seat];
+  return Array.from({ length: 4 }, (_, i) => {
+    const filled = i < count;
+    return `<circle cx="${x + i * 9}" cy="${y}" r="3" fill="${filled ? ink : "#ffffff"}" stroke="${ink}" stroke-width="1.2" />`;
+  }).join("");
+}
+
+/** Pressluftatmer-Factory: Tragegerüst mit Flasche, Gurten, Lungenautomat. */
+function makePressluftatmer(seat: "a" | "b" | "c" | "d"): IconFn {
+  return ({ accent, ink, cx, cy }) => {
+    const x = cx, y = cy;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Tragegestell/Rückenplatte -->
+        <rect x="${x - 46}" y="${y - 54}" width="92" height="110" rx="8" fill="${accent}" />
+        <!-- Flasche (stehend) -->
+        <rect x="${x - 18}" y="${y - 44}" width="36" height="80" rx="8" fill="#2a2a2a" />
+        <!-- Ventilkopf -->
+        <rect x="${x - 10}" y="${y - 54}" width="20" height="14" fill="${ink}" />
+        <circle cx="${x}" cy="${y - 58}" r="6" fill="${accent}" />
+        <!-- Manometer mit Hochdruckschlauch -->
+        <path d="M ${x + 10} ${y - 46} Q ${x + 34} ${y - 46} ${x + 38} ${y - 20}" fill="none" stroke-width="3" />
+        <circle cx="${x + 38}" cy="${y - 12}" r="8" fill="#ffffff" />
+        <!-- Lungenautomat -->
+        <rect x="${x - 40}" y="${y - 20}" width="18" height="22" rx="3" fill="${ink}" />
+        <!-- Gurte links/rechts oben -->
+        <path d="M ${x - 46} ${y - 54} Q ${x - 60} ${y - 30} ${x - 44} ${y + 10}" fill="none" stroke-width="4" />
+        <path d="M ${x + 46} ${y - 54} Q ${x + 60} ${y - 30} ${x + 44} ${y + 10}" fill="none" stroke-width="4" />
+        <!-- Label mit Sitz-Punkten -->
+        <rect x="${x - 22}" y="${y + 40}" width="44" height="14" fill="#ffffff" />
+        ${seatDots(x - 18, y + 47, seat, ink)}
+      </g>
+    `;
+  };
+}
+
+const iconPaA = makePressluftatmer("a");
+const iconPaB = makePressluftatmer("b");
+const iconPaC = makePressluftatmer("c");
+const iconPaD = makePressluftatmer("d");
+
+/** Atemschutzmaske-Factory: Vollmaske mit Sichtscheibe und Lungenautomat-Anschluss. */
+function makeAtemschutzmaske(seat: "a" | "b" | "c" | "d"): IconFn {
+  return ({ accent, ink, cx, cy }) => {
+    const x = cx, y = cy;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Maskenkörper -->
+        <path d="M ${x - 60} ${y - 10} Q ${x - 60} ${y - 52} ${x} ${y - 52} Q ${x + 60} ${y - 52} ${x + 60} ${y - 10} L ${x + 40} ${y + 40} Q ${x} ${y + 58} ${x - 40} ${y + 40} Z" fill="${accent}" />
+        <!-- Panorama-Sichtscheibe -->
+        <path d="M ${x - 46} ${y - 10} Q ${x - 50} ${y - 38} ${x} ${y - 40} Q ${x + 50} ${y - 38} ${x + 46} ${y - 10} L ${x + 34} ${y + 12} Q ${x} ${y + 20} ${x - 34} ${y + 12} Z" fill="#b8d8f0" />
+        <!-- Glanz-Linie -->
+        <path d="M ${x - 36} ${y - 20} L ${x - 10} ${y - 32}" stroke="#ffffff" stroke-width="3" />
+        <!-- Anschluss-Stutzen unten -->
+        <rect x="${x - 14}" y="${y + 36}" width="28" height="20" fill="${ink}" />
+        <circle cx="${x}" cy="${y + 52}" r="10" fill="${ink}" />
+        <circle cx="${x}" cy="${y + 52}" r="4" fill="${accent}" />
+        <!-- Bänderung (Kopfspinne) -->
+        <path d="M ${x - 60} ${y - 20} L ${x - 78} ${y - 30}" stroke-width="3" />
+        <path d="M ${x + 60} ${y - 20} L ${x + 78} ${y - 30}" stroke-width="3" />
+        <path d="M ${x - 56} ${y + 20} L ${x - 76} ${y + 16}" stroke-width="3" />
+        <path d="M ${x + 56} ${y + 20} L ${x + 76} ${y + 16}" stroke-width="3" />
+        <!-- Sitz-Punkte oben als Kennung -->
+        ${seatDots(x - 18, y - 46, seat, ink)}
+      </g>
+    `;
+  };
+}
+
+const iconMaskeA = makeAtemschutzmaske("a");
+const iconMaskeB = makeAtemschutzmaske("b");
+const iconMaskeC = makeAtemschutzmaske("c");
+const iconMaskeD = makeAtemschutzmaske("d");
+
+/** Atemschutzüberwachungstafel: Tafel mit Kartensteckplätzen. */
+const iconUeberwachungstafel: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Tafelrahmen -->
+      <rect x="${x - 80}" y="${y - 56}" width="160" height="112" rx="6" fill="${accent}" />
+      <rect x="${x - 74}" y="${y - 50}" width="148" height="100" fill="#ffffff" />
+      <!-- Aufhängung / Griff -->
+      <rect x="${x - 20}" y="${y - 66}" width="40" height="10" rx="3" fill="${ink}" />
+      <!-- Kartenschlitze (4x2 Grid) -->
+      <rect x="${x - 66}" y="${y - 40}" width="60" height="30" rx="2" fill="#eaeaea" stroke-width="2" />
+      <rect x="${x + 6}" y="${y - 40}" width="60" height="30" rx="2" fill="#eaeaea" stroke-width="2" />
+      <rect x="${x - 66}" y="${y - 2}" width="60" height="30" rx="2" fill="#eaeaea" stroke-width="2" />
+      <rect x="${x + 6}" y="${y - 2}" width="60" height="30" rx="2" fill="#eaeaea" stroke-width="2" />
+      <!-- Uhr mit Zeigern -->
+      <circle cx="${x}" cy="${y + 38}" r="10" fill="${accent}" />
+      <line x1="${x}" y1="${y + 38}" x2="${x}" y2="${y + 30}" stroke-width="2" />
+      <line x1="${x}" y1="${y + 38}" x2="${x + 6}" y2="${y + 38}" stroke-width="2" />
+      <!-- Kartendummies auf zwei Plätzen -->
+      <rect x="${x - 60}" y="${y - 34}" width="48" height="20" fill="${accent}" />
+      <line x1="${x - 54}" y1="${y - 24}" x2="${x - 20}" y2="${y - 24}" stroke-width="1.6" stroke="#ffffff" />
+    </g>
+  `;
+};
+
+/** Atemschutznotfalltasche: rote Tasche mit Kreuz und Tragegurt. */
+const iconNotfalltasche: IconFn = ({ ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Taschenkorpus -->
+      <rect x="${x - 70}" y="${y - 34}" width="140" height="80" rx="10" fill="#d83a2a" />
+      <!-- Reißverschluss -->
+      <line x1="${x - 66}" y1="${y - 16}" x2="${x + 66}" y2="${y - 16}" stroke-width="2" stroke-dasharray="4 3" />
+      <!-- Kreuz-Symbol -->
+      <rect x="${x - 10}" y="${y + 4}" width="20" height="30" fill="#ffffff" />
+      <rect x="${x - 20}" y="${y + 14}" width="40" height="10" fill="#ffffff" />
+      <!-- Tragegurt oben -->
+      <path d="M ${x - 40} ${y - 34} Q ${x - 10} ${y - 60} ${x + 40} ${y - 34}" fill="none" stroke-width="5" />
+      <!-- Seitennähte -->
+      <line x1="${x - 70}" y1="${y - 24}" x2="${x - 64}" y2="${y + 36}" stroke-width="1.4" />
+      <line x1="${x + 70}" y1="${y - 24}" x2="${x + 64}" y2="${y + 36}" stroke-width="1.4" />
+    </g>
+  `;
+};
+
+/** Sanitätskoffer: rechteckiger Koffer mit Griff und Kreuz. */
+const iconSanitaetskoffer: IconFn = ({ ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus -->
+      <rect x="${x - 70}" y="${y - 26}" width="140" height="72" rx="5" fill="#ffffff" />
+      <!-- Deckelkante -->
+      <line x1="${x - 70}" y1="${y - 8}" x2="${x + 70}" y2="${y - 8}" stroke-width="3" />
+      <!-- Griff -->
+      <rect x="${x - 28}" y="${y - 46}" width="56" height="12" rx="4" fill="${ink}" />
+      <path d="M ${x - 18} ${y - 46} L ${x - 18} ${y - 26}" stroke-width="3" />
+      <path d="M ${x + 18} ${y - 46} L ${x + 18} ${y - 26}" stroke-width="3" />
+      <!-- Kreuz-Symbol -->
+      <rect x="${x - 8}" y="${y + 2}" width="16" height="36" fill="#d83a2a" />
+      <rect x="${x - 22}" y="${y + 16}" width="44" height="10" fill="#d83a2a" />
+      <!-- Verschlüsse -->
+      <rect x="${x - 54}" y="${y - 14}" width="10" height="12" fill="${ink}" />
+      <rect x="${x + 44}" y="${y - 14}" width="10" height="12" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Defibrillator: AED-Gerät mit Herzblitz-Symbol. */
+const iconDefibrillator: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Gehäuse -->
+      <rect x="${x - 60}" y="${y - 52}" width="120" height="110" rx="8" fill="${accent}" />
+      <!-- Display oben -->
+      <rect x="${x - 46}" y="${y - 40}" width="92" height="32" rx="3" fill="#2a2a2a" />
+      <!-- EKG-Linie im Display -->
+      <path d="M ${x - 42} ${y - 24} L ${x - 26} ${y - 24} L ${x - 18} ${y - 30} L ${x - 10} ${y - 18} L ${x - 2} ${y - 24} L ${x + 42} ${y - 24}" fill="none" stroke="#50ff80" stroke-width="2" />
+      <!-- Herz-Blitz Symbol -->
+      <path d="M ${x - 20} ${y + 6} Q ${x - 30} ${y - 4} ${x - 20} ${y + 14} Q ${x - 10} ${y + 22} ${x} ${y + 32} Q ${x + 10} ${y + 22} ${x + 20} ${y + 14} Q ${x + 30} ${y - 4} ${x + 20} ${y + 6} Q ${x + 10} ${y - 2} ${x} ${y + 8} Q ${x - 10} ${y - 2} ${x - 20} ${y + 6} Z" fill="#d83a2a" />
+      <path d="M ${x - 2} ${y + 10} L ${x - 8} ${y + 22} L ${x + 2} ${y + 22} L ${x - 4} ${y + 34}" fill="none" stroke="#ffffff" stroke-width="2.4" />
+      <!-- Schock-Taste -->
+      <circle cx="${x}" cy="${y + 46}" r="10" fill="#f5c330" />
+      <!-- Elektroden-Anschlusskabel -->
+      <path d="M ${x + 60} ${y + 20} Q ${x + 80} ${y + 36} ${x + 72} ${y + 56}" fill="none" stroke-width="3" />
+    </g>
+  `;
+};
+
+/** Wolldecke: gefaltete Decke mit Streifen. */
+const iconWolldecke: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Unterster Falz -->
+      <rect x="${x - 70}" y="${y + 30}" width="140" height="16" rx="2" fill="${accent}" />
+      <!-- Mittlerer Falz -->
+      <rect x="${x - 66}" y="${y + 8}" width="132" height="20" rx="2" fill="${accent}" />
+      <!-- Oberer Falz -->
+      <rect x="${x - 62}" y="${y - 18}" width="124" height="24" rx="3" fill="${accent}" />
+      <!-- Oberste Seite (gefaltet) -->
+      <path d="M ${x - 58} ${y - 18} L ${x - 40} ${y - 48} L ${x + 40} ${y - 48} L ${x + 58} ${y - 18} Z" fill="${accent}" />
+      <!-- Querstreifen als Muster -->
+      <line x1="${x - 56}" y1="${y - 34}" x2="${x + 56}" y2="${y - 34}" stroke-width="2" />
+      <line x1="${x - 62}" y1="${y - 8}" x2="${x + 62}" y2="${y - 8}" stroke-width="2" />
+      <line x1="${x - 66}" y1="${y + 18}" x2="${x + 66}" y2="${y + 18}" stroke-width="2" />
+      <line x1="${x - 70}" y1="${y + 38}" x2="${x + 70}" y2="${y + 38}" stroke-width="2" />
+      <!-- Textur-Tupfer -->
+      <circle cx="${x - 30}" cy="${y - 26}" r="1.4" fill="${ink}" />
+      <circle cx="${x + 10}" cy="${y - 30}" r="1.4" fill="${ink}" />
+      <circle cx="${x - 10}" cy="${y}" r="1.4" fill="${ink}" />
+      <circle cx="${x + 32}" cy="${y + 2}" r="1.4" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Sauerstoffflasche: kleine medizinische Flasche (grünes Label). */
+const iconSauerstoffflasche: IconFn = ({ ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Flaschenkörper (etwas schlanker) -->
+      <path d="M ${x - 22} ${y - 34} Q ${x - 22} ${y - 46} ${x - 12} ${y - 46} L ${x + 12} ${y - 46} Q ${x + 22} ${y - 46} ${x + 22} ${y - 34} L ${x + 22} ${y + 52} Q ${x + 22} ${y + 60} ${x + 14} ${y + 60} L ${x - 14} ${y + 60} Q ${x - 22} ${y + 60} ${x - 22} ${y + 52} Z" fill="#ffffff" />
+      <!-- Grünes Schulterband -->
+      <rect x="${x - 22}" y="${y - 36}" width="44" height="14" fill="#2ea86a" />
+      <!-- Ventil -->
+      <rect x="${x - 10}" y="${y - 58}" width="20" height="14" fill="${ink}" />
+      <!-- Druckminderer -->
+      <rect x="${x - 4}" y="${y - 70}" width="28" height="12" fill="${ink}" />
+      <circle cx="${x + 20}" cy="${y - 56}" r="8" fill="#ffffff" />
+      <!-- Label mit Kreuz -->
+      <rect x="${x - 14}" y="${y + 6}" width="28" height="36" fill="#2ea86a" />
+      <rect x="${x - 4}" y="${y + 14}" width="8" height="20" fill="#ffffff" />
+      <rect x="${x - 10}" y="${y + 20}" width="20" height="8" fill="#ffffff" />
+      <!-- Standfuß -->
+      <rect x="${x - 24}" y="${y + 58}" width="48" height="6" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Handfunkgerät: HRT mit Antenne, Display, Tastatur. */
+const iconHandfunk: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Antenne -->
+      <rect x="${x - 20}" y="${y - 70}" width="10" height="34" rx="3" fill="${ink}" />
+      <circle cx="${x - 15}" cy="${y - 74}" r="4" fill="${ink}" />
+      <!-- Gehäuse -->
+      <rect x="${x - 36}" y="${y - 40}" width="72" height="100" rx="6" fill="${accent}" />
+      <!-- Display -->
+      <rect x="${x - 28}" y="${y - 32}" width="56" height="26" fill="#2a2a2a" />
+      <rect x="${x - 22}" y="${y - 26}" width="44" height="4" fill="#50ff80" />
+      <rect x="${x - 22}" y="${y - 18}" width="32" height="4" fill="#50ff80" />
+      <!-- PTT-Taste links außen -->
+      <rect x="${x - 40}" y="${y - 14}" width="6" height="30" rx="2" fill="${ink}" />
+      <!-- Lautsprecher-Gitter -->
+      <circle cx="${x - 18}" cy="${y + 4}" r="1.4" fill="${ink}" />
+      <circle cx="${x - 10}" cy="${y + 4}" r="1.4" fill="${ink}" />
+      <circle cx="${x - 2}" cy="${y + 4}" r="1.4" fill="${ink}" />
+      <circle cx="${x + 6}" cy="${y + 4}" r="1.4" fill="${ink}" />
+      <circle cx="${x + 14}" cy="${y + 4}" r="1.4" fill="${ink}" />
+      <circle cx="${x + 22}" cy="${y + 4}" r="1.4" fill="${ink}" />
+      <!-- Tastatur -->
+      <rect x="${x - 26}" y="${y + 14}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 8}" y="${y + 14}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x + 10}" y="${y + 14}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 26}" y="${y + 28}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 8}" y="${y + 28}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x + 10}" y="${y + 28}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 26}" y="${y + 42}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x - 8}" y="${y + 42}" width="14" height="10" rx="2" fill="${ink}" />
+      <rect x="${x + 10}" y="${y + 42}" width="14" height="10" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Wärmebildkamera: Kamera mit Objektiv und Display. */
+const iconWaermebildkamera: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kamerakörper -->
+      <rect x="${x - 70}" y="${y - 40}" width="120" height="70" rx="10" fill="${accent}" />
+      <!-- Objektiv -->
+      <circle cx="${x - 36}" cy="${y - 6}" r="26" fill="#2a2a2a" />
+      <circle cx="${x - 36}" cy="${y - 6}" r="16" fill="${ink}" />
+      <circle cx="${x - 36}" cy="${y - 6}" r="6" fill="#ffffff" />
+      <!-- Display rechts -->
+      <rect x="${x}" y="${y - 30}" width="48" height="36" fill="#2a2a2a" />
+      <!-- Thermo-Farbverlauf angedeutet (drei Farbblöcke) -->
+      <rect x="${x + 2}" y="${y - 28}" width="10" height="32" fill="#d83a2a" />
+      <rect x="${x + 12}" y="${y - 28}" width="10" height="32" fill="#f5c330" />
+      <rect x="${x + 22}" y="${y - 28}" width="10" height="32" fill="#2e8bff" />
+      <rect x="${x + 32}" y="${y - 28}" width="14" height="32" fill="#1a1a1a" />
+      <!-- Griff unten -->
+      <path d="M ${x - 22} ${y + 30} L ${x - 14} ${y + 58} L ${x + 22} ${y + 58} L ${x + 30} ${y + 30} Z" fill="${accent}" />
+      <!-- Trigger -->
+      <rect x="${x - 4}" y="${y + 32}" width="12" height="14" rx="2" fill="${ink}" />
+      <!-- Trageschlaufe -->
+      <path d="M ${x + 50} ${y - 20} Q ${x + 76} ${y - 26} ${x + 74} ${y + 10}" fill="none" stroke-width="3" />
+    </g>
+  `;
+};
+
+/** Signalpfeife: Pfeife mit Luftlochsteg und Band. */
+const iconSignalpfeife: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Hauptkörper (Zylinder) -->
+      <rect x="${x - 60}" y="${y - 14}" width="90" height="36" rx="10" fill="${accent}" />
+      <!-- Mundstück links -->
+      <rect x="${x - 76}" y="${y - 6}" width="18" height="18" rx="3" fill="${accent}" />
+      <!-- Windblech (diagonale Öffnung) -->
+      <path d="M ${x - 32} ${y - 14} L ${x - 14} ${y - 20} L ${x - 10} ${y - 4} L ${x - 32} ${y - 4} Z" fill="${ink}" />
+      <!-- Luftkammer-Rundung -->
+      <circle cx="${x + 10}" cy="${y + 4}" r="20" fill="${accent}" />
+      <!-- Aufhängeöse -->
+      <circle cx="${x + 36}" cy="${y - 24}" r="6" fill="none" stroke-width="3" />
+      <!-- Band -->
+      <path d="M ${x + 36} ${y - 30} Q ${x + 52} ${y - 56} ${x + 76} ${y - 44}" fill="none" stroke-width="3" stroke-dasharray="4 3" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -1942,6 +2249,24 @@ ICON_REGISTRY.push(
   [/co-warngeraet|co-warngerät/, iconCoWarn],
   [/ex-warngeraet|ex-warngerät/, iconExWarn],
   [/auffangtrichter/, iconAuffangtrichter],
+  // Mannschaftsraum — spezifische vor generischen; Maske vor atemschutz-Tafel etc.
+  [/pressluftatmer\s*a\b/, iconPaA],
+  [/pressluftatmer\s*b\b/, iconPaB],
+  [/pressluftatmer\s*c\b/, iconPaC],
+  [/pressluftatmer\s*d\b/, iconPaD],
+  [/atemschutzueberwachungstafel|atemschutzüberwachungstafel/, iconUeberwachungstafel],
+  [/atemschutznotfalltasche/, iconNotfalltasche],
+  [/atemschutzmaske\s*a\b/, iconMaskeA],
+  [/atemschutzmaske\s*b\b/, iconMaskeB],
+  [/atemschutzmaske\s*c\b/, iconMaskeC],
+  [/atemschutzmaske\s*d\b/, iconMaskeD],
+  [/sanitaetskoffer|sanitätskoffer/, iconSanitaetskoffer],
+  [/defibrillator/, iconDefibrillator],
+  [/wolldecke/, iconWolldecke],
+  [/sauerstoffflasche/, iconSauerstoffflasche],
+  [/handfunkgeraet|handfunkgerät/, iconHandfunk],
+  [/waermebildkamera|wärmebildkamera/, iconWaermebildkamera],
+  [/signalpfeife/, iconSignalpfeife],
 );
 
 generate();

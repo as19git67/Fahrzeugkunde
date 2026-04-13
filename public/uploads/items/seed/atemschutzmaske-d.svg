@@ -36,17 +36,25 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#3aa0ff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
-    </g>
-  
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Maskenkörper -->
+        <path d="M 100 100 Q 100 58 160 58 Q 220 58 220 100 L 200 150 Q 160 168 120 150 Z" fill="#3aa0ff" />
+        <!-- Panorama-Sichtscheibe -->
+        <path d="M 114 100 Q 110 72 160 70 Q 210 72 206 100 L 194 122 Q 160 130 126 122 Z" fill="#b8d8f0" />
+        <!-- Glanz-Linie -->
+        <path d="M 124 90 L 150 78" stroke="#ffffff" stroke-width="3" />
+        <!-- Anschluss-Stutzen unten -->
+        <rect x="146" y="146" width="28" height="20" fill="#1a1a1a" />
+        <circle cx="160" cy="162" r="10" fill="#1a1a1a" />
+        <circle cx="160" cy="162" r="4" fill="#3aa0ff" />
+        <!-- Bänderung (Kopfspinne) -->
+        <path d="M 100 90 L 82 80" stroke-width="3" />
+        <path d="M 220 90 L 238 80" stroke-width="3" />
+        <path d="M 104 130 L 84 126" stroke-width="3" />
+        <path d="M 216 130 L 236 126" stroke-width="3" />
+        <!-- Sitz-Punkte oben als Kennung -->
+        <circle cx="142" cy="64" r="3" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="1.2" /><circle cx="151" cy="64" r="3" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="1.2" /><circle cx="160" cy="64" r="3" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="1.2" /><circle cx="169" cy="64" r="3" fill="#1a1a1a" stroke="#1a1a1a" stroke-width="1.2" />
+      </g>
+    
   </g>
 </svg>

@@ -36,16 +36,21 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#e05a85">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Korpus -->
+      <rect x="90" y="84" width="140" height="72" rx="5" fill="#ffffff" />
+      <!-- Deckelkante -->
+      <line x1="90" y1="102" x2="230" y2="102" stroke-width="3" />
+      <!-- Griff -->
+      <rect x="132" y="64" width="56" height="12" rx="4" fill="#1a1a1a" />
+      <path d="M 142 64 L 142 84" stroke-width="3" />
+      <path d="M 178 64 L 178 84" stroke-width="3" />
+      <!-- Kreuz-Symbol -->
+      <rect x="152" y="112" width="16" height="36" fill="#d83a2a" />
+      <rect x="138" y="126" width="44" height="10" fill="#d83a2a" />
+      <!-- Verschlüsse -->
+      <rect x="106" y="96" width="10" height="12" fill="#1a1a1a" />
+      <rect x="204" y="96" width="10" height="12" fill="#1a1a1a" />
     </g>
   
   </g>

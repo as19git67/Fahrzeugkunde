@@ -36,16 +36,26 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#9a5bd0">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
+    <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Kamerakörper -->
+      <rect x="90" y="70" width="120" height="70" rx="10" fill="#9a5bd0" />
+      <!-- Objektiv -->
+      <circle cx="124" cy="104" r="26" fill="#2a2a2a" />
+      <circle cx="124" cy="104" r="16" fill="#1a1a1a" />
+      <circle cx="124" cy="104" r="6" fill="#ffffff" />
+      <!-- Display rechts -->
+      <rect x="160" y="80" width="48" height="36" fill="#2a2a2a" />
+      <!-- Thermo-Farbverlauf angedeutet (drei Farbblöcke) -->
+      <rect x="162" y="82" width="10" height="32" fill="#d83a2a" />
+      <rect x="172" y="82" width="10" height="32" fill="#f5c330" />
+      <rect x="182" y="82" width="10" height="32" fill="#2e8bff" />
+      <rect x="192" y="82" width="14" height="32" fill="#1a1a1a" />
+      <!-- Griff unten -->
+      <path d="M 138 140 L 146 168 L 182 168 L 190 140 Z" fill="#9a5bd0" />
+      <!-- Trigger -->
+      <rect x="156" y="142" width="12" height="14" rx="2" fill="#1a1a1a" />
+      <!-- Trageschlaufe -->
+      <path d="M 210 90 Q 236 84 234 120" fill="none" stroke-width="3" />
     </g>
   
   </g>
