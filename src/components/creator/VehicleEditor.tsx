@@ -556,6 +556,8 @@ function PositionList({
 }) {
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -569,12 +571,100 @@ function PositionList({
     await onReload();
   };
 
+  const startRename = (id: number, current: string) => {
+    setRenamingId(id);
+    setRenameValue(current);
+  };
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+  const submitRename = async (id: number) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/positions/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRename();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDelete = async (pos: Position) => {
+    const ok = window.confirm(
+      `Position "${pos.label}" wirklich löschen?\n\n` +
+      "Alle zugehörigen Kisten und darin verorteten Gegenstände werden " +
+      "ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/positions/${pos.id}`, { method: "DELETE" });
+    if (res.ok) {
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-1">
       <h5 className="text-xs text-zinc-500 font-semibold">Positionen (Ort)</h5>
       {positions.map((p) => (
         <div key={p.id} className="flex flex-col gap-1 bg-zinc-700/50 rounded-lg px-2 py-1">
-          <div className="text-sm text-zinc-300">{p.label}</div>
+          {renamingId === p.id ? (
+            <form
+              onSubmit={(e) => { e.preventDefault(); submitRename(p.id); }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                autoFocus
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Escape") cancelRename(); }}
+                className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-red-400"
+              />
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+              >
+                OK
+              </button>
+              <button
+                type="button"
+                onClick={cancelRename}
+                className="text-zinc-400 hover:text-white text-xs px-1"
+              >
+                ✕
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-1">
+              <div className="flex-1 text-sm text-zinc-300">{p.label}</div>
+              <button
+                onClick={() => startRename(p.id, p.label)}
+                title="Position umbenennen"
+                aria-label="Position umbenennen"
+                className="text-zinc-500 hover:text-white text-xs p-0.5 rounded transition-colors"
+              >
+                ✏️
+              </button>
+              <button
+                onClick={() => handleDelete(p)}
+                title="Position löschen"
+                aria-label="Position löschen"
+                className="text-zinc-500 hover:text-red-400 text-xs p-0.5 rounded transition-colors"
+              >
+                🗑️
+              </button>
+            </div>
+          )}
           <BoxList positionId={p.id} boxes={p.boxes} onReload={onReload} />
         </div>
       ))}
