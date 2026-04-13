@@ -36,17 +36,20 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#6aa0ff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
-    </g>
-  
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Kupplung hinten -->
+        <rect x="80" y="90" width="14" height="40" rx="2" fill="#1a1a1a" />
+        <!-- Mittleres Rohrstück -->
+        <rect x="94" y="96" width="49.5" height="28" fill="#2e8bff" />
+        <!-- Verjüngung -->
+        <path d="M 143.5 96 L 200 92 L 200 128 L 143.5 124 Z" fill="#2e8bff" />
+        <!-- Mündung -->
+        <rect x="200" y="90" width="16" height="40" fill="#1a1a1a" />
+        <!-- Umschalthebel oben (Sprüh-/Vollstrahl) -->
+        <rect x="130" y="76" width="10" height="22" rx="3" fill="#1a1a1a" />
+        <!-- Griff unten -->
+        <rect x="130" y="124" width="40" height="14" rx="3" fill="#2e8bff" />
+      </g>
+    
   </g>
 </svg>

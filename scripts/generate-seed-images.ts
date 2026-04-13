@@ -1280,6 +1280,182 @@ const iconFluchthaube: IconFn = ({ accent, ink, cx, cy }) => {
   `;
 };
 
+// -- G6 Icons ----------------------------------------------------------------
+
+/** Schnellangriffsschlauch: Haspel mit formstabilem Schlauch und Strahlrohr. */
+const iconSchnellangriff: IconFn = ({ ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Seitenplatten -->
+      <rect x="${x - 72}" y="${y - 46}" width="14" height="92" rx="3" fill="#d83a2a" />
+      <rect x="${x + 58}" y="${y - 46}" width="14" height="92" rx="3" fill="#d83a2a" />
+      <!-- Bodenschiene -->
+      <rect x="${x - 80}" y="${y + 46}" width="160" height="12" rx="3" fill="${ink}" />
+      <!-- Trommel seitlich -->
+      <circle cx="${x}" cy="${y}" r="42" fill="#d83a2a" />
+      <circle cx="${x}" cy="${y}" r="34" fill="#e6d8b8" />
+      <circle cx="${x}" cy="${y}" r="26" fill="#d83a2a" />
+      <circle cx="${x}" cy="${y}" r="18" fill="#e6d8b8" />
+      <circle cx="${x}" cy="${y}" r="10" fill="#d83a2a" />
+      <circle cx="${x}" cy="${y}" r="4" fill="${ink}" />
+      <!-- Kurbel -->
+      <line x1="${x}" y1="${y}" x2="${x + 36}" y2="${y - 14}" stroke-width="4" />
+      <circle cx="${x + 36}" cy="${y - 14}" r="5" fill="${ink}" />
+      <!-- Schlauch heraus mit Strahlrohr -->
+      <path d="M ${x - 30} ${y + 38} Q ${x - 56} ${y + 48} ${x - 68} ${y + 24}" fill="none" stroke-width="8" stroke="#d83a2a" />
+      <path d="M ${x - 30} ${y + 38} Q ${x - 56} ${y + 48} ${x - 68} ${y + 24}" fill="none" stroke-width="8" />
+      <!-- Strahlrohr-Spitze -->
+      <path d="M ${x - 66} ${y + 28} L ${x - 82} ${y + 10} L ${x - 74} ${y + 4} L ${x - 60} ${y + 20} Z" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Hohlstrahlrohr-Factory: rundes Pistolen-Strahlrohr in Größenfarbe. */
+function makeHohlstrahl(color: string, size: "B" | "C"): IconFn {
+  return ({ ink, cx, cy }) => {
+    const x = cx, y = cy;
+    const barrelW = size === "B" ? 90 : 76;
+    const barrelH = size === "B" ? 40 : 32;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Kupplung hinten -->
+        <rect x="${x - 84}" y="${y - barrelH / 2 - 4}" width="16" height="${barrelH + 8}" rx="2" fill="${ink}" />
+        <!-- Korpus -->
+        <rect x="${x - 68}" y="${y - barrelH / 2}" width="${barrelW - 20}" height="${barrelH}" rx="6" fill="${color}" />
+        <!-- Rändel-Dosierring (Strahl/Sprüh) -->
+        <rect x="${x - 8}" y="${y - barrelH / 2 - 4}" width="24" height="${barrelH + 8}" fill="${ink}" />
+        <line x1="${x - 4}" y1="${y - barrelH / 2 - 2}" x2="${x - 4}" y2="${y + barrelH / 2 + 2}" stroke="#f7f1e1" stroke-width="1.4" />
+        <line x1="${x + 2}" y1="${y - barrelH / 2 - 2}" x2="${x + 2}" y2="${y + barrelH / 2 + 2}" stroke="#f7f1e1" stroke-width="1.4" />
+        <line x1="${x + 8}" y1="${y - barrelH / 2 - 2}" x2="${x + 8}" y2="${y + barrelH / 2 + 2}" stroke="#f7f1e1" stroke-width="1.4" />
+        <!-- Düsenkopf (konisch) -->
+        <path d="M ${x + 16} ${y - barrelH / 2} L ${x + 58} ${y - barrelH / 2 - 8} L ${x + 58} ${y + barrelH / 2 + 8} L ${x + 16} ${y + barrelH / 2} Z" fill="${color}" />
+        <!-- Pistolengriff unten -->
+        <path d="M ${x - 42} ${y + barrelH / 2} L ${x - 28} ${y + barrelH / 2 + 38} L ${x - 6} ${y + barrelH / 2 + 38} L ${x - 20} ${y + barrelH / 2} Z" fill="${color}" />
+        <!-- Abzug -->
+        <rect x="${x - 30}" y="${y + barrelH / 2 + 4}" width="14" height="18" rx="3" fill="${ink}" />
+      </g>
+    `;
+  };
+}
+
+const iconHohlstrahlB = makeHohlstrahl("#2e8bff", "B");
+const iconHohlstrahlC = makeHohlstrahl("#d83a2a", "C");
+
+/** Mehrzweckstrahlrohr-Factory: älteres Strahlrohr mit Vollstrahl/Sprüh-Hebel. */
+function makeMehrzweckstrahl(color: string, size: "B" | "C"): IconFn {
+  return ({ ink, cx, cy }) => {
+    const x = cx, y = cy;
+    const barrelW = size === "B" ? 110 : 90;
+    const barrelH = size === "B" ? 28 : 22;
+    return `
+      <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Kupplung hinten -->
+        <rect x="${x - 80}" y="${y - barrelH / 2 - 6}" width="14" height="${barrelH + 12}" rx="2" fill="${ink}" />
+        <!-- Mittleres Rohrstück -->
+        <rect x="${x - 66}" y="${y - barrelH / 2}" width="${barrelW * 0.45}" height="${barrelH}" fill="${color}" />
+        <!-- Verjüngung -->
+        <path d="M ${x - 66 + barrelW * 0.45} ${y - barrelH / 2} L ${x + 40} ${y - barrelH / 2 - 4} L ${x + 40} ${y + barrelH / 2 + 4} L ${x - 66 + barrelW * 0.45} ${y + barrelH / 2} Z" fill="${color}" />
+        <!-- Mündung -->
+        <rect x="${x + 40}" y="${y - barrelH / 2 - 6}" width="16" height="${barrelH + 12}" fill="${ink}" />
+        <!-- Umschalthebel oben (Sprüh-/Vollstrahl) -->
+        <rect x="${x - 30}" y="${y - barrelH / 2 - 20}" width="10" height="22" rx="3" fill="${ink}" />
+        <!-- Griff unten -->
+        <rect x="${x - 30}" y="${y + barrelH / 2}" width="40" height="14" rx="3" fill="${color}" />
+      </g>
+    `;
+  };
+}
+
+const iconMehrzweckstrahlB = makeMehrzweckstrahl("#2e8bff", "B");
+const iconMehrzweckstrahlC = makeMehrzweckstrahl("#d83a2a", "C");
+
+/** Hygieneboard: Wandtafel mit zwei Spendern und Waschbecken. */
+const iconHygieneboard: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Board-Rahmen -->
+      <rect x="${x - 80}" y="${y - 54}" width="160" height="110" rx="6" fill="${accent}" />
+      <rect x="${x - 74}" y="${y - 48}" width="148" height="98" fill="#ffffff" />
+      <!-- Spender 1 (Desinfektion, links) -->
+      <rect x="${x - 60}" y="${y - 38}" width="24" height="40" rx="3" fill="${accent}" />
+      <rect x="${x - 58}" y="${y - 2}" width="20" height="8" fill="${ink}" />
+      <rect x="${x - 55}" y="${y + 6}" width="14" height="8" fill="${ink}" />
+      <!-- Spender 2 (Seife, mitte) -->
+      <rect x="${x - 12}" y="${y - 38}" width="24" height="40" rx="3" fill="${accent}" />
+      <rect x="${x - 10}" y="${y - 2}" width="20" height="8" fill="${ink}" />
+      <rect x="${x - 7}" y="${y + 6}" width="14" height="8" fill="${ink}" />
+      <!-- Handtuchspender rechts -->
+      <rect x="${x + 34}" y="${y - 38}" width="32" height="30" rx="3" fill="${accent}" />
+      <line x1="${x + 38}" y1="${y - 28}" x2="${x + 62}" y2="${y - 28}" stroke-width="1.6" />
+      <line x1="${x + 38}" y1="${y - 22}" x2="${x + 62}" y2="${y - 22}" stroke-width="1.6" />
+      <line x1="${x + 38}" y1="${y - 16}" x2="${x + 62}" y2="${y - 16}" stroke-width="1.6" />
+      <!-- Papier hängt heraus -->
+      <rect x="${x + 44}" y="${y - 8}" width="12" height="16" fill="${ink}" />
+      <!-- Waschbecken unten -->
+      <path d="M ${x - 56} ${y + 24} L ${x + 56} ${y + 24} L ${x + 48} ${y + 46} L ${x - 48} ${y + 46} Z" fill="${accent}" />
+      <circle cx="${x}" cy="${y + 20}" r="4" fill="${ink}" />
+      <rect x="${x - 2}" y="${y + 14}" width="4" height="10" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Stützkrümmer: 90° Bogen mit Stütze am Boden. */
+const iconStuetzkruemmer: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Vertikaler Einlass -->
+      <rect x="${x - 20}" y="${y - 54}" width="40" height="40" fill="${accent}" />
+      <!-- Kupplung oben -->
+      <rect x="${x - 26}" y="${y - 60}" width="52" height="14" rx="2" fill="${ink}" />
+      <!-- 90° Bogen -->
+      <path d="M ${x - 20} ${y - 14} Q ${x - 20} ${y + 26} ${x + 20} ${y + 26} L ${x + 20} ${y - 14} Q ${x + 20} ${y + 6} ${x} ${y + 6} Q ${x - 20} ${y + 6} ${x - 20} ${y - 14} Z" fill="${accent}" />
+      <!-- Horizontaler Auslass -->
+      <rect x="${x + 20}" y="${y + 6}" width="56" height="40" fill="${accent}" />
+      <!-- Kupplung rechts -->
+      <rect x="${x + 72}" y="${y}" width="14" height="52" rx="2" fill="${ink}" />
+      <!-- Stütze / Standfuß -->
+      <rect x="${x - 6}" y="${y + 26}" width="12" height="28" fill="${ink}" />
+      <rect x="${x - 26}" y="${y + 52}" width="52" height="10" rx="2" fill="${ink}" />
+    </g>
+  `;
+};
+
+/** Verteilerstück: B-CBC Verteiler mit 1 Einlass und 3 Auslässen mit Ventilen. */
+const iconVerteilerstueck: IconFn = ({ accent, ink, cx, cy }) => {
+  const x = cx, y = cy;
+  return `
+    <g stroke="${ink}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Hauptkörper -->
+      <path d="M ${x - 50} ${y - 10} L ${x - 50} ${y + 20} L ${x + 50} ${y + 20} L ${x + 50} ${y - 10} Q ${x + 50} ${y - 20} ${x + 38} ${y - 20} L ${x - 38} ${y - 20} Q ${x - 50} ${y - 20} ${x - 50} ${y - 10} Z" fill="${accent}" />
+      <!-- Einlass B unten -->
+      <rect x="${x - 20}" y="${y + 20}" width="40" height="30" fill="${accent}" />
+      <rect x="${x - 26}" y="${y + 46}" width="52" height="12" rx="2" fill="${ink}" />
+      <!-- Auslass links (C) -->
+      <rect x="${x - 76}" y="${y - 16}" width="30" height="22" fill="${accent}" />
+      <rect x="${x - 82}" y="${y - 22}" width="12" height="34" rx="2" fill="${ink}" />
+      <!-- Auslass Mitte (B) -->
+      <rect x="${x - 14}" y="${y - 48}" width="28" height="30" fill="${accent}" />
+      <rect x="${x - 18}" y="${y - 58}" width="36" height="12" rx="2" fill="${ink}" />
+      <!-- Auslass rechts (C) -->
+      <rect x="${x + 46}" y="${y - 16}" width="30" height="22" fill="${accent}" />
+      <rect x="${x + 70}" y="${y - 22}" width="12" height="34" rx="2" fill="${ink}" />
+      <!-- Drei Absperr-Handräder -->
+      <circle cx="${x - 60}" cy="${y - 28}" r="7" fill="none" stroke-width="3" />
+      <line x1="${x - 60}" y1="${y - 35}" x2="${x - 60}" y2="${y - 21}" stroke-width="2" />
+      <line x1="${x - 67}" y1="${y - 28}" x2="${x - 53}" y2="${y - 28}" stroke-width="2" />
+      <circle cx="${x}" cy="${y - 8}" r="8" fill="none" stroke-width="3" />
+      <line x1="${x}" y1="${y - 16}" x2="${x}" y2="${y}" stroke-width="2" />
+      <line x1="${x - 8}" y1="${y - 8}" x2="${x + 8}" y2="${y - 8}" stroke-width="2" />
+      <circle cx="${x + 60}" cy="${y - 28}" r="7" fill="none" stroke-width="3" />
+      <line x1="${x + 60}" y1="${y - 35}" x2="${x + 60}" y2="${y - 21}" stroke-width="2" />
+      <line x1="${x + 53}" y1="${y - 28}" x2="${x + 67}" y2="${y - 28}" stroke-width="2" />
+    </g>
+  `;
+};
+
 /** Generische Werkzeug-Silhouette als Fallback. */
 const iconFallback: IconFn = ({ accent, ink, cx, cy }) => {
   // Hammer/Schraubenschlüssel-Kombi
@@ -1472,6 +1648,15 @@ ICON_REGISTRY.push(
   [/zumischer\s*z4/, iconZumischerZ4],
   [/schaumstrahlrohr/, iconSchaumstrahlrohr],
   [/fluchthaube/, iconFluchthaube],
+  // G6 — Schnellangriff vor generischem Strahlrohr; Hohl- vs. Mehrzweck differenziert
+  [/schnellangriff/, iconSchnellangriff],
+  [/hohlstrahlrohr\s*b/, iconHohlstrahlB],
+  [/hohlstrahlrohr\s*c/, iconHohlstrahlC],
+  [/b-mehrzweckstrahlrohr/, iconMehrzweckstrahlB],
+  [/c-mehrzweckstrahlrohr/, iconMehrzweckstrahlC],
+  [/hygieneboard/, iconHygieneboard],
+  [/stuetzkruemmer|stützkrümmer/, iconStuetzkruemmer],
+  [/verteilerstueck|verteilerstück/, iconVerteilerstueck],
 );
 
 generate();

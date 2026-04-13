@@ -36,17 +36,23 @@
   <!-- Haupt-Icon mit Sketch-Filter -->
   <g filter="url(#sketch)">
     
-    <g stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="#6aa0ff">
-      <!-- Hammerkopf -->
-      <rect x="90" y="80" width="60" height="28" rx="4" />
-      <rect x="78" y="84" width="16" height="20" rx="3" fill="#1a1a1a" />
-      <!-- Stiel -->
-      <rect x="146" y="102" width="90" height="14" rx="6" fill="#c9a068" />
-      <!-- Griff-Wicklung -->
-      <line x1="190" y1="104" x2="190" y2="114" />
-      <line x1="202" y1="104" x2="202" y2="114" />
-      <line x1="214" y1="104" x2="214" y2="114" />
-    </g>
-  
+      <g stroke="#1a1a1a" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round">
+        <!-- Kupplung hinten -->
+        <rect x="76" y="90" width="16" height="40" rx="2" fill="#1a1a1a" />
+        <!-- Korpus -->
+        <rect x="92" y="94" width="56" height="32" rx="6" fill="#d83a2a" />
+        <!-- Rändel-Dosierring (Strahl/Sprüh) -->
+        <rect x="152" y="90" width="24" height="40" fill="#1a1a1a" />
+        <line x1="156" y1="92" x2="156" y2="128" stroke="#f7f1e1" stroke-width="1.4" />
+        <line x1="162" y1="92" x2="162" y2="128" stroke="#f7f1e1" stroke-width="1.4" />
+        <line x1="168" y1="92" x2="168" y2="128" stroke="#f7f1e1" stroke-width="1.4" />
+        <!-- Düsenkopf (konisch) -->
+        <path d="M 176 94 L 218 86 L 218 134 L 176 126 Z" fill="#d83a2a" />
+        <!-- Pistolengriff unten -->
+        <path d="M 118 126 L 132 164 L 154 164 L 140 126 Z" fill="#d83a2a" />
+        <!-- Abzug -->
+        <rect x="130" y="130" width="14" height="18" rx="3" fill="#1a1a1a" />
+      </g>
+    
   </g>
 </svg>
