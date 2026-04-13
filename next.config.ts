@@ -24,9 +24,13 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_TIME: BUILD_TIME,
   },
   images: {
-    // Lokale Uploads erlauben
+    // Lokale Uploads erlauben. /uploads/** kommt aus dem public-Ordner
+    // (Seed-Bilder), /api/uploads/** wird vom Route Handler ausgeliefert.
     remotePatterns: [],
-    localPatterns: [{ pathname: "/uploads/**" }],
+    localPatterns: [
+      { pathname: "/uploads/**" },
+      { pathname: "/api/uploads/**" },
+    ],
     // SVG-Dateien (Seed-Bilder und Fahrzeugansichten) durch die Image-Optimierung zulassen.
     // Ohne diese Option liefert Next.js bei /_next/image?url=...svg einen Fehler und das
     // <Image>-Tag zeigt einen gebrochenen Link (z.B. bei "Was ist das?").
