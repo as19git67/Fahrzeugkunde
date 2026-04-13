@@ -1,7 +1,6 @@
 import { it, expect, beforeEach, afterAll } from "vitest";
-import { eq } from "drizzle-orm";
 import { getTestDb, cleanDb, closeDb, resetAndSeedDb, describeDb as describe } from "./db-helper";
-import { vehicles, boxes, items } from "@/db/schema";
+import { vehicles, items, vehicleViews, compartments, positions, boxes } from "@/db/schema";
 
 const db = getTestDb();
 
@@ -15,7 +14,7 @@ afterAll(async () => {
 });
 
 describe("resetAndSeedDb", () => {
-  it("empties the DB and loads the demo HLF 20 with the full hierarchy", async () => {
+  it("creates an empty HLF 20 demo vehicle", async () => {
     // Vorher: leer
     expect(await db.select().from(vehicles)).toHaveLength(0);
 
@@ -27,27 +26,13 @@ describe("resetAndSeedDb", () => {
     expect(vs[0].name).toBe("HLF 20");
     expect(result.vehicleId).toBe(vs[0].id);
 
-    // Box-Ebene ist modelliert — mindestens die orange Kiste für die Seilwinde.
-    const bs = await db.select().from(boxes);
-    expect(bs.length).toBeGreaterThanOrEqual(1);
-    const orangeBox = bs.find((b) => b.label === "orange Kiste");
-    expect(orangeBox).toBeDefined();
-
-    // Seilwinde referenziert die orange Kiste
-    const [seilwinde] = await db.select().from(items).where(eq(items.name, "Seilwinde"));
-    expect(seilwinde.boxId).toBe(orangeBox!.id);
-    expect(seilwinde.positionId).not.toBeNull();
-    expect(seilwinde.article).toBe("die");
-
-    // Beladung umfasst die erwarteten ~100 Gegenstände
-    const its = await db.select().from(items);
-    expect(its.length).toBe(result.itemCount);
-    expect(its.length).toBeGreaterThanOrEqual(100);
-
-    // Jeder Gegenstand hat einen Artikel (der/die/das)
-    for (const it of its) {
-      expect(["der", "die", "das"]).toContain(it.article);
-    }
+    // Seed-Daten sind absichtlich leer
+    expect(result.itemCount).toBe(0);
+    expect(await db.select().from(items)).toHaveLength(0);
+    expect(await db.select().from(vehicleViews)).toHaveLength(0);
+    expect(await db.select().from(compartments)).toHaveLength(0);
+    expect(await db.select().from(positions)).toHaveLength(0);
+    expect(await db.select().from(boxes)).toHaveLength(0);
   });
 
   it("is idempotent: calling twice wipes and reseeds", async () => {
@@ -57,7 +42,5 @@ describe("resetAndSeedDb", () => {
     const vs = await db.select().from(vehicles);
     expect(vs).toHaveLength(1);
     expect(vs[0].id).toBe(r2.vehicleId);
-    const its = await db.select().from(items);
-    expect(its).toHaveLength(r2.itemCount);
   });
 });

@@ -62,7 +62,8 @@ export async function closeDb() {
 
 /**
  * Leert die DB und befüllt sie frisch mit dem Demo-HLF 20 Seed.
- * Nützlich für Integrationstests, die auf einer realistischen Beladung aufbauen.
+ * Der Seed ist aktuell absichtlich leer — das Fahrzeug wird ohne Beladung
+ * angelegt.
  */
 export async function resetAndSeedDb(): Promise<SeedResult> {
   await cleanDb();

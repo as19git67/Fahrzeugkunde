@@ -34,7 +34,7 @@ export default function CreatorPage() {
 
   const handleResetSeed = async () => {
     const ok = window.confirm(
-      "Datenbank wirklich zurücksetzen und mit der HLF-20-Beispielbeladung neu befüllen?\n\n" +
+      "Datenbank wirklich zurücksetzen und neu seeden?\n\n" +
       "Alle angelegten Fahrzeuge und Highscores gehen dabei verloren."
     );
     if (!ok) return;
@@ -129,8 +129,8 @@ export default function CreatorPage() {
                   ⚠️ Datenbank zurücksetzen
                 </h2>
                 <p className="text-sm text-zinc-400">
-                  Löscht alle Fahrzeuge, Beladungen und Highscores und füllt die DB
-                  mit der Beispielbeladung eines HLF 20 (ca. 100 Gegenstände inkl. Bildern).
+                  Löscht alle Fahrzeuge, Beladungen und Highscores und legt ein
+                  leeres HLF 20 als Ausgangspunkt an.
                 </p>
                 {resetMessage && (
                   <p className="text-sm mt-2 text-zinc-300">{resetMessage}</p>

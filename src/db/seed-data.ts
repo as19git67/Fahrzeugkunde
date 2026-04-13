@@ -1,9 +1,9 @@
 /**
- * Wiederverwendbare Seed-Logik: legt ein Demo-HLF 20 mit vollständiger
- * Hierarchie (Views → Compartments → Positions → Boxes → Items) an.
+ * Wiederverwendbare Seed-Logik: legt ein Demo-HLF 20 an.
  *
- * Die Beladung orientiert sich an einem typischen HLF 20 Beladeplan nach
- * DIN 14530-27 mit ca. 100 Gegenständen.
+ * Die konkreten Seed-Daten (Ansichten, Gegenstände) sind aktuell leer
+ * (siehe seed-hlf20.ts). Das Fahrzeug wird trotzdem angelegt, damit der
+ * Creator einen Ausgangspunkt zum Befüllen hat.
  *
  * Wird sowohl vom CLI-Seed (src/db/seed.ts) als auch von Tests genutzt.
  */
@@ -14,10 +14,10 @@ type Queryable = Pool | Client;
 
 export interface SeedResult {
   vehicleId: number;
-  viewIds: Record<string, number>; // "left" → id
-  compartmentIds: Record<string, number>; // "G1" → id
-  positionIds: Record<string, number>; // "G1|oben links" → id
-  boxIds: Record<string, number>; // "G1|oben links|orange Kiste" → id
+  viewIds: Record<string, number>;
+  compartmentIds: Record<string, number>;
+  positionIds: Record<string, number>;
+  boxIds: Record<string, number>;
   itemCount: number;
 }
 
@@ -34,11 +34,10 @@ function boxKey(comp: string, pos: string, box: string) {
 export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
   const vehicleRes = await client.query(
     "INSERT INTO vehicles (name, description) VALUES ($1, $2) RETURNING id",
-    ["HLF 20", "Hilfeleistungslöschgruppenfahrzeug 20 – Musterbeladung nach DIN 14530-27"]
+    ["HLF 20", "Hilfeleistungslöschgruppenfahrzeug 20"]
   );
   const vehicleId: number = vehicleRes.rows[0].id;
 
-  // Ansichten anlegen
   const viewIds: Record<string, number> = {};
   for (let i = 0; i < VIEW_DEFS.length; i++) {
     const v = VIEW_DEFS[i];
@@ -49,12 +48,10 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
     viewIds[v.side] = r.rows[0].id;
   }
 
-  // Eindeutige Compartments/Positions/Boxes aus der Item-Liste ableiten
   const compartmentIds: Record<string, number> = {};
   const positionIds: Record<string, number> = {};
   const boxIds: Record<string, number> = {};
 
-  // Compartments pro Seite sortieren in ihrer Reihenfolge des Vorkommens
   const compMeta: Record<string, { view: string; sort: number }> = {};
   const viewCounters: Record<string, number> = {};
   for (const it of HLF20_ITEMS) {
@@ -64,7 +61,6 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
     }
   }
 
-  // Compartments anlegen
   for (const [comp, meta] of Object.entries(compMeta)) {
     const r = await client.query(
       "INSERT INTO compartments (view_id, label, sort_order) VALUES ($1,$2,$3) RETURNING id",
@@ -73,7 +69,6 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
     compartmentIds[compKey(comp)] = r.rows[0].id;
   }
 
-  // Positionen pro Compartment
   const posSeen: Record<string, number> = {};
   for (const it of HLF20_ITEMS) {
     const key = posKey(it.compartment, it.position);
@@ -86,7 +81,6 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
     positionIds[key] = r.rows[0].id;
   }
 
-  // Boxen pro Position (nur wenn Item eine Box zugeordnet hat)
   const boxSeen: Record<string, number> = {};
   for (const it of HLF20_ITEMS) {
     if (!it.box) continue;
@@ -101,7 +95,6 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
     boxIds[key] = r.rows[0].id;
   }
 
-  // Items anlegen
   for (const it of HLF20_ITEMS) {
     const pKey = posKey(it.compartment, it.position);
     const bKey = it.box ? boxKey(it.compartment, it.position, it.box) : null;

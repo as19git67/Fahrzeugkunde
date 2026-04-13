@@ -1,5 +1,5 @@
 /**
- * Seed-Daten: Demo-Fahrzeug HLF 20 mit Beispiel-Beladung.
+ * Seed-Daten: Demo-Fahrzeug HLF 20 (derzeit ohne Beladung).
  * Aufruf: npx tsx src/db/seed.ts
  */
 import pg from "pg";
