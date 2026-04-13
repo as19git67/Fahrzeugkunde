@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-label="HLF 20 Ansicht Heck">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="798" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="801" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="380" fill="url(#paper)" />
+
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="780" height="360" stroke-width="2.4" rx="6" />
+    <rect x="16" y="16" width="768" height="348" stroke-width="1.2" rx="4" />
+  </g>
+
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="40" y1="340" x2="120" y2="340" />
+    <line x1="40" y1="348" x2="140" y2="348" />
+    <line x1="640" y1="340" x2="760" y2="340" />
+    <line x1="680" y1="348" x2="760" y2="348" />
+  </g>
+
+  <g filter="url(#sketch)">
+    
+    <!-- Fahrbahn -->
+    <line x1="20" y1="340" x2="780" y2="340" stroke="#1a1a1a" stroke-width="3" />
+
+    <!-- Aufbau-Heckkontur -->
+    <rect x="140" y="90" width="520" height="200" fill="#d83a2a" stroke="#1a1a1a" stroke-width="3" />
+
+    <!-- Dachkante / obere Leiste -->
+    <rect x="136" y="82" width="528" height="12" fill="#c02a1a" stroke="#1a1a1a" stroke-width="2.4" />
+
+    <!-- Mannschaftsraum-Heckscheibe (oben in der Aufbau-Rückwand, eher oben mittig) -->
+    <rect x="260" y="106" width="280" height="56" fill="#b8d8f0" stroke="#1a1a1a" stroke-width="2.6" />
+    <line x1="400" y1="106" x2="400" y2="162" stroke="#1a1a1a" stroke-width="1.6" />
+
+    <!-- Heck-Rolltor GR (Ausstieg / Pumpenstand-Zugang) -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="220" y="170" width="360" height="120" fill="#e0d3a8" />
+      <line x1="226" y1="182" x2="574" y2="182" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="192" x2="574" y2="192" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="202" x2="574" y2="202" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="212" x2="574" y2="212" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="222" x2="574" y2="222" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="232" x2="574" y2="232" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="242" x2="574" y2="242" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="252" x2="574" y2="252" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="262" x2="574" y2="262" stroke="#1a1a1a" stroke-width="1.2" /><line x1="226" y1="272" x2="574" y2="272" stroke="#1a1a1a" stroke-width="1.2" />
+      <!-- Griff unten mittig -->
+      <rect x="382" y="276" width="36" height="8" rx="2" fill="#1a1a1a" />
+    </g>
+  
+
+    <!-- Pumpenstand-Bedienblende (Andeutung: zwei Manometer + Hebel, LINKS neben GR) -->
+    <rect x="154" y="178" width="58" height="108" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2.4" />
+    <circle cx="172" cy="200" r="10" fill="#f7f1e1" stroke="#1a1a1a" stroke-width="1.8" />
+    <line x1="172" y1="200" x2="178" y2="194" stroke="#1a1a1a" stroke-width="1.4" />
+    <circle cx="196" cy="200" r="10" fill="#f7f1e1" stroke="#1a1a1a" stroke-width="1.8" />
+    <line x1="196" y1="200" x2="190" y2="194" stroke="#1a1a1a" stroke-width="1.4" />
+    <rect x="162" y="220" width="40" height="6" fill="#9a9a9a" stroke="#1a1a1a" stroke-width="1.2" />
+    <rect x="162" y="234" width="40" height="6" fill="#9a9a9a" stroke="#1a1a1a" stroke-width="1.2" />
+    <rect x="162" y="248" width="16" height="24" fill="#3aa0ff" stroke="#1a1a1a" stroke-width="1.4" />
+    <rect x="186" y="248" width="16" height="24" fill="#f5c330" stroke="#1a1a1a" stroke-width="1.4" />
+
+    <!-- Elektrik / Abgang RECHTS neben GR -->
+    <rect x="588" y="178" width="58" height="108" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2.4" />
+    <rect x="598" y="188" width="38" height="28" fill="#f7f1e1" stroke="#1a1a1a" stroke-width="1.6" />
+    <line x1="604" y1="198" x2="630" y2="198" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="604" y1="206" x2="630" y2="206" stroke="#1a1a1a" stroke-width="1.2" />
+    <circle cx="605" cy="230" r="4" fill="#1a1a1a" />
+    <circle cx="617" cy="230" r="4" fill="#1a1a1a" />
+    <circle cx="629" cy="230" r="4" fill="#1a1a1a" />
+    <rect x="598" y="246" width="38" height="30" fill="#9a9a9a" stroke="#1a1a1a" stroke-width="1.4" />
+
+    <!-- Rücklichter (links + rechts vom Rolltor, hoch) -->
+    <rect x="150" y="100" width="34" height="60" fill="#c02a1a" stroke="#1a1a1a" stroke-width="2" />
+    <rect x="154" y="106" width="26" height="16" fill="#f5c330" stroke="#1a1a1a" stroke-width="1.2" />
+    <rect x="154" y="128" width="26" height="12" fill="#f5f5d0" stroke="#1a1a1a" stroke-width="1.2" />
+    <rect x="154" y="144" width="26" height="12" fill="#e63b2e" stroke="#1a1a1a" stroke-width="1.2" />
+
+    <rect x="616" y="100" width="34" height="60" fill="#c02a1a" stroke="#1a1a1a" stroke-width="2" />
+    <rect x="620" y="106" width="26" height="16" fill="#f5c330" stroke="#1a1a1a" stroke-width="1.2" />
+    <rect x="620" y="128" width="26" height="12" fill="#f5f5d0" stroke="#1a1a1a" stroke-width="1.2" />
+    <rect x="620" y="144" width="26" height="12" fill="#e63b2e" stroke="#1a1a1a" stroke-width="1.2" />
+
+    <!-- Blaulichtbalken Heck (schmaler als vorn), auf Dach -->
+    <rect x="320" y="72" width="160" height="12" rx="3" fill="#3aa0ff" stroke="#1a1a1a" stroke-width="2.4" />
+    <line x1="350" y1="72" x2="350" y2="84" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="380" y1="72" x2="380" y2="84" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="410" y1="72" x2="410" y2="84" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="440" y1="72" x2="440" y2="84" stroke="#1a1a1a" stroke-width="1.2" />
+
+    <!-- Leiter-Andeutung auf Dach (hinten sichtbar) -->
+    <line x1="146" y1="66" x2="654" y2="66" stroke="#1a1a1a" stroke-width="2.4" />
+    <line x1="146" y1="72" x2="654" y2="72" stroke="#1a1a1a" stroke-width="1.4" />
+
+    <!-- Chassis / hintere Stoßstange durchgehend -->
+    <rect x="100" y="290" width="600" height="22" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="3" />
+
+    <!-- Kennzeichen mittig auf der Stoßstange -->
+    <rect x="350" y="294" width="100" height="14" fill="#f7f1e1" stroke="#1a1a1a" stroke-width="1.6" />
+
+    <!-- Anhängerkupplung-Andeutung -->
+    <rect x="392" y="308" width="16" height="14" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2" />
+    <circle cx="400" cy="322" r="7" fill="#9a9a9a" stroke="#1a1a1a" stroke-width="1.6" />
+
+    <!-- Räder unten (zwei hintere, angedeutet) -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="180" cy="318" r="22" fill="#1a1a1a" />
+      <circle cx="180" cy="318" r="10" fill="#9a9a9a" />
+      <circle cx="180" cy="318" r="4" fill="#1a1a1a" />
+      <line x1="172" y1="318" x2="188" y2="318" stroke-width="1.4" />
+      <line x1="180" y1="310" x2="180" y2="326" stroke-width="1.4" />
+    </g>
+  
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="620" cy="318" r="22" fill="#1a1a1a" />
+      <circle cx="620" cy="318" r="10" fill="#9a9a9a" />
+      <circle cx="620" cy="318" r="4" fill="#1a1a1a" />
+      <line x1="612" y1="318" x2="628" y2="318" stroke-width="1.4" />
+      <line x1="620" y1="310" x2="620" y2="326" stroke-width="1.4" />
+    </g>
+  
+  
+  </g>
+</svg>

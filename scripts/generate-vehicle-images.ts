@@ -4,8 +4,8 @@
  *
  *   public/uploads/views/hlf_left.svg
  *   public/uploads/views/hlf_right.svg
- *   public/uploads/views/hlf_back.svg   (TODO — folgt in separatem Block)
- *   public/uploads/views/hlf_top.svg    (TODO — folgt in separatem Block)
+ *   public/uploads/views/hlf_back.svg
+ *   public/uploads/views/hlf_top.svg
  *
  * Keine sichtbaren Texte — nur aria-label.
  *
@@ -251,6 +251,173 @@ function renderRight(): string {
   return wrap("HLF 20 Ansicht rechts", "hlf_right_v1", body);
 }
 
+// -- HECKANSICHT -------------------------------------------------------------
+// Blick von hinten auf den Aufbau: oben Mannschaftsraum-Heckscheibe, Mitte
+// Heck-Rolltor (GR) mit Pumpenstand-Andeutung unten, Rücklichter, Kennzeichen.
+function renderBack(): string {
+  // Grundrisse: Aufbau ist breiter als Kabine-Rück; der Heck-Rolltor nimmt
+  // den größten Teil mittig ein. Oben schmälerer Bereich für Heckscheibe
+  // Mannschaftsraum (sichtbar über dem Aufbau-Dach).
+  const body = `
+    <!-- Fahrbahn -->
+    <line x1="20" y1="340" x2="780" y2="340" stroke="${INK}" stroke-width="3" />
+
+    <!-- Aufbau-Heckkontur -->
+    <rect x="140" y="90" width="520" height="200" fill="${BODY}" stroke="${INK}" stroke-width="3" />
+
+    <!-- Dachkante / obere Leiste -->
+    <rect x="136" y="82" width="528" height="12" fill="${CAB}" stroke="${INK}" stroke-width="2.4" />
+
+    <!-- Mannschaftsraum-Heckscheibe (oben in der Aufbau-Rückwand, eher oben mittig) -->
+    <rect x="260" y="106" width="280" height="56" fill="${GLASS}" stroke="${INK}" stroke-width="2.6" />
+    <line x1="400" y1="106" x2="400" y2="162" stroke="${INK}" stroke-width="1.6" />
+
+    <!-- Heck-Rolltor GR (Ausstieg / Pumpenstand-Zugang) -->
+    ${rollDoor(220, 170, 360, 120)}
+
+    <!-- Pumpenstand-Bedienblende (Andeutung: zwei Manometer + Hebel, LINKS neben GR) -->
+    <rect x="154" y="178" width="58" height="108" fill="${CHASSIS}" stroke="${INK}" stroke-width="2.4" />
+    <circle cx="172" cy="200" r="10" fill="${PAPER_A}" stroke="${INK}" stroke-width="1.8" />
+    <line x1="172" y1="200" x2="178" y2="194" stroke="${INK}" stroke-width="1.4" />
+    <circle cx="196" cy="200" r="10" fill="${PAPER_A}" stroke="${INK}" stroke-width="1.8" />
+    <line x1="196" y1="200" x2="190" y2="194" stroke="${INK}" stroke-width="1.4" />
+    <rect x="162" y="220" width="40" height="6" fill="${HUB}" stroke="${INK}" stroke-width="1.2" />
+    <rect x="162" y="234" width="40" height="6" fill="${HUB}" stroke="${INK}" stroke-width="1.2" />
+    <rect x="162" y="248" width="16" height="24" fill="${LIGHTBAR}" stroke="${INK}" stroke-width="1.4" />
+    <rect x="186" y="248" width="16" height="24" fill="#f5c330" stroke="${INK}" stroke-width="1.4" />
+
+    <!-- Elektrik / Abgang RECHTS neben GR -->
+    <rect x="588" y="178" width="58" height="108" fill="${CHASSIS}" stroke="${INK}" stroke-width="2.4" />
+    <rect x="598" y="188" width="38" height="28" fill="${PAPER_A}" stroke="${INK}" stroke-width="1.6" />
+    <line x1="604" y1="198" x2="630" y2="198" stroke="${INK}" stroke-width="1.2" />
+    <line x1="604" y1="206" x2="630" y2="206" stroke="${INK}" stroke-width="1.2" />
+    <circle cx="605" cy="230" r="4" fill="${INK}" />
+    <circle cx="617" cy="230" r="4" fill="${INK}" />
+    <circle cx="629" cy="230" r="4" fill="${INK}" />
+    <rect x="598" y="246" width="38" height="30" fill="${HUB}" stroke="${INK}" stroke-width="1.4" />
+
+    <!-- Rücklichter (links + rechts vom Rolltor, hoch) -->
+    <rect x="150" y="100" width="34" height="60" fill="#c02a1a" stroke="${INK}" stroke-width="2" />
+    <rect x="154" y="106" width="26" height="16" fill="#f5c330" stroke="${INK}" stroke-width="1.2" />
+    <rect x="154" y="128" width="26" height="12" fill="#f5f5d0" stroke="${INK}" stroke-width="1.2" />
+    <rect x="154" y="144" width="26" height="12" fill="#e63b2e" stroke="${INK}" stroke-width="1.2" />
+
+    <rect x="616" y="100" width="34" height="60" fill="#c02a1a" stroke="${INK}" stroke-width="2" />
+    <rect x="620" y="106" width="26" height="16" fill="#f5c330" stroke="${INK}" stroke-width="1.2" />
+    <rect x="620" y="128" width="26" height="12" fill="#f5f5d0" stroke="${INK}" stroke-width="1.2" />
+    <rect x="620" y="144" width="26" height="12" fill="#e63b2e" stroke="${INK}" stroke-width="1.2" />
+
+    <!-- Blaulichtbalken Heck (schmaler als vorn), auf Dach -->
+    <rect x="320" y="72" width="160" height="12" rx="3" fill="${LIGHTBAR}" stroke="${INK}" stroke-width="2.4" />
+    <line x1="350" y1="72" x2="350" y2="84" stroke="${INK}" stroke-width="1.2" />
+    <line x1="380" y1="72" x2="380" y2="84" stroke="${INK}" stroke-width="1.2" />
+    <line x1="410" y1="72" x2="410" y2="84" stroke="${INK}" stroke-width="1.2" />
+    <line x1="440" y1="72" x2="440" y2="84" stroke="${INK}" stroke-width="1.2" />
+
+    <!-- Leiter-Andeutung auf Dach (hinten sichtbar) -->
+    <line x1="146" y1="66" x2="654" y2="66" stroke="${INK}" stroke-width="2.4" />
+    <line x1="146" y1="72" x2="654" y2="72" stroke="${INK}" stroke-width="1.4" />
+
+    <!-- Chassis / hintere Stoßstange durchgehend -->
+    <rect x="100" y="290" width="600" height="22" fill="${CHASSIS}" stroke="${INK}" stroke-width="3" />
+
+    <!-- Kennzeichen mittig auf der Stoßstange -->
+    <rect x="350" y="294" width="100" height="14" fill="${PAPER_A}" stroke="${INK}" stroke-width="1.6" />
+
+    <!-- Anhängerkupplung-Andeutung -->
+    <rect x="392" y="308" width="16" height="14" fill="${CHASSIS}" stroke="${INK}" stroke-width="2" />
+    <circle cx="400" cy="322" r="7" fill="${HUB}" stroke="${INK}" stroke-width="1.6" />
+
+    <!-- Räder unten (zwei hintere, angedeutet) -->
+    ${wheel(180, 318, 22)}
+    ${wheel(620, 318, 22)}
+  `;
+  return wrap("HLF 20 Ansicht Heck", "hlf_back_v1", body);
+}
+
+// -- DRAUFSICHT --------------------------------------------------------------
+// Von oben: Kabine vorn, dahinter Aufbau-Dach mit Leitern + Dachkästen.
+function renderTop(): string {
+  // Horizontal: links = Front, rechts = Heck. Gesamtfahrzeug von oben.
+  const body = `
+    <!-- Umriss Gesamtfahrzeug -->
+    <rect x="60" y="90" width="680" height="200" fill="${BODY}" stroke="${INK}" stroke-width="3" rx="6" />
+
+    <!-- Kabinenbereich (vorn = links), etwas dunkler -->
+    <rect x="60" y="90" width="190" height="200" fill="${CAB}" stroke="${INK}" stroke-width="3" rx="6" />
+
+    <!-- Windschutzscheibe (Kabinen-Front) -->
+    <path d="M 64 140 L 110 104 L 200 104 L 200 176 L 64 176 Z"
+          fill="${GLASS}" stroke="${INK}" stroke-width="2.4" stroke-linejoin="round" />
+    <line x1="132" y1="104" x2="132" y2="176" stroke="${INK}" stroke-width="1.6" />
+
+    <!-- Blaulichtbalken quer auf Kabinen-Dach -->
+    <rect x="210" y="122" width="32" height="136" rx="4" fill="${LIGHTBAR}" stroke="${INK}" stroke-width="2.4" />
+    <line x1="210" y1="150" x2="242" y2="150" stroke="${INK}" stroke-width="1.2" />
+    <line x1="210" y1="176" x2="242" y2="176" stroke="${INK}" stroke-width="1.2" />
+    <line x1="210" y1="202" x2="242" y2="202" stroke="${INK}" stroke-width="1.2" />
+    <line x1="210" y1="228" x2="242" y2="228" stroke="${INK}" stroke-width="1.2" />
+
+    <!-- Trennkante Kabine/Aufbau -->
+    <line x1="250" y1="90" x2="250" y2="290" stroke="${INK}" stroke-width="2.6" />
+
+    <!-- Aufbau-Dach: Leitern längs (zwei Leitern nebeneinander) -->
+    ${topLadder(268, 118, 430, 38)}
+    ${topLadder(268, 170, 430, 38)}
+
+    <!-- Dachkasten / Geräteraum mittig hinter den Leitern -->
+    <rect x="268" y="222" width="200" height="46" fill="${ROLL}" stroke="${INK}" stroke-width="2.6" />
+    <line x1="268" y1="240" x2="468" y2="240" stroke="${INK}" stroke-width="1.4" />
+    <line x1="318" y1="222" x2="318" y2="268" stroke="${INK}" stroke-width="1.4" />
+    <line x1="368" y1="222" x2="368" y2="268" stroke="${INK}" stroke-width="1.4" />
+    <line x1="418" y1="222" x2="418" y2="268" stroke="${INK}" stroke-width="1.4" />
+
+    <!-- Lüftergitter / Abgas Andeutung rechts vom Dachkasten -->
+    <rect x="482" y="222" width="60" height="46" fill="${HUB}" stroke="${INK}" stroke-width="2.4" />
+    <line x1="492" y1="230" x2="532" y2="230" stroke="${INK}" stroke-width="1.2" />
+    <line x1="492" y1="240" x2="532" y2="240" stroke="${INK}" stroke-width="1.2" />
+    <line x1="492" y1="250" x2="532" y2="250" stroke="${INK}" stroke-width="1.2" />
+    <line x1="492" y1="260" x2="532" y2="260" stroke="${INK}" stroke-width="1.2" />
+
+    <!-- Lichtmast-Platz (kleines Rechteck hinten am Aufbau, nahe Kabine) -->
+    <rect x="560" y="222" width="60" height="46" fill="${CHASSIS}" stroke="${INK}" stroke-width="2.4" />
+    <circle cx="590" cy="245" r="10" fill="${LIGHTBAR}" stroke="${INK}" stroke-width="1.8" />
+
+    <!-- Heck-Markierung (dunkler Streifen außen hinten) -->
+    <rect x="720" y="90" width="20" height="200" fill="${CHASSIS}" stroke="${INK}" stroke-width="2.4" />
+
+    <!-- Umriss-Linien Aufbau-Rand (Kante-Paneel) -->
+    <line x1="250" y1="110" x2="720" y2="110" stroke="${INK}" stroke-width="1.6" opacity="0.6" />
+    <line x1="250" y1="270" x2="720" y2="270" stroke="${INK}" stroke-width="1.6" opacity="0.6" />
+
+    <!-- Richtungs-Pfeil (vorn nach links) als Orientierungshilfe, dezent -->
+    <g stroke="${INK}" stroke-width="1.6" fill="none" opacity="0.55">
+      <line x1="120" y1="64" x2="80" y2="64" />
+      <polyline points="90,58 80,64 90,70" stroke-linejoin="round" />
+      <line x1="680" y1="64" x2="720" y2="64" />
+      <polyline points="710,58 720,64 710,70" stroke-linejoin="round" />
+    </g>
+  `;
+  return wrap("HLF 20 Ansicht Dach", "hlf_top_v1", body);
+}
+
+/** Leiter von oben gesehen: zwei Holme + Sprossen. */
+function topLadder(x: number, y: number, w: number, h: number): string {
+  const rungs: string[] = [];
+  const step = 26;
+  for (let lx = x + step; lx < x + w; lx += step) {
+    rungs.push(`<line x1="${lx}" y1="${y + 3}" x2="${lx}" y2="${y + h - 3}" stroke="${INK}" stroke-width="1.4" />`);
+  }
+  return `
+    <g stroke="${INK}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ROLL}" />
+      <line x1="${x}" y1="${y + 6}" x2="${x + w}" y2="${y + 6}" stroke-width="1.6" />
+      <line x1="${x}" y1="${y + h - 6}" x2="${x + w}" y2="${y + h - 6}" stroke-width="1.6" />
+      ${rungs.join("")}
+    </g>
+  `;
+}
+
 // -- Main --------------------------------------------------------------------
 
 function generate(): void {
@@ -261,7 +428,8 @@ function generate(): void {
   const files: Array<[string, string]> = [
     ["hlf_left.svg", renderLeft()],
     ["hlf_right.svg", renderRight()],
-    // hlf_back.svg und hlf_top.svg folgen in einem separaten Block.
+    ["hlf_back.svg", renderBack()],
+    ["hlf_top.svg", renderTop()],
   ];
 
   for (const [name, svg] of files) {
