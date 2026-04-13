@@ -364,6 +364,8 @@ function CompartmentList({
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [renamingId, setRenamingId] = useState<number | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -382,6 +384,11 @@ function CompartmentList({
     fd.append("file", file);
     fd.append("folder", "compartments");
     const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(`Upload fehlgeschlagen: ${data.error ?? res.statusText}`);
+      return;
+    }
     const { path } = await res.json();
     await fetch(`/api/compartments/${compId}`, {
       method: "PATCH",
@@ -391,18 +398,109 @@ function CompartmentList({
     await onReload();
   };
 
+  const startRename = (id: number, current: string) => {
+    setRenamingId(id);
+    setRenameValue(current);
+  };
+  const cancelRename = () => {
+    setRenamingId(null);
+    setRenameValue("");
+  };
+  const submitRename = async (id: number) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    const res = await fetch(`/api/compartments/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label }),
+    });
+    if (res.ok) {
+      cancelRename();
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Umbenennen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
+  const handleDelete = async (comp: Compartment) => {
+    const ok = window.confirm(
+      `Fach "${comp.label}" wirklich löschen?\n\n` +
+      "Alle zugehörigen Positionen, Kisten und darin verorteten " +
+      "Gegenstände werden ebenfalls gelöscht."
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/compartments/${comp.id}`, { method: "DELETE" });
+    if (res.ok) {
+      if (expanded === comp.id) setExpanded(null);
+      await onReload();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(`Löschen fehlgeschlagen: ${data.error ?? res.statusText}`);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <h4 className="text-sm font-semibold text-zinc-400">Fächer / Rolladen</h4>
       {compartments.map((c) => (
         <div key={c.id} className="bg-zinc-800 rounded-xl overflow-hidden">
-          <button
-            onClick={() => setExpanded(expanded === c.id ? null : c.id)}
-            className="w-full flex items-center justify-between px-4 py-2 hover:bg-zinc-700/50 transition-colors text-left"
-          >
-            <span className="font-semibold text-white">{c.label}</span>
-            <span className="text-xs text-zinc-500">{c.positions.length} Positionen</span>
-          </button>
+          <div className="flex items-center gap-1 px-4 py-2 hover:bg-zinc-700/50 transition-colors">
+            {renamingId === c.id ? (
+              <form
+                onSubmit={(e) => { e.preventDefault(); submitRename(c.id); }}
+                className="flex-1 flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Escape") cancelRename(); }}
+                  className="flex-1 bg-zinc-700 border border-zinc-600 rounded-lg px-2 py-1 text-white text-sm outline-none focus:border-red-400"
+                />
+                <button
+                  type="submit"
+                  className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg"
+                >
+                  Speichern
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelRename}
+                  className="text-zinc-400 hover:text-white text-xs px-1"
+                >
+                  ✕
+                </button>
+              </form>
+            ) : (
+              <>
+                <button
+                  onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+                  className="flex-1 flex items-center justify-between text-left"
+                >
+                  <span className="font-semibold text-white">{c.label}</span>
+                  <span className="text-xs text-zinc-500">{c.positions.length} Positionen</span>
+                </button>
+                <button
+                  onClick={() => startRename(c.id, c.label)}
+                  title="Fach umbenennen"
+                  aria-label="Fach umbenennen"
+                  className="text-zinc-500 hover:text-white text-sm p-1 rounded transition-colors"
+                >
+                  ✏️
+                </button>
+                <button
+                  onClick={() => handleDelete(c)}
+                  title="Fach löschen"
+                  aria-label="Fach löschen"
+                  className="text-zinc-500 hover:text-red-400 text-sm p-1 rounded transition-colors"
+                >
+                  🗑️
+                </button>
+              </>
+            )}
+          </div>
           <AnimatePresence>
             {expanded === c.id && (
               <motion.div
