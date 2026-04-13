@@ -33,6 +33,37 @@ function copyMissing(srcDir, destDir) {
   return added;
 }
 
+// Spiegelt einen Ordner force-overwrite ins Ziel: vorhandene Dateien werden
+// ueberschrieben, Dateien im Ziel die in der Quelle nicht mehr existieren
+// werden geloescht. Wird nur fuer kuratierte Seed-Ordner verwendet
+// (items/seed, views), niemals fuer User-Upload-Pfade.
+function mirrorForce(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return 0;
+  fs.mkdirSync(destDir, { recursive: true });
+  const srcEntries = new Set(fs.readdirSync(srcDir));
+  let written = 0;
+  // 1. Im Ziel ueberzaehlige Dateien entfernen
+  if (fs.existsSync(destDir)) {
+    for (const name of fs.readdirSync(destDir)) {
+      if (!srcEntries.has(name)) {
+        fs.rmSync(path.join(destDir, name), { recursive: true, force: true });
+      }
+    }
+  }
+  // 2. Quelle force-overwrite ins Ziel kopieren
+  for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
+    const src = path.join(srcDir, entry.name);
+    const dest = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      written += mirrorForce(src, dest);
+    } else if (entry.isFile() || entry.isSymbolicLink()) {
+      fs.copyFileSync(src, dest);
+      written++;
+    }
+  }
+  return written;
+}
+
 // --- Uploads-Verzeichnis vorbereiten (Docker-Volume) ---
 function setupUploads() {
   const dataAssets = "/data/assets";
@@ -50,6 +81,23 @@ function setupUploads() {
     if (fs.existsSync(bundledUploads)) {
       const added = copyMissing(bundledUploads, dataAssets);
       if (added > 0) console.log(`📦 ${added} Seed-Asset(s) ins Volume kopiert`);
+
+      // Kuratierte Seed-Ordner immer force-overwrite, damit neu generierte
+      // Item-Icons und Fahrzeugansichten nach Re-Deploy wirksam werden.
+      // User-Uploads liegen in anderen Pfaden (z.B. items/ ohne "seed/")
+      // und bleiben unberührt.
+      const forceDirs = [
+        path.join("items", "seed"),
+        path.join("views"),
+      ];
+      let refreshed = 0;
+      for (const rel of forceDirs) {
+        refreshed += mirrorForce(
+          path.join(bundledUploads, rel),
+          path.join(dataAssets, rel)
+        );
+      }
+      if (refreshed > 0) console.log(`♻️  ${refreshed} kuratierte Seed-Asset(s) aktualisiert`);
     }
 
     // Prüfen, ob public/uploads bereits ein Symlink auf dataAssets ist
