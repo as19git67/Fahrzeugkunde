@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" role="img" aria-label="HLF 20 Ansicht links">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#f7f1e1" />
+      <stop offset="100%" stop-color="#e8dfc3" />
+    </radialGradient>
+    <filter id="sketch" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="302" />
+      <feDisplacementMap in="SourceGraphic" scale="1.8" />
+    </filter>
+    <filter id="sketchLight" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="305" />
+      <feDisplacementMap in="SourceGraphic" scale="1.1" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="380" fill="url(#paper)" />
+
+  <g fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round" filter="url(#sketchLight)">
+    <rect x="10" y="10" width="780" height="360" stroke-width="2.4" rx="6" />
+    <rect x="16" y="16" width="768" height="348" stroke-width="1.2" rx="4" />
+  </g>
+
+  <g stroke="#1a1a1a" stroke-width="1" opacity="0.18" filter="url(#sketchLight)">
+    <line x1="40" y1="340" x2="120" y2="340" />
+    <line x1="40" y1="348" x2="140" y2="348" />
+    <line x1="640" y1="340" x2="760" y2="340" />
+    <line x1="680" y1="348" x2="760" y2="348" />
+  </g>
+
+  <g filter="url(#sketch)">
+    
+    <!-- Fahrbahn -->
+    <line x1="20" y1="340" x2="780" y2="340" stroke="#1a1a1a" stroke-width="3" />
+
+    <!-- Chassis / Rahmen (dunkler Streifen unter Aufbau) -->
+    <rect x="40" y="262" width="720" height="28" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="3" />
+
+    <!-- Aufbau (großer Kasten rechts) -->
+    <rect x="300" y="70" width="460" height="192" fill="#d83a2a" stroke="#1a1a1a" stroke-width="3" />
+
+    <!-- Kabine (links, leicht niedriger als Aufbau) -->
+    <path d="M 40 140 L 110 92 L 300 92 L 300 262 L 40 262 Z"
+          fill="#c02a1a" stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" />
+
+    <!-- Windschutzscheibe -->
+    <path d="M 52 140 L 118 102 L 166 102 L 166 148 Z"
+          fill="#b8d8f0" stroke="#1a1a1a" stroke-width="2.4" stroke-linejoin="round" />
+
+    <!-- Blaulichtbalken auf der Kabine -->
+    <rect x="120" y="78" width="170" height="14" rx="4" fill="#3aa0ff" stroke="#1a1a1a" stroke-width="2.4" />
+    <line x1="140" y1="78" x2="140" y2="92" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="170" y1="78" x2="170" y2="92" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="200" y1="78" x2="200" y2="92" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="230" y1="78" x2="230" y2="92" stroke="#1a1a1a" stroke-width="1.2" />
+    <line x1="260" y1="78" x2="260" y2="92" stroke="#1a1a1a" stroke-width="1.2" />
+
+    <!-- Fahrertüre (vorne, neben Windschutzscheibe) -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="170" y="148" width="64" height="112" fill="#c02a1a" />
+      <!-- Fenster -->
+      <rect x="176" y="156" width="52" height="50.4" fill="#b8d8f0" />
+      <!-- Griff rechts mittig -->
+      <rect x="216" y="204" width="12" height="4" rx="2" fill="#1a1a1a" />
+    </g>
+  
+
+    <!-- Türe Mannschaft links (hinten, neben Fahrertüre) -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="236" y="120" width="60" height="140" fill="#c02a1a" />
+      <!-- Fenster -->
+      <rect x="242" y="128" width="48" height="63" fill="#b8d8f0" />
+      <!-- Griff rechts mittig -->
+      <rect x="278" y="190" width="12" height="4" rx="2" fill="#1a1a1a" />
+    </g>
+  
+
+    <!-- Trittbrett unter Kabine -->
+    <rect x="50" y="256" width="246" height="10" fill="#1a1a1a" />
+
+    <!-- G1 Rolltor -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="314" y="96" width="138" height="156" fill="#e0d3a8" />
+      <line x1="320" y1="108" x2="446" y2="108" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="118" x2="446" y2="118" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="128" x2="446" y2="128" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="138" x2="446" y2="138" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="148" x2="446" y2="148" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="158" x2="446" y2="158" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="168" x2="446" y2="168" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="178" x2="446" y2="178" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="188" x2="446" y2="188" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="198" x2="446" y2="198" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="208" x2="446" y2="208" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="218" x2="446" y2="218" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="228" x2="446" y2="228" stroke="#1a1a1a" stroke-width="1.2" /><line x1="320" y1="238" x2="446" y2="238" stroke="#1a1a1a" stroke-width="1.2" />
+      <!-- Griff unten mittig -->
+      <rect x="365" y="238" width="36" height="8" rx="2" fill="#1a1a1a" />
+    </g>
+  
+
+    <!-- G3 Rolltor -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="460" y="96" width="138" height="156" fill="#e0d3a8" />
+      <line x1="466" y1="108" x2="592" y2="108" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="118" x2="592" y2="118" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="128" x2="592" y2="128" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="138" x2="592" y2="138" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="148" x2="592" y2="148" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="158" x2="592" y2="158" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="168" x2="592" y2="168" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="178" x2="592" y2="178" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="188" x2="592" y2="188" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="198" x2="592" y2="198" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="208" x2="592" y2="208" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="218" x2="592" y2="218" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="228" x2="592" y2="228" stroke="#1a1a1a" stroke-width="1.2" /><line x1="466" y1="238" x2="592" y2="238" stroke="#1a1a1a" stroke-width="1.2" />
+      <!-- Griff unten mittig -->
+      <rect x="511" y="238" width="36" height="8" rx="2" fill="#1a1a1a" />
+    </g>
+  
+
+    <!-- G5 Rolltor -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <rect x="606" y="96" width="138" height="156" fill="#e0d3a8" />
+      <line x1="612" y1="108" x2="738" y2="108" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="118" x2="738" y2="118" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="128" x2="738" y2="128" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="138" x2="738" y2="138" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="148" x2="738" y2="148" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="158" x2="738" y2="158" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="168" x2="738" y2="168" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="178" x2="738" y2="178" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="188" x2="738" y2="188" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="198" x2="738" y2="198" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="208" x2="738" y2="208" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="218" x2="738" y2="218" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="228" x2="738" y2="228" stroke="#1a1a1a" stroke-width="1.2" /><line x1="612" y1="238" x2="738" y2="238" stroke="#1a1a1a" stroke-width="1.2" />
+      <!-- Griff unten mittig -->
+      <rect x="657" y="238" width="36" height="8" rx="2" fill="#1a1a1a" />
+    </g>
+  
+
+    <!-- Leiter / Dachgepäck (Hinweis auf Leitern oben) -->
+    <line x1="320" y1="62" x2="760" y2="62" stroke="#1a1a1a" stroke-width="2.4" />
+    <line x1="320" y1="68" x2="760" y2="68" stroke="#1a1a1a" stroke-width="1.4" />
+
+    <!-- Räder -->
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="130" cy="302" r="36" fill="#1a1a1a" />
+      <circle cx="130" cy="302" r="24" fill="#9a9a9a" />
+      <circle cx="130" cy="302" r="4" fill="#1a1a1a" />
+      <line x1="108" y1="302" x2="152" y2="302" stroke-width="1.4" />
+      <line x1="130" y1="280" x2="130" y2="324" stroke-width="1.4" />
+    </g>
+  
+    
+    <g stroke="#1a1a1a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="640" cy="302" r="36" fill="#1a1a1a" />
+      <circle cx="640" cy="302" r="24" fill="#9a9a9a" />
+      <circle cx="640" cy="302" r="4" fill="#1a1a1a" />
+      <line x1="618" y1="302" x2="662" y2="302" stroke-width="1.4" />
+      <line x1="640" y1="280" x2="640" y2="324" stroke-width="1.4" />
+    </g>
+  
+
+    <!-- Hintere Stoßstange -->
+    <rect x="752" y="250" width="14" height="60" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="2.4" />
+
+    <!-- Scheinwerfer vorne (am Kabinen-Bug) -->
+    <rect x="46" y="220" width="18" height="24" fill="#f5f5d0" stroke="#1a1a1a" stroke-width="2" />
+    <rect x="46" y="250" width="18" height="10" fill="#f5c330" stroke="#1a1a1a" stroke-width="2" />
+  
+  </g>
+</svg>
