@@ -125,7 +125,7 @@ export default function Home() {
         )}
 
         {/* Nav-Links */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <NavCard
             href="/highscore"
             icon="🏆"
@@ -138,25 +138,18 @@ export default function Home() {
             title="Creator"
             desc="Fahrzeug und Beladung anlegen"
           />
-          <div
-            onClick={() => !user && setShowLogin(true)}
-            className="cursor-pointer"
-          >
-            {user ? (
-              <NavCard
-                href="/play"
-                icon="🎮"
-                title="Spielen"
-                desc="Wähle ein Fahrzeug und leg los"
-              />
-            ) : (
+          {!user && (
+            <div
+              onClick={() => setShowLogin(true)}
+              className="cursor-pointer"
+            >
               <div className="bg-zinc-900 border border-zinc-800 hover:border-zinc-600 rounded-2xl p-5 transition-all">
                 <div className="text-3xl mb-2">👤</div>
                 <h4 className="font-bold text-white">Anmelden</h4>
                 <p className="text-zinc-500 text-sm mt-1">Für den Highscore einloggen</p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </main>
 
