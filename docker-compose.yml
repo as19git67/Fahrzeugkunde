@@ -24,6 +24,41 @@ services:
       DATABASE_URL: postgres://fahrzeugkunde:fahrzeugkunde@db:5432/fahrzeugkunde
     volumes:
       - app-data:/data
+      # Backup-Verzeichnis auch in die App gemountet (read-write), damit
+      # Drop-in-Restore beim Container-Start (siehe startup.js) eine
+      # umbenannte *.backup-Datei einlesen kann.
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # -------------------------------------------------------------------------
+  # Backup-Sidecar
+  #
+  # Erzeugt täglich eine einzige Backup-Datei (DB-Dump + Assets) unter
+  # ./backups/ auf dem Host. Retention per BACKUP_RETENTION_DAYS.
+  #
+  # Restore:
+  #   cp ./backups/fahrzeugkunde-20260414T...Z.backup ./backups/restore.backup
+  #   docker compose restart app
+  # (Details siehe README – Abschnitt "Backup & Restore")
+  # -------------------------------------------------------------------------
+  backup:
+    build: ./scripts/backup
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://fahrzeugkunde:fahrzeugkunde@db:5432/fahrzeugkunde
+      BACKUP_DIR: /backups
+      ASSETS_DIR: /data/assets
+      # Default: alle 24h laufen, 14 Tage aufbewahren
+      BACKUP_INTERVAL_SECONDS: "86400"
+      BACKUP_RETENTION_DAYS: "14"
+      TZ: Europe/Berlin
+    volumes:
+      # Assets nur lesend – Sidecar darf keine App-Dateien verändern
+      - app-data:/data:ro
+      # Backups landen im Host-Ordner, werden nicht im Docker-Volume versteckt
+      - ./backups:/backups
     depends_on:
       db:
         condition: service_healthy
