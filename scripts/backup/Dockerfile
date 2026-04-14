@@ -1,6 +1,8 @@
 # Sidecar-Image für tägliche Backups (DB + Assets).
-# Basiert auf postgres:16-alpine, damit pg_dump bitgenau zur DB-Version passt.
-FROM postgres:16-alpine
+# Die Major-Version MUSS zur DB in docker-compose.yml passen – ein älterer
+# pg_dump verweigert gegen einen neueren Server den Dump ("server version
+# mismatch") und hinterlässt dabei eine leere db.dump.
+FROM postgres:18-alpine
 
 # busybox-tar und -find reichen für unsere Zwecke; coreutils liefert stabiles
 # `date -u +%FT%TZ` und `stat -c%s` – hilfreich für Logs.

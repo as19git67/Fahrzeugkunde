@@ -69,7 +69,18 @@ run_backup() {
     --compress=6 \
     --dbname="$DATABASE_URL" \
     --file="$work/db.dump"
-  log "db.dump fertig ($(stat -c%s "$work/db.dump") Bytes)"
+  # Defensiver Sanity-Check: Ein gültiger custom-format Dump hat immer einen
+  # Header (>0 Bytes). Bei pg_dump/Server-Versionsmismatch legt pg_dump die
+  # Datei per --file zwar an, schreibt aber nichts hinein. Ohne diese Prüfung
+  # würde ein leerer Dump ins Archiv wandern und stillschweigend gute
+  # Backups wegrotieren.
+  local db_dump_size
+  db_dump_size=$(stat -c%s "$work/db.dump")
+  if [[ "$db_dump_size" -le 0 ]]; then
+    log "FEHLER: pg_dump hat einen leeren db.dump erzeugt – Backup wird abgebrochen"
+    return 1
+  fi
+  log "db.dump fertig ($db_dump_size Bytes)"
 
   # 2) Assets als tar. Wenn der Ordner leer oder nicht vorhanden ist,
   #    legen wir trotzdem ein (leeres) Tar an – damit Backups einheitlich
