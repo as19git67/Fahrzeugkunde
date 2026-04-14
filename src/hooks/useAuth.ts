@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 interface User {
   id: number;
   handle: string;
+  role?: string;
 }
 
 export function useAuth() {

@@ -111,8 +111,11 @@ export async function setup() {
         handle TEXT NOT NULL UNIQUE,
         email TEXT NOT NULL UNIQUE,
         verified BOOLEAN DEFAULT false,
+        role TEXT NOT NULL DEFAULT 'user',
         created_at TIMESTAMP DEFAULT now()
       );
+      -- Nachträgliche Migration für bestehende Test-DBs
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
       CREATE TABLE IF NOT EXISTS auth_codes (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

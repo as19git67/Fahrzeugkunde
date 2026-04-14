@@ -80,8 +80,12 @@ CREATE TABLE IF NOT EXISTS users (
   handle TEXT NOT NULL UNIQUE,
   email TEXT NOT NULL UNIQUE,
   verified BOOLEAN DEFAULT false,
+  role TEXT NOT NULL DEFAULT 'user',
   created_at TIMESTAMP DEFAULT now()
 );
+
+-- Nachträgliche Migration für bestehende Datenbanken: role-Spalte ergänzen.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
 
 CREATE TABLE IF NOT EXISTS auth_codes (
   id SERIAL PRIMARY KEY,

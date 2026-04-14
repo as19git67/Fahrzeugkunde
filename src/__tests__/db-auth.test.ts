@@ -2,6 +2,7 @@ import { it, expect, beforeEach, afterAll } from "vitest";
 import { eq } from "drizzle-orm";
 import { getTestDb, cleanDb, closeDb, describeDb as describe } from "./db-helper";
 import { users, authCodes, sessions } from "@/db/schema";
+import { createOrGetUser, isAdmin } from "@/lib/auth";
 
 const db = getTestDb();
 
@@ -41,6 +42,39 @@ describe("users", () => {
     await expect(
       db.insert(users).values({ handle: "User2", email: "same@test.de" })
     ).rejects.toThrow();
+  });
+
+  it("defaults role to 'user' for a freshly inserted row", async () => {
+    const [user] = await db
+      .insert(users)
+      .values({ handle: "PlainUser", email: "plain@test.de" })
+      .returning();
+    expect(user.role).toBe("user");
+    expect(isAdmin(user)).toBe(false);
+  });
+});
+
+describe("first-user admin promotion", () => {
+  it("promotes the very first user to admin", async () => {
+    const { user, isNew } = await createOrGetUser("FirstUser", "first@test.de");
+    expect(isNew).toBe(true);
+    expect(user?.role).toBe("admin");
+    expect(isAdmin(user)).toBe(true);
+  });
+
+  it("creates subsequent users as plain 'user'", async () => {
+    await createOrGetUser("FirstUser", "first@test.de");
+    const { user, isNew } = await createOrGetUser("SecondUser", "second@test.de");
+    expect(isNew).toBe(true);
+    expect(user?.role).toBe("user");
+    expect(isAdmin(user)).toBe(false);
+  });
+
+  it("does not demote an existing admin when looked up again", async () => {
+    await createOrGetUser("FirstUser", "first@test.de");
+    const { user, isNew } = await createOrGetUser("FirstUser", "first@test.de");
+    expect(isNew).toBe(false);
+    expect(user?.role).toBe("admin");
   });
 });
 
