@@ -15,7 +15,7 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
-import { createZip, type ZipEntry } from "./zip";
+import { createZip, readZip, type ZipEntry } from "./zip";
 
 /** Schema-Version des Paketformats. Bei Breaking Changes erhöhen. */
 export const PACKAGE_SCHEMA_VERSION = 1;
@@ -213,4 +213,168 @@ export async function buildPackageZip(params: {
     { name: "vehicle.json", data: vehicleBuf },
     ...assetEntries,
   ]);
+}
+
+export interface ParsedPackage {
+  manifest: PackageManifest;
+  vehicle: PackageVehicle;
+  /** Asset-Pfad im Paket → Rohdaten. Nur Einträge unter `assets/` sind enthalten. */
+  assets: Map<string, Buffer>;
+}
+
+/**
+ * Fehlerklasse für Validierungsprobleme beim Paket-Import. Die `status`-Eigenschaft
+ * wird von der API-Route als HTTP-Statuscode verwendet (400 = Client-Fehler).
+ */
+export class PackageValidationError extends Error {
+  status = 400;
+  constructor(message: string) {
+    super(message);
+    this.name = "PackageValidationError";
+  }
+}
+
+/**
+ * Liest ein .fzk-Paket, validiert Manifest + Schema-Version + Checksums und
+ * liefert geparste Struktur + Asset-Daten zurück. Wirft `PackageValidationError`
+ * bei jeder Art von Unstimmigkeit – der Caller kann daraus direkt eine
+ * benutzerfreundliche Fehlermeldung ableiten.
+ */
+export function readPackageZip(buf: Buffer): ParsedPackage {
+  let entries: ZipEntry[];
+  try {
+    entries = readZip(buf);
+  } catch (err) {
+    throw new PackageValidationError(
+      `Datei ist kein gültiges ZIP-Archiv: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  const byName = new Map(entries.map((e) => [e.name, e.data] as const));
+
+  const manifestRaw = byName.get("manifest.json");
+  if (!manifestRaw) throw new PackageValidationError("manifest.json fehlt im Paket");
+  const vehicleRaw = byName.get("vehicle.json");
+  if (!vehicleRaw) throw new PackageValidationError("vehicle.json fehlt im Paket");
+
+  let manifest: PackageManifest;
+  try {
+    manifest = JSON.parse(manifestRaw.toString("utf8")) as PackageManifest;
+  } catch (err) {
+    throw new PackageValidationError(
+      `manifest.json ist kein gültiges JSON: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  if (manifest.magic !== PACKAGE_MAGIC) {
+    throw new PackageValidationError(
+      "Paket stammt nicht aus Fahrzeugkunde (manifest.magic fehlt oder falsch)"
+    );
+  }
+  if (manifest.schemaVersion !== PACKAGE_SCHEMA_VERSION) {
+    throw new PackageValidationError(
+      `Nicht unterstützte Paket-Version: ${manifest.schemaVersion} (erwartet: ${PACKAGE_SCHEMA_VERSION})`
+    );
+  }
+
+  let vehicle: PackageVehicle;
+  try {
+    vehicle = JSON.parse(vehicleRaw.toString("utf8")) as PackageVehicle;
+  } catch (err) {
+    throw new PackageValidationError(
+      `vehicle.json ist kein gültiges JSON: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  if (!vehicle || typeof vehicle.name !== "string" || !Array.isArray(vehicle.views)) {
+    throw new PackageValidationError("vehicle.json hat ungültige Struktur");
+  }
+
+  // Assets einsammeln und Checksums validieren
+  const assets = new Map<string, Buffer>();
+  for (const [name, data] of byName) {
+    if (name === "manifest.json" || name === "vehicle.json") continue;
+    if (!name.startsWith(PACKAGE_ASSET_PREFIX)) {
+      // Ungewöhnliche Einträge ignorieren (wäre ggf. in zukünftigen Versionen relevant)
+      continue;
+    }
+    // Pfadsicherheit: keine "..", keine absoluten Pfade, keine Backslashes
+    const segments = name.split("/");
+    for (const s of segments) {
+      if (s === "" || s === "." || s === ".." || s.includes("\\")) {
+        throw new PackageValidationError(`Ungültiger Asset-Pfad im Paket: ${name}`);
+      }
+    }
+
+    const expectedHash = manifest.assetChecksums?.[name];
+    if (!expectedHash) {
+      throw new PackageValidationError(`Asset ohne Eintrag im Manifest: ${name}`);
+    }
+    if (sha256(data) !== expectedHash) {
+      throw new PackageValidationError(`Checksum stimmt nicht für Asset: ${name}`);
+    }
+    assets.set(name, data);
+  }
+
+  // Sicherstellen, dass alle im Manifest aufgeführten Assets auch im ZIP sind
+  for (const assetPath of Object.keys(manifest.assetChecksums ?? {})) {
+    if (!assets.has(assetPath)) {
+      throw new PackageValidationError(`Im Manifest referenziertes Asset fehlt: ${assetPath}`);
+    }
+  }
+
+  return { manifest, vehicle, assets };
+}
+
+/**
+ * Sammelt alle im vehicle-Tree referenzierten Paket-Asset-Pfade. Dient zur
+ * Prüfung vor dem Import (jede Referenz muss im ZIP vorhanden sein).
+ */
+export function collectReferencedAssetPaths(vehicle: PackageVehicle): Set<string> {
+  const refs = new Set<string>();
+  const add = (p: string | null | undefined) => {
+    if (p && p.startsWith(PACKAGE_ASSET_PREFIX)) refs.add(p);
+  };
+  for (const v of vehicle.views) {
+    add(v.imagePath);
+    for (const c of v.compartments ?? []) {
+      add(c.imagePath);
+      for (const pos of c.positions ?? []) {
+        for (const b of pos.boxes ?? []) {
+          add(b.imagePath);
+          for (const i of b.items ?? []) {
+            add(i.imagePath);
+            add(i.silhouettePath);
+          }
+        }
+        for (const i of pos.items ?? []) {
+          add(i.imagePath);
+          add(i.silhouettePath);
+        }
+      }
+    }
+  }
+  return refs;
+}
+
+/**
+ * Liefert eine dateisystemsichere Dateiendung (ohne Punkt, kleingeschrieben).
+ * Fällt auf `bin` zurück, wenn keine gültige Endung erkennbar ist.
+ */
+export function safeExtFromPath(p: string): string {
+  const base = p.split("/").pop() ?? "";
+  const dot = base.lastIndexOf(".");
+  if (dot < 0) return "bin";
+  const ext = base.slice(dot + 1).toLowerCase();
+  if (!/^[a-z0-9]{1,8}$/.test(ext)) return "bin";
+  return ext;
+}
+
+/**
+ * Erzeugt einen neuen eindeutigen Dateinamen analog zur bestehenden
+ * Upload-Route (siehe src/app/api/upload/route.ts). Zeitstempel + Zufalls-Suffix
+ * garantieren Kollisionsfreiheit.
+ */
+export function generateUploadFilename(ext: string): string {
+  return `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 }
