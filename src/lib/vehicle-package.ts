@@ -146,12 +146,14 @@ export function slugifyName(name: string): string {
   return (
     name
       .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "") // Diakritika entfernen
+      // Deutsche Umlaute zuerst ausschreiben – MUSS vor dem NFKD-Zerlegen
+      // passieren, sonst wird "ä" zu "a" + Diakritikum und danach zu "a".
       .replace(/ä/g, "ae")
       .replace(/ö/g, "oe")
       .replace(/ü/g, "ue")
       .replace(/ß/g, "ss")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "") // sonstige Diakritika entfernen
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .slice(0, 64) || "vehicle"

@@ -17,7 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { getSessionUser } from "@/lib/auth";
-import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
+import { db } from "@/db";
 import {
   collectReferencedAssetPaths,
   generateUploadFilename,
@@ -27,8 +27,8 @@ import {
   safeExtFromPath,
   UPLOAD_DIR,
   UPLOAD_URL_PREFIX,
-  type PackageItem,
 } from "@/lib/vehicle-package";
+import { insertVehicleTree, makeRewriter } from "@/lib/vehicle-import";
 
 /**
  * Asset-Pfad aus dem Paket (z. B. "assets/items/seed/foo.svg") auf einen
@@ -140,116 +140,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const rewrite = (p: string | null | undefined): string | null => {
-    if (!p) return null;
-    if (p.startsWith(PACKAGE_ASSET_PREFIX)) {
-      return pathMap.get(p) ?? null;
-    }
-    // Externer / nicht-lokaler Pfad – unverändert übernehmen
-    return p;
-  };
+  const rewrite = makeRewriter(pathMap);
 
   // 4) Datenbank-Inserts innerhalb einer Transaktion
   let newVehicleId: number;
   try {
-    newVehicleId = await db.transaction(async (tx) => {
-      const [inserted] = await tx
-        .insert(vehicles)
-        .values({ name: vehicle.name, description: vehicle.description ?? null })
-        .returning();
-
-      const vehicleId = inserted.id;
-
-      const insertItem = async (
-        it: PackageItem,
-        positionId: number | null,
-        boxId: number | null
-      ) => {
-        await tx.insert(items).values({
-          vehicleId,
-          name: it.name,
-          article: it.article ?? null,
-          description: it.description ?? null,
-          imagePath: rewrite(it.imagePath),
-          silhouettePath: rewrite(it.silhouettePath),
-          category: it.category ?? null,
-          difficulty: it.difficulty ?? 1,
-          positionId: positionId ?? null,
-          boxId: boxId ?? null,
-          locationLabel: it.locationLabel ?? null,
-        });
-      };
-
-      for (const v of vehicle.views) {
-        const [vv] = await tx
-          .insert(vehicleViews)
-          .values({
-            vehicleId,
-            side: v.side,
-            label: v.label,
-            imagePath: rewrite(v.imagePath),
-            sortOrder: v.sortOrder ?? 0,
-          })
-          .returning();
-
-        for (const c of v.compartments ?? []) {
-          const [cc] = await tx
-            .insert(compartments)
-            .values({
-              viewId: vv.id,
-              label: c.label,
-              imagePath: rewrite(c.imagePath),
-              hotspotX: c.hotspotX,
-              hotspotY: c.hotspotY,
-              hotspotW: c.hotspotW,
-              hotspotH: c.hotspotH,
-              sortOrder: c.sortOrder ?? 0,
-            })
-            .returning();
-
-          for (const p of c.positions ?? []) {
-            const [pp] = await tx
-              .insert(positions)
-              .values({
-                compartmentId: cc.id,
-                label: p.label,
-                hotspotX: p.hotspotX,
-                hotspotY: p.hotspotY,
-                hotspotW: p.hotspotW,
-                hotspotH: p.hotspotH,
-                sortOrder: p.sortOrder ?? 0,
-              })
-              .returning();
-
-            for (const b of p.boxes ?? []) {
-              const [bb] = await tx
-                .insert(boxes)
-                .values({
-                  positionId: pp.id,
-                  label: b.label,
-                  imagePath: rewrite(b.imagePath),
-                  hotspotX: b.hotspotX,
-                  hotspotY: b.hotspotY,
-                  hotspotW: b.hotspotW,
-                  hotspotH: b.hotspotH,
-                  sortOrder: b.sortOrder ?? 0,
-                })
-                .returning();
-
-              for (const it of b.items ?? []) {
-                await insertItem(it, pp.id, bb.id);
-              }
-            }
-
-            for (const it of p.items ?? []) {
-              await insertItem(it, pp.id, null);
-            }
-          }
-        }
-      }
-
-      return vehicleId;
-    });
+    newVehicleId = await db.transaction(async (tx) =>
+      insertVehicleTree(tx, vehicle, rewrite)
+    );
   } catch (err) {
     // DB-Rollback ist durch die Transaktion erfolgt – nun die bereits
     // geschriebenen Asset-Dateien löschen, damit nichts Verwaistes zurückbleibt.
