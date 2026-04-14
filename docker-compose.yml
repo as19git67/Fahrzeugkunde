@@ -1,6 +1,8 @@
+name: fahrzeugkunde-test
+
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: fahrzeugkunde
@@ -16,18 +18,23 @@ services:
       retries: 5
 
   app:
-    build: .
+    container_name: fahrzeugkunde-app-test
+    image: ghcr.io/as19git67/fahrzeugkunde:test
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8002:3000"
+    labels:
+      com.centurylinklabs.watchtower.scope: fahrzeugkundetest
     environment:
       DATABASE_URL: postgres://fahrzeugkunde:fahrzeugkunde@db:5432/fahrzeugkunde
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
     volumes:
       - app-data:/data
-      # Backup-Verzeichnis auch in die App gemountet (read-write), damit
-      # Drop-in-Restore beim Container-Start (siehe startup.js) eine
-      # umbenannte *.backup-Datei einlesen kann.
-      - ./backups:/backups
     depends_on:
       db:
         condition: service_healthy
@@ -58,10 +65,40 @@ services:
       # Assets nur lesend – Sidecar darf keine App-Dateien verändern
       - app-data:/data:ro
       # Backups landen im Host-Ordner, werden nicht im Docker-Volume versteckt
-      - ./backups:/backups
+      - backups:/backups
     depends_on:
       db:
         condition: service_healthy
 
+  # ── Watchtower (Port 9002 — separater Endpunkt vom Produktions-Watchtower) ───
+  watchtower:
+    image: containrrr/watchtower
+    container_name: fahrzeugkunde-watchtower-test
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_HTTP_API_UPDATE: "true"
+      WATCHTOWER_HTTP_API_TOKEN: ${WATCHTOWER_TOKEN}
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_SCOPE: fahrzeugkundetest
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+    command: >
+      --http-api-periodic-polls
+      fahrzeugkunde-app-test
+    ports:
+      - "9002:8080"
+
 volumes:
   app-data:
+    driver: local
+    driver_opts:
+      device: /mnt/vm/fahrzeugkunde_test/data
+      o: bind
+      type: none
+  backups:
+    driver: local
+    driver_opts:
+      device: /mnt/vm/fahrzeugkunde_test/backups
+      o: bind
+      type: none
