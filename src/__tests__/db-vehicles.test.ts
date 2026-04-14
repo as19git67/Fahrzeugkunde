@@ -181,6 +181,95 @@ describe("boxes (optional Kiste-Ebene)", () => {
     expect(item.positionId).toBe(pos.id);
   });
 
+  it("cascades: deleting a compartment also deletes items in it", async () => {
+    const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
+    const [view] = await db
+      .insert(vehicleViews)
+      .values({ vehicleId: v.id, side: "left", label: "links" })
+      .returning();
+    const [comp] = await db
+      .insert(compartments)
+      .values({ viewId: view.id, label: "G1" })
+      .returning();
+    const [pos] = await db
+      .insert(positions)
+      .values({ compartmentId: comp.id, label: "oben" })
+      .returning();
+    const [box] = await db
+      .insert(boxes)
+      .values({ positionId: pos.id, label: "orange Kiste" })
+      .returning();
+    await db.insert(items).values({
+      vehicleId: v.id,
+      name: "Seilwinde",
+      positionId: pos.id,
+      boxId: box.id,
+    });
+
+    // Darf nicht an FK-Constraint scheitern: Fach loeschen muss die
+    // verorteten Gegenstaende mit cascaden.
+    await db.delete(compartments).where(eq(compartments.id, comp.id));
+
+    expect(await db.select().from(items)).toHaveLength(0);
+    expect(await db.select().from(boxes)).toHaveLength(0);
+    expect(await db.select().from(positions)).toHaveLength(0);
+  });
+
+  it("cascades: deleting a box also deletes items inside", async () => {
+    const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
+    const [view] = await db
+      .insert(vehicleViews)
+      .values({ vehicleId: v.id, side: "left", label: "links" })
+      .returning();
+    const [comp] = await db
+      .insert(compartments)
+      .values({ viewId: view.id, label: "G1" })
+      .returning();
+    const [pos] = await db
+      .insert(positions)
+      .values({ compartmentId: comp.id, label: "oben" })
+      .returning();
+    const [box] = await db
+      .insert(boxes)
+      .values({ positionId: pos.id, label: "orange Kiste" })
+      .returning();
+    await db.insert(items).values({
+      vehicleId: v.id,
+      name: "Seilwinde",
+      positionId: pos.id,
+      boxId: box.id,
+    });
+
+    await db.delete(boxes).where(eq(boxes.id, box.id));
+
+    expect(await db.select().from(items)).toHaveLength(0);
+  });
+
+  it("cascades: deleting a position also deletes items located there", async () => {
+    const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
+    const [view] = await db
+      .insert(vehicleViews)
+      .values({ vehicleId: v.id, side: "left", label: "links" })
+      .returning();
+    const [comp] = await db
+      .insert(compartments)
+      .values({ viewId: view.id, label: "G1" })
+      .returning();
+    const [pos] = await db
+      .insert(positions)
+      .values({ compartmentId: comp.id, label: "oben" })
+      .returning();
+    await db.insert(items).values({
+      vehicleId: v.id,
+      name: "Atemschutzgeraet",
+      positionId: pos.id,
+    });
+
+    await db.delete(positions).where(eq(positions.id, pos.id));
+
+    expect(await db.select().from(items)).toHaveLength(0);
+  });
+
   it("cascades: deleting a position deletes its boxes", async () => {
     const [v] = await db.insert(vehicles).values({ name: "HLF 20" }).returning();
     const [view] = await db

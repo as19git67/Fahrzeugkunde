@@ -68,8 +68,8 @@ export const items = pgTable("items", {
   silhouettePath: text("silhouette_path"),
   category: text("category"),
   difficulty: integer("difficulty").default(1),
-  positionId: integer("position_id").references(() => positions.id),
-  boxId: integer("box_id").references(() => boxes.id),
+  positionId: integer("position_id").references(() => positions.id, { onDelete: "cascade" }),
+  boxId: integer("box_id").references(() => boxes.id, { onDelete: "cascade" }),
   locationLabel: text("location_label"),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
 });
