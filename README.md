@@ -214,18 +214,57 @@ installations without ID conflicts.
   that prefix is refused.
 - SHA-256 mismatches abort the import with HTTP 400 *before* any writes.
 
-### 2. Full daily backup — planned
+### 2. Full daily backup (sidecar)
 
-A dedicated backup sidecar container (daily `pg_dump -Fc` plus a tar of
-`/data/assets`, with rolling retention) is planned. Restoring will be a
-drop-in operation: place `RESTORE.tgz` into a bind-mounted `./restore/`
-directory and restart the app container; `startup.js` will detect the
-file, run `pg_restore` + rsync the assets, and rename the trigger file to
-`restored-<timestamp>.tgz` so it does not run again on the next start.
+A dedicated `backup` service in `docker-compose.yml` (built from
+`scripts/backup/`) runs alongside the app. Every
+`BACKUP_INTERVAL_SECONDS` (default `86400`, i.e. once per day) it writes
+a single tarball to `./backups/` on the host:
 
-Until this lands, rely on standard Postgres and volume backups at the
-infrastructure level, combined with `.fzk` exports for per-vehicle
-portability.
+```
+backups/fahrzeugkunde-20260414T020000Z.backup
+├── manifest.json     # { "format": "fahrzeugkunde-backup", "schemaVersion": 1, ... }
+├── db.dump           # pg_dump --format=custom --compress=6
+└── assets.tar        # raw tar of /data/assets
+```
+
+Files older than `BACKUP_RETENTION_DAYS` (default 14) are pruned at the
+end of every run. The sidecar mounts `/data` **read-only** – it can
+never damage live data.
+
+| Environment variable      | Default       | Purpose                                      |
+|---------------------------|---------------|----------------------------------------------|
+| `BACKUP_INTERVAL_SECONDS` | `86400`       | Seconds between runs (`0` disables the loop) |
+| `BACKUP_RETENTION_DAYS`   | `14`          | Delete `.backup` files older than N days     |
+| `BACKUP_DIR`              | `/backups`    | Where to write archives                      |
+| `ASSETS_DIR`              | `/data/assets`| Source folder for the asset tar              |
+| `RUN_ONCE`                | *(unset)*     | When set, run a single backup and exit       |
+
+### 3. Drop-in restore
+
+To restore from a backup, pick a file from `./backups/` and rename it
+to `restore.backup`:
+
+```bash
+cp backups/fahrzeugkunde-20260414T020000Z.backup backups/restore.backup
+docker compose restart app
+```
+
+`startup.js` checks for `/backups/restore.backup` on every container
+start. When it finds one:
+
+1. Extracts the tarball into a temp folder
+2. Verifies `manifest.json` (format + schema version)
+3. Runs `pg_restore --clean --if-exists --exit-on-error --no-owner --no-privileges`
+   against the live database
+4. Wipes `/data/assets` and extracts `assets.tar` in its place
+5. Renames the trigger to `restore.backup.done-<timestamp>` so the
+   restore does not run again on the next start
+6. If any step fails, the trigger is moved to `restore.backup.failed-<timestamp>`
+   to avoid a restart loop – check the container logs for the cause
+
+The app image ships with `postgresql-client-16` (via PGDG) so
+`pg_restore` is available at runtime.
 
 ## Scripts
 
