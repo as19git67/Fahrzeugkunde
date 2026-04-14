@@ -140,13 +140,21 @@ async function migrate(client) {
 }
 
 // --- Seed: Demo-Fahrzeug HLF 20 (idempotent, aktuell ohne Beladung) ---
+// Wichtig: Der Check muss NICHT nach Name "HLF 20" suchen, sonst wuerde ein
+// vom Benutzer umbenanntes Seed-Fahrzeug beim naechsten Start zu einem
+// zweiten HLF 20 fuehren. Stattdessen pruefen wir, ob ueberhaupt bereits
+// ein Fahrzeug existiert — ist das der Fall, hat der Seed schon gelaufen
+// (oder der Benutzer hat manuell Fahrzeuge angelegt) und wir ruehren nichts an.
 async function seed(client) {
-  const existing = await client.query(
-    "SELECT id FROM vehicles WHERE name = $1",
-    ["HLF 20"]
-  );
+  const existing = await client.query("SELECT id, name FROM vehicles LIMIT 1");
   if (existing.rows.length > 0) {
-    console.log("✅ Seed: HLF 20 bereits vorhanden (id:", existing.rows[0].id, ")");
+    console.log(
+      "✅ Seed: Fahrzeug bereits vorhanden (id:",
+      existing.rows[0].id,
+      "name:",
+      existing.rows[0].name,
+      "), Seed wird uebersprungen"
+    );
     return;
   }
 
@@ -282,7 +290,13 @@ async function main() {
   require("./server.js");
 }
 
-main().catch((err) => {
-  console.error("❌ Startup fehlgeschlagen:", err);
-  process.exit(1);
-});
+// Nur beim direkten Start ausfuehren. Damit koennen Tests einzelne Helfer
+// (z.B. seed()) importieren, ohne dass der komplette Startup-Flow losbricht.
+if (require.main === module) {
+  main().catch((err) => {
+    console.error("❌ Startup fehlgeschlagen:", err);
+    process.exit(1);
+  });
+}
+
+module.exports = { seed, migrate };
