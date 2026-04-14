@@ -75,11 +75,17 @@ export const items = pgTable("items", {
 });
 
 // --- Benutzer ---
+// `role` unterscheidet normale Nutzer von Administratoren. Der erste
+// jemals registrierte User wird beim Anlegen automatisch auf 'admin'
+// hochgestuft (siehe `createOrGetUser`); alle weiteren Logins bekommen
+// den Default 'user'. Nur Admins dürfen die DB zurücksetzen und
+// Fahrzeug-Pakete importieren/exportieren.
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   handle: text("handle").notNull().unique(),
   email: text("email").notNull().unique(),
   verified: boolean("verified").default(false),
+  role: text("role").notNull().default("user"),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
 });
 

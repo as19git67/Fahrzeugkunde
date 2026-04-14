@@ -3,8 +3,8 @@
  *
  * Stellt sicher, dass das Schema migriert ist, setzt dann die spielrelevanten
  * Tabellen zurück und befüllt sie frisch mit dem HLF-20-Seed. Nur eingeloggte
- * Benutzer dürfen die Aktion auslösen — so kann sie bequem aus dem Creator-UI
- * genutzt werden. Benutzer/Sessions bleiben erhalten.
+ * Administratoren (role = 'admin') dürfen die Aktion auslösen — so kann sie
+ * bequem aus dem Creator-UI genutzt werden. Benutzer/Sessions bleiben erhalten.
  */
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
@@ -12,7 +12,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { seedDemoVehicle } from "@/db/seed-data";
 import { SCHEMA_SQL } from "@/db/schema-sql";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isAdmin } from "@/lib/auth";
 
 const DATABASE_URL =
   process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/fahrzeugkunde";
@@ -68,6 +68,12 @@ export async function POST() {
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  }
+  if (!isAdmin(user)) {
+    return NextResponse.json(
+      { error: "Nur Administratoren dürfen die Datenbank zurücksetzen." },
+      { status: 403 }
+    );
   }
 
   const pool = new Pool({ connectionString: DATABASE_URL });

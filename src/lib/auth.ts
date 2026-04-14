@@ -1,9 +1,25 @@
 import { db, users, authCodes, sessions } from "@/db";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 
 export const SESSION_COOKIE = "fwk_session";
+
+export type UserRole = "admin" | "user";
+
+/** Minimal-Typ des Session-Users wie er aus der DB gelesen wird. */
+export type SessionUser = {
+  id: number;
+  handle: string;
+  email: string;
+  verified: boolean | null;
+  role: string;
+  createdAt: string | null;
+};
+
+export function isAdmin(user: { role?: string | null } | null | undefined): boolean {
+  return !!user && user.role === "admin";
+}
 
 export function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -22,7 +38,15 @@ export async function createOrGetUser(handle: string, email: string) {
   const [handleTaken] = await db.select().from(users).where(eq(users.handle, handle));
   if (handleTaken) return { user: null, isNew: false, error: "handle_taken" };
 
-  const [user] = await db.insert(users).values({ handle, email }).returning();
+  // Der erste jemals registrierte Benutzer wird automatisch zum Administrator.
+  // So bekommt die frisch aufgesetzte Installation ohne weiteres Zutun genau
+  // einen Admin, der DB-Reset und Fahrzeug-Import/-Export auslösen darf.
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(users);
+  const role: UserRole = count === 0 ? "admin" : "user";
+
+  const [user] = await db.insert(users).values({ handle, email, role }).returning();
   return { user, isNew: true };
 }
 
@@ -71,7 +95,7 @@ export async function createSession(userId: number): Promise<string> {
   return token;
 }
 
-export async function getSessionUser() {
+export async function getSessionUser(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -80,5 +104,5 @@ export async function getSessionUser() {
   if (!session) return null;
 
   const [user] = await db.select().from(users).where(eq(users.id, session.userId));
-  return user ?? null;
+  return (user as SessionUser | undefined) ?? null;
 }

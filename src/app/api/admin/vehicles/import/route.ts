@@ -11,12 +11,13 @@
  *  - DB-Transaktionen werden atomar ausgeführt; bei Fehler werden alle
  *    geschriebenen Asset-Dateien wieder entfernt (Rollback).
  *
- * Der aufgerufene Benutzer muss eingeloggt sein (wie /api/admin/reset-seed).
+ * Der aufgerufene Benutzer muss Administrator sein (role = 'admin'),
+ * analog zu /api/admin/reset-seed.
  */
 import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isAdmin } from "@/lib/auth";
 import { db } from "@/db";
 import {
   collectReferencedAssetPaths,
@@ -74,6 +75,12 @@ export async function POST(req: NextRequest) {
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  }
+  if (!isAdmin(user)) {
+    return NextResponse.json(
+      { error: "Nur Administratoren dürfen Fahrzeuge importieren." },
+      { status: 403 }
+    );
   }
 
   let formData: FormData;

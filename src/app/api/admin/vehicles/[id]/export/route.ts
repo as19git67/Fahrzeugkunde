@@ -2,7 +2,7 @@
  * GET /api/admin/vehicles/[id]/export
  *
  * Liefert das komplette Fahrzeug (Struktur + referenzierte Bilder) als
- * .fzk-Paket (ZIP) zum Download. Nur eingeloggte Benutzer dürfen exportieren –
+ * .fzk-Paket (ZIP) zum Download. Nur Administratoren dürfen exportieren –
  * analog zu /api/admin/reset-seed.
  *
  * Die Bildpfade werden vor dem Export normalisiert: Aus DB-Pfaden wie
@@ -13,7 +13,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq, sql } from "drizzle-orm";
 import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isAdmin } from "@/lib/auth";
 import {
   buildPackageZip,
   resolveUploadFsPath,
@@ -55,6 +55,12 @@ export async function GET(
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  }
+  if (!isAdmin(user)) {
+    return NextResponse.json(
+      { error: "Nur Administratoren dürfen Fahrzeuge exportieren." },
+      { status: 403 }
+    );
   }
 
   const { id } = await params;

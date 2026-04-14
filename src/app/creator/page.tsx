@@ -15,6 +15,7 @@ interface Vehicle {
 
 export default function CreatorPage() {
   const { user, loading, refetch } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<number | null>(null);
@@ -228,62 +229,66 @@ export default function CreatorPage() {
           />
         ) : (
           <div className="flex flex-col gap-8">
-            {/* DB zurücksetzen + Seed laden */}
-            <div className="bg-zinc-900 border border-yellow-500/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-yellow-300 mb-1">
-                  ⚠️ Datenbank zurücksetzen
-                </h2>
-                <p className="text-sm text-zinc-400">
-                  Löscht alle Fahrzeuge, Beladungen und Highscores und legt ein
-                  leeres HLF 20 als Ausgangspunkt an.
-                </p>
-                {resetMessage && (
-                  <p className="text-sm mt-2 text-zinc-300">{resetMessage}</p>
-                )}
+            {/* DB zurücksetzen + Seed laden — nur für Administratoren sichtbar */}
+            {isAdmin && (
+              <div className="bg-zinc-900 border border-yellow-500/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-yellow-300 mb-1">
+                    ⚠️ Datenbank zurücksetzen
+                  </h2>
+                  <p className="text-sm text-zinc-400">
+                    Löscht alle Fahrzeuge, Beladungen und Highscores und legt ein
+                    leeres HLF 20 als Ausgangspunkt an.
+                  </p>
+                  {resetMessage && (
+                    <p className="text-sm mt-2 text-zinc-300">{resetMessage}</p>
+                  )}
+                </div>
+                <button
+                  onClick={handleResetSeed}
+                  disabled={resetting}
+                  className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-700 disabled:text-zinc-400 text-black font-bold px-5 py-3 rounded-xl transition-colors whitespace-nowrap"
+                >
+                  {resetting ? "Setze zurück..." : "DB zurücksetzen & seeden"}
+                </button>
               </div>
-              <button
-                onClick={handleResetSeed}
-                disabled={resetting}
-                className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-700 disabled:text-zinc-400 text-black font-bold px-5 py-3 rounded-xl transition-colors whitespace-nowrap"
-              >
-                {resetting ? "Setze zurück..." : "DB zurücksetzen & seeden"}
-              </button>
-            </div>
+            )}
 
-            {/* Fahrzeug importieren (.fzk-Paket) */}
-            <div className="bg-zinc-900 border border-blue-500/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-              <div className="flex-1">
-                <h2 className="text-lg font-bold text-blue-300 mb-1">
-                  📦 Fahrzeug-Paket importieren
-                </h2>
-                <p className="text-sm text-zinc-400">
-                  Liest eine zuvor exportierte <code>.fzk</code>-Datei (Struktur
-                  + Bilder) ein und legt daraus ein neues Fahrzeug an. Bestehende
-                  Fahrzeuge bleiben unverändert.
-                </p>
-                {importMessage && (
-                  <p className="text-sm mt-2 text-zinc-300">{importMessage}</p>
-                )}
+            {/* Fahrzeug importieren (.fzk-Paket) — nur für Administratoren sichtbar */}
+            {isAdmin && (
+              <div className="bg-zinc-900 border border-blue-500/30 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold text-blue-300 mb-1">
+                    📦 Fahrzeug-Paket importieren
+                  </h2>
+                  <p className="text-sm text-zinc-400">
+                    Liest eine zuvor exportierte <code>.fzk</code>-Datei (Struktur
+                    + Bilder) ein und legt daraus ein neues Fahrzeug an. Bestehende
+                    Fahrzeuge bleiben unverändert.
+                  </p>
+                  {importMessage && (
+                    <p className="text-sm mt-2 text-zinc-300">{importMessage}</p>
+                  )}
+                </div>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept=".fzk,.zip,application/zip"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleImportFile(f);
+                  }}
+                />
+                <button
+                  onClick={() => importInputRef.current?.click()}
+                  disabled={importing}
+                  className="bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-400 text-white font-bold px-5 py-3 rounded-xl transition-colors whitespace-nowrap"
+                >
+                  {importing ? "Importiere..." : "Datei auswählen"}
+                </button>
               </div>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept=".fzk,.zip,application/zip"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleImportFile(f);
-                }}
-              />
-              <button
-                onClick={() => importInputRef.current?.click()}
-                disabled={importing}
-                className="bg-blue-500 hover:bg-blue-400 disabled:bg-zinc-700 disabled:text-zinc-400 text-white font-bold px-5 py-3 rounded-xl transition-colors whitespace-nowrap"
-              >
-                {importing ? "Importiere..." : "Datei auswählen"}
-              </button>
-            </div>
+            )}
 
             {/* Neues Fahrzeug */}
             <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
@@ -371,14 +376,16 @@ export default function CreatorPage() {
                           Bearbeiten →
                         </motion.button>
                         <div className="flex gap-1">
-                          <button
-                            onClick={() => handleExportVehicle(v)}
-                            disabled={exportingId === v.id}
-                            title="Als .fzk-Paket exportieren"
-                            className="text-zinc-500 hover:text-blue-300 disabled:text-zinc-700 p-1 rounded transition-colors"
-                          >
-                            {exportingId === v.id ? "⏳" : "📦"}
-                          </button>
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleExportVehicle(v)}
+                              disabled={exportingId === v.id}
+                              title="Als .fzk-Paket exportieren"
+                              className="text-zinc-500 hover:text-blue-300 disabled:text-zinc-700 p-1 rounded transition-colors"
+                            >
+                              {exportingId === v.id ? "⏳" : "📦"}
+                            </button>
+                          )}
                           <button
                             onClick={() => {
                               setRenamingId(v.id);
