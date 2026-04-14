@@ -87,6 +87,25 @@ jobs:
           build-args: |
             BUILD_NUMBER=${{ github.run_number }}-${{ github.sha }}
 
+      - name: Extract metadata (tags, labels) for backup sidecar image
+        id: meta-backup
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backup
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=semver,pattern={{version}}
+            type=raw,value=test,enable=${{ github.event_name == 'pull_request' }}
+
+      - name: Build and push backup sidecar Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./scripts/backup
+          push: true
+          platforms: linux/amd64  # linux/arm64
+          tags: ${{ steps.meta-backup.outputs.tags }}
+          labels: ${{ steps.meta-backup.outputs.labels }}
+
       - name: Deploy to TrueNAS (test)
         if: github.event_name == 'pull_request'
         run: |

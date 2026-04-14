@@ -51,7 +51,7 @@ services:
   # (Details siehe README – Abschnitt "Backup & Restore")
   # -------------------------------------------------------------------------
   backup:
-    build: ./scripts/backup
+    image: ghcr.io/as19git67/fahrzeugkunde-backup:test
     restart: unless-stopped
     environment:
       DATABASE_URL: postgres://fahrzeugkunde:fahrzeugkunde@db:5432/fahrzeugkunde
