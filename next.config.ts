@@ -23,6 +23,13 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_BUILD_SHA: BUILD_SHA,
     NEXT_PUBLIC_BUILD_TIME: BUILD_TIME,
   },
+  // src/db/schema-sql.ts liest src/db/schema.sql zur Laufzeit via fs.readFileSync.
+  // Da die Datei nur dynamisch referenziert wird, muss sie explizit ins Standalone-
+  // Trace aufgenommen werden, damit sie im Docker-Runner unter cwd/src/db/schema.sql
+  // verfuegbar ist.
+  outputFileTracingIncludes: {
+    "/*": ["src/db/schema.sql"],
+  },
   images: {
     // Lokale Uploads erlauben. /uploads/** kommt aus dem public-Ordner
     // (Seed-Bilder), /api/uploads/** wird vom Route Handler ausgeliefert.

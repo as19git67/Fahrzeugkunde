@@ -128,98 +128,14 @@ function setupUploads() {
 }
 
 // --- Migration: Tabellen anlegen (IF NOT EXISTS) ---
+// Liest die DDL aus src/db/schema.sql — gleiche Datei, die auch die App
+// (src/db/schema-sql.ts) verwendet. So kann das Schema nicht mehr zwischen
+// Container-Start-Migration und App-Migration auseinanderlaufen.
+const SCHEMA_SQL_PATH = path.join(__dirname, "src", "db", "schema.sql");
+
 async function migrate(client) {
-  await client.query(`
-    CREATE TABLE IF NOT EXISTS vehicles (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT,
-      created_at TIMESTAMP DEFAULT now()
-    );
-
-    CREATE TABLE IF NOT EXISTS vehicle_views (
-      id SERIAL PRIMARY KEY,
-      vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
-      side TEXT NOT NULL CHECK(side IN ('left','right','back','top','front')),
-      label TEXT NOT NULL,
-      image_path TEXT,
-      sort_order INTEGER DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS compartments (
-      id SERIAL PRIMARY KEY,
-      view_id INTEGER NOT NULL REFERENCES vehicle_views(id) ON DELETE CASCADE,
-      label TEXT NOT NULL,
-      image_path TEXT,
-      hotspot_x DOUBLE PRECISION,
-      hotspot_y DOUBLE PRECISION,
-      hotspot_w DOUBLE PRECISION,
-      hotspot_h DOUBLE PRECISION,
-      sort_order INTEGER DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS positions (
-      id SERIAL PRIMARY KEY,
-      compartment_id INTEGER NOT NULL REFERENCES compartments(id) ON DELETE CASCADE,
-      label TEXT NOT NULL,
-      hotspot_x DOUBLE PRECISION,
-      hotspot_y DOUBLE PRECISION,
-      hotspot_w DOUBLE PRECISION,
-      hotspot_h DOUBLE PRECISION,
-      sort_order INTEGER DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS items (
-      id SERIAL PRIMARY KEY,
-      vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
-      name TEXT NOT NULL,
-      description TEXT,
-      image_path TEXT,
-      silhouette_path TEXT,
-      category TEXT,
-      difficulty INTEGER DEFAULT 1,
-      position_id INTEGER REFERENCES positions(id),
-      location_label TEXT,
-      created_at TIMESTAMP DEFAULT now()
-    );
-
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      handle TEXT NOT NULL UNIQUE,
-      email TEXT NOT NULL UNIQUE,
-      verified BOOLEAN DEFAULT false,
-      created_at TIMESTAMP DEFAULT now()
-    );
-
-    CREATE TABLE IF NOT EXISTS auth_codes (
-      id SERIAL PRIMARY KEY,
-      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      code TEXT NOT NULL,
-      expires_at TIMESTAMP NOT NULL,
-      used BOOLEAN DEFAULT false,
-      created_at TIMESTAMP DEFAULT now()
-    );
-
-    CREATE TABLE IF NOT EXISTS sessions (
-      id SERIAL PRIMARY KEY,
-      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-      token TEXT NOT NULL UNIQUE,
-      created_at TIMESTAMP DEFAULT now()
-    );
-
-    CREATE TABLE IF NOT EXISTS highscores (
-      id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id),
-      handle TEXT NOT NULL,
-      score INTEGER NOT NULL,
-      mode TEXT NOT NULL CHECK(mode IN ('time_attack','speed_run')),
-      correct_answers INTEGER NOT NULL,
-      total_answers INTEGER NOT NULL,
-      duration_seconds INTEGER NOT NULL,
-      vehicle_id INTEGER REFERENCES vehicles(id),
-      created_at TIMESTAMP DEFAULT now()
-    );
-  `);
+  const sql = fs.readFileSync(SCHEMA_SQL_PATH, "utf8");
+  await client.query(sql);
   console.log("✅ Migration abgeschlossen");
 }
 

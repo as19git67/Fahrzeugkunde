@@ -57,6 +57,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Startup-Skript: Migration + Seed + Server
 COPY --chown=nextjs:nodejs startup.js ./
 
+# DB-Schema als einzige Quelle der Wahrheit fuer Startup- und App-Migration.
+# Wird zur Laufzeit von startup.js und von src/db/schema-sql.ts eingelesen.
+COPY --chown=nextjs:nodejs src/db/schema.sql ./src/db/schema.sql
+
 # /data wird als Volume gemountet (gemeinsam mit PostgreSQL)
 # PostgreSQL nutzt /data/pgdata, die App nutzt /data/assets
 # /backups wird per Bind-Mount vom Host eingehängt (Backup-Sidecar + Restore)
