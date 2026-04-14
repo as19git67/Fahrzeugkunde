@@ -37,6 +37,10 @@ yarn-error.log*
 # Datenbank (lokal)
 /data/
 
+# Backups des Sidecar-Containers – Inhalt bleibt lokal, .gitkeep nicht
+/backups/*
+!/backups/.gitkeep
+
 # vercel
 .vercel
 
