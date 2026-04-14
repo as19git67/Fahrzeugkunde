@@ -10,9 +10,19 @@ const DATABASE_URL = process.env.DATABASE_URL || "postgres://postgres:postgres@l
 const client = new pg.Client({ connectionString: DATABASE_URL });
 await client.connect();
 
-const existing = await client.query("SELECT id FROM vehicles WHERE name = 'HLF 20'");
+// Idempotenz-Check: nicht nach Name filtern, sonst entsteht ein Duplikat,
+// wenn das Seed-Fahrzeug inzwischen umbenannt wurde. Sobald ueberhaupt ein
+// Fahrzeug existiert, ist der Seed bereits gelaufen (oder der Benutzer hat
+// manuell Fahrzeuge angelegt) und wir lassen die DB unveraendert.
+const existing = await client.query("SELECT id, name FROM vehicles LIMIT 1");
 if (existing.rows.length > 0) {
-  console.log("Fahrzeug HLF 20 bereits vorhanden (id:", existing.rows[0].id, ")");
+  console.log(
+    "Fahrzeug bereits vorhanden (id:",
+    existing.rows[0].id,
+    "name:",
+    existing.rows[0].name,
+    "), Seed wird uebersprungen"
+  );
   await client.end();
   process.exit(0);
 }
