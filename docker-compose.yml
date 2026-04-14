@@ -2,6 +2,7 @@ name: fahrzeugkunde-test
 
 services:
   db:
+    container_name: fahrzeugkunde-db-test
     image: postgres:18-alpine
     restart: unless-stopped
     environment:
