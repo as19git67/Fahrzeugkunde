@@ -216,6 +216,14 @@ function tryRestore() {
     if (!fs.existsSync(dump)) {
       throw new Error("db.dump fehlt im Backup-Paket");
     }
+    // Ein gültiger pg_dump custom-format Dump ist nie 0 Bytes (mindestens
+    // der Header wird geschrieben). Eine leere Datei deutet auf ein defektes
+    // Backup hin (z.B. pg_dump/Server-Versionsmismatch im Sidecar) – lieber
+    // hart abbrechen, als die laufende DB mit --clean zu entleeren und
+    // anschließend an einem Nullbyte-Archiv zu scheitern.
+    if (fs.statSync(dump).size === 0) {
+      throw new Error("db.dump ist leer – Backup ist defekt, Restore abgebrochen");
+    }
     execFileSync(
       "pg_restore",
       [
