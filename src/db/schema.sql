@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS items (
   silhouette_path TEXT,
   category TEXT,
   difficulty INTEGER DEFAULT 1,
-  position_id INTEGER REFERENCES positions(id),
-  box_id INTEGER REFERENCES boxes(id),
+  position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
+  box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
   location_label TEXT,
   created_at TIMESTAMP DEFAULT now()
 );
@@ -76,6 +76,37 @@ CREATE TABLE IF NOT EXISTS items (
 -- Nachtraegliche Migration fuer bestehende Datenbanken
 ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
 ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
+
+-- Nachtraegliche Migration fuer bestehende Datenbanken: FK von items.position_id
+-- und items.box_id auf ON DELETE CASCADE umstellen, damit das Loeschen eines
+-- Fachs, einer Position oder einer Kiste die darin verorteten Gegenstaende
+-- mitloescht (statt an einem FK-Constraint zu scheitern). Die Standard-
+-- Constraint-Namen von Postgres werden vorausgesetzt; ein DO-Block sorgt fuer
+-- Idempotenz: umgestellt wird nur, wenn die delete_rule aktuell nicht CASCADE ist.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.referential_constraints
+    WHERE constraint_name = 'items_position_id_fkey'
+      AND delete_rule <> 'CASCADE'
+  ) THEN
+    ALTER TABLE items DROP CONSTRAINT items_position_id_fkey;
+    ALTER TABLE items ADD CONSTRAINT items_position_id_fkey
+      FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE;
+  END IF;
+
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.referential_constraints
+    WHERE constraint_name = 'items_box_id_fkey'
+      AND delete_rule <> 'CASCADE'
+  ) THEN
+    ALTER TABLE items DROP CONSTRAINT items_box_id_fkey;
+    ALTER TABLE items ADD CONSTRAINT items_box_id_fkey
+      FOREIGN KEY (box_id) REFERENCES boxes(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,

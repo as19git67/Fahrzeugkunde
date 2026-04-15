@@ -98,14 +98,35 @@ export async function setup() {
         silhouette_path TEXT,
         category TEXT,
         difficulty INTEGER DEFAULT 1,
-        position_id INTEGER REFERENCES positions(id),
-        box_id INTEGER REFERENCES boxes(id),
+        position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
+        box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
         location_label TEXT,
         created_at TIMESTAMP DEFAULT now()
       );
       -- Nachträgliche Migration für bestehende Test-DBs
       ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
       ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
+      -- FK items.position_id / items.box_id auf ON DELETE CASCADE umstellen,
+      -- falls die Test-DB noch die alte NO-ACTION-Variante hat.
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.referential_constraints
+          WHERE constraint_name = 'items_position_id_fkey' AND delete_rule <> 'CASCADE'
+        ) THEN
+          ALTER TABLE items DROP CONSTRAINT items_position_id_fkey;
+          ALTER TABLE items ADD CONSTRAINT items_position_id_fkey
+            FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE;
+        END IF;
+        IF EXISTS (
+          SELECT 1 FROM information_schema.referential_constraints
+          WHERE constraint_name = 'items_box_id_fkey' AND delete_rule <> 'CASCADE'
+        ) THEN
+          ALTER TABLE items DROP CONSTRAINT items_box_id_fkey;
+          ALTER TABLE items ADD CONSTRAINT items_box_id_fkey
+            FOREIGN KEY (box_id) REFERENCES boxes(id) ON DELETE CASCADE;
+        END IF;
+      END $$;
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         handle TEXT NOT NULL UNIQUE,
