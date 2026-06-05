@@ -957,6 +957,7 @@ function BoxList({
 function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => void }) {
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<ItemData | null>(null);
+  const [filter, setFilter] = useState("");
 
   // Flache Liste aller Ziele (Position oder Box) mit Pfad
   const allTargets = vehicle.views.flatMap((v) =>
@@ -983,67 +984,143 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
     )
   );
 
+  // Liste nach Suchbegriff filtern (Name, Artikel, Kategorie, Ort, Beschreibung)
+  const query = filter.trim().toLowerCase();
+  const filteredItems = query
+    ? vehicle.items.filter((item) =>
+        [item.name, item.article, item.category, item.locationLabel, item.description]
+          .some((field) => field?.toLowerCase().includes(query))
+      )
+    : vehicle.items;
+
+  const closeForm = () => { setShowForm(false); setEditingItem(null); };
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Item-Liste */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {vehicle.items.map((item) => (
-          <div
-            key={item.id}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex gap-3 cursor-pointer hover:border-zinc-600 transition-colors"
-            onClick={() => { setEditingItem(item); setShowForm(true); }}
-          >
-            {item.imagePath ? (
-              <HoverPreviewImage src={item.imagePath} alt={item.name}>
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
-                  <Image src={item.imagePath} alt={item.name} fill className="object-contain p-1" sizes="64px" />
-                </div>
-              </HoverPreviewImage>
-            ) : (
-              <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
-            )}
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-white truncate">
-                {item.article && <span className="text-zinc-400 mr-1">{item.article}</span>}
-                {item.name}
-              </div>
-              {item.locationLabel && (
-                <div className="text-xs text-zinc-500 mt-0.5">{item.locationLabel}</div>
-              )}
-              {item.category && (
-                <div className="text-xs text-red-400 mt-0.5">{item.category}</div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Neues Item / Editieren */}
-      {showForm ? (
-        <ItemForm
-          vehicleId={vehicle.id}
-          item={editingItem}
-          targets={allTargets}
-          onSave={() => { setShowForm(false); setEditingItem(null); onReload(); }}
-          onCancel={() => { setShowForm(false); setEditingItem(null); }}
-          onDelete={async () => {
-            if (editingItem) {
-              await fetch(`/api/items/${editingItem.id}`, { method: "DELETE" });
-              setShowForm(false);
-              setEditingItem(null);
-              await onReload();
-            }
-          }}
-        />
-      ) : (
+      {/* Filter + Hinzufügen */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <div className="relative flex-1">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm pointer-events-none">🔍</span>
+          <input
+            type="text"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            placeholder="Beladung durchsuchen..."
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl pl-9 pr-9 py-2 text-white text-sm outline-none focus:border-red-400"
+          />
+          {filter && (
+            <button
+              type="button"
+              onClick={() => setFilter("")}
+              title="Filter zurücksetzen"
+              aria-label="Filter zurücksetzen"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white p-1 rounded transition-colors"
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <button
           onClick={() => { setEditingItem(null); setShowForm(true); }}
-          className="border-2 border-dashed border-zinc-700 hover:border-red-500 rounded-2xl p-4 text-zinc-500 hover:text-white transition-all font-semibold"
+          className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-xl transition-colors text-sm whitespace-nowrap"
         >
-          + Ausrüstungsgegenstand hinzufügen
+          + Gegenstand
         </button>
+      </div>
+
+      {/* Item-Liste */}
+      {filteredItems.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex gap-3 cursor-pointer hover:border-zinc-600 transition-colors"
+              onClick={() => { setEditingItem(item); setShowForm(true); }}
+            >
+              {item.imagePath ? (
+                <HoverPreviewImage src={item.imagePath} alt={item.name}>
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800">
+                    <Image src={item.imagePath} alt={item.name} fill className="object-contain p-1" sizes="64px" />
+                  </div>
+                </HoverPreviewImage>
+              ) : (
+                <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-white truncate">
+                  {item.article && <span className="text-zinc-400 mr-1">{item.article}</span>}
+                  {item.name}
+                </div>
+                {item.locationLabel && (
+                  <div className="text-xs text-zinc-500 mt-0.5">{item.locationLabel}</div>
+                )}
+                {item.category && (
+                  <div className="text-xs text-red-400 mt-0.5">{item.category}</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-zinc-500 text-sm text-center py-8">
+          {query
+            ? `Keine Gegenstände gefunden für „${filter.trim()}".`
+            : "Noch keine Gegenstände. Füge den ersten hinzu."}
+        </div>
+      )}
+
+      {/* Formular als Popup-Dialog */}
+      {showForm && (
+        <ItemFormDialog onClose={closeForm}>
+          <ItemForm
+            vehicleId={vehicle.id}
+            item={editingItem}
+            targets={allTargets}
+            onSave={() => { closeForm(); onReload(); }}
+            onCancel={closeForm}
+            onDelete={async () => {
+              if (editingItem) {
+                await fetch(`/api/items/${editingItem.id}`, { method: "DELETE" });
+                closeForm();
+                await onReload();
+              }
+            }}
+          />
+        </ItemFormDialog>
       )}
     </div>
+  );
+}
+
+// Modaler Dialog-Container: rendert seinen Inhalt zentriert über einem
+// abgedunkelten Backdrop. Schließen per Backdrop-Klick oder Escape-Taste.
+function ItemFormDialog({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[90] flex items-start sm:items-center justify-center p-4 bg-black/70 overflow-y-auto"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>,
+    document.body
   );
 }
 
