@@ -11,7 +11,7 @@ export function ScorePopup({ delta }: Props) {
     <AnimatePresence>
       {delta !== null && (
         <motion.div
-          key={delta + Math.random()}
+          key={delta}
           initial={{ opacity: 1, y: 0, scale: 1 }}
           animate={{ opacity: 0, y: -60, scale: 1.3 }}
           exit={{ opacity: 0 }}

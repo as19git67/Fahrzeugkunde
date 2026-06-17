@@ -44,6 +44,7 @@ const INITIAL_STATE: GameState = {
 
 export function useGame() {
   const [state, setState] = useState<GameState>(INITIAL_STATE);
+  const [now, setNow] = useState(() => Date.now());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopTimer = useCallback(() => {
@@ -92,7 +93,6 @@ export function useGame() {
         if (prev.phase !== "playing") return prev;
 
         const elapsed = Date.now() - (prev.questionStartTime ?? Date.now());
-        const currentItem = prev.questions[prev.currentIndex];
         const result = calculateScore({
           correct,
           elapsedMs: elapsed,
@@ -147,8 +147,15 @@ export function useGame() {
     setState(INITIAL_STATE);
   }, [stopTimer]);
 
+  useEffect(() => {
+    if (state.phase !== "playing" || !state.startTime) return;
+
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [state.phase, state.startTime]);
+
   const currentQuestion = state.questions[state.currentIndex] ?? null;
-  const elapsedSeconds = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
+  const elapsedSeconds = state.startTime ? Math.floor((now - state.startTime) / 1000) : 0;
 
   return { state, currentQuestion, elapsedSeconds, startGame, answerQuestion, nextQuestion, resetGame };
 }

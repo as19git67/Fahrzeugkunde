@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { createZip, readZip } from "@/lib/zip";
-import { deflateRawSync } from "node:zlib";
+import { crc32, deflateRawSync } from "node:zlib";
 
 describe("zip: createZip + readZip round-trip", () => {
   it("liest einen einzigen Eintrag korrekt zurück", () => {
@@ -84,7 +84,6 @@ describe("zip: Kompatibilität mit DEFLATE beim Lesen", () => {
     const nameBuf = Buffer.from(name, "utf8");
     const compressed = deflateRawSync(raw);
     // CRC32 der ORIGINAL-Daten – via Node zlib.crc32
-    const { crc32 } = require("node:zlib");
     const crc = crc32(raw);
 
     const lfh = Buffer.alloc(30);

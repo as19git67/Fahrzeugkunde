@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, highscores } from "@/db";
-import { eq, desc } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -9,7 +9,11 @@ export async function GET(req: NextRequest) {
   const vehicleId = searchParams.get("vehicleId");
   const limit = parseInt(searchParams.get("limit") || "10");
 
-  let query = db
+  const filters = [];
+  if (mode) filters.push(eq(highscores.mode, mode));
+  if (vehicleId) filters.push(eq(highscores.vehicleId, parseInt(vehicleId)));
+
+  const results = await db
     .select({
       id: highscores.id,
       handle: highscores.handle,
@@ -21,17 +25,11 @@ export async function GET(req: NextRequest) {
       createdAt: highscores.createdAt,
     })
     .from(highscores)
+    .where(filters.length ? and(...filters) : undefined)
     .orderBy(desc(highscores.score))
     .limit(limit);
 
-  const results = await query;
-
-  const filtered = results.filter((r) => {
-    if (mode && r.mode !== mode) return false;
-    return true;
-  });
-
-  return NextResponse.json(filtered.slice(0, limit));
+  return NextResponse.json(results);
 }
 
 export async function POST(req: NextRequest) {
