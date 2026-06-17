@@ -27,7 +27,6 @@ export default function HighscorePage() {
 
   useEffect(() => {
     const url = mode === "all" ? "/api/highscores?limit=20" : `/api/highscores?limit=20&mode=${mode}`;
-    setLoading(true);
     fetch(url)
       .then((r) => r.json())
       .then(setEntries)
@@ -52,7 +51,10 @@ export default function HighscorePage() {
           {["all", "time_attack", "speed_run"].map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => {
+                setLoading(true);
+                setMode(m);
+              }}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
                 mode === m
                   ? "bg-red-600 text-white"
