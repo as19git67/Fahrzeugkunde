@@ -10,6 +10,7 @@
  * "assets/items/xyz.jpg", sodass der Import auf einer anderen Installation
  * die Bilder korrekt wieder einspielen kann – unabhängig von dortigen IDs.
  */
+import { statSync } from "node:fs";
 import { NextRequest, NextResponse } from "next/server";
 import { eq, sql } from "drizzle-orm";
 import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
@@ -32,6 +33,14 @@ import {
  * zurück (oder den Originalpfad, falls er nicht lokal auflösbar ist – dann
  * bleibt er im Paket als externer Verweis erhalten).
  */
+function isReadableUploadFile(fsPath: string): boolean {
+  try {
+    return statSync(fsPath).isFile();
+  } catch {
+    return false;
+  }
+}
+
 function rewriteImagePath(
   dbPath: string | null,
   assetFiles: Map<string, string>
@@ -39,6 +48,12 @@ function rewriteImagePath(
   if (!dbPath) return null;
   const fsPath = resolveUploadFsPath(dbPath);
   if (!fsPath) return dbPath; // Externer / nicht auflösbarer Pfad – unverändert lassen
+  // Upload-Referenzen können in der DB verbleiben, obwohl die Datei (z. B. nach
+  // einem Deployment oder manueller Bereinigung) nicht mehr auf der Platte liegt.
+  // In diesem Fall darf der Export nicht mit einem Serverfehler abbrechen; der
+  // Pfad bleibt als externe Referenz im JSON erhalten und wird nicht ins ZIP
+  // aufgenommen.
+  if (!isReadableUploadFile(fsPath)) return dbPath;
   const pkgPath = uploadPathToPackagePath(dbPath);
   if (!pkgPath) return dbPath;
   // Mehrfach referenzierte Bilder nur einmal im Paket ablegen
