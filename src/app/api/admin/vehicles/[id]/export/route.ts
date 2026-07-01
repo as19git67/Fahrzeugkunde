@@ -12,6 +12,7 @@
  */
 import { statSync } from "node:fs";
 import { NextRequest, NextResponse } from "next/server";
+import { statSync } from "node:fs";
 import { eq, sql } from "drizzle-orm";
 import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
 import { getSessionUser, isAdmin } from "@/lib/auth";
@@ -56,6 +57,13 @@ function rewriteImagePath(
   if (!isReadableUploadFile(fsPath)) return dbPath;
   const pkgPath = uploadPathToPackagePath(dbPath);
   if (!pkgPath) return dbPath;
+  // Fehlende oder nicht reguläre Dateien dürfen den Export nicht mit einem
+  // Lesefehler abbrechen. Die Referenz bleibt dann als externer Pfad erhalten.
+  try {
+    if (!statSync(fsPath).isFile()) return dbPath;
+  } catch {
+    return dbPath;
+  }
   // Mehrfach referenzierte Bilder nur einmal im Paket ablegen
   if (!assetFiles.has(pkgPath)) {
     assetFiles.set(pkgPath, fsPath);
