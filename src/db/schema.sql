@@ -79,7 +79,28 @@ CREATE TABLE IF NOT EXISTS items (
 -- Nachtraegliche Migration fuer bestehende Datenbanken
 ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
 ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
-ALTER TABLE items ADD COLUMN IF NOT EXISTS location_image_path TEXT;
+
+-- Nachtraegliche Migration: `location_image_path` ergaenzen und einmalig aus
+-- `image_path` vorbelegen. Vor der Trennung gab es nur ein Bild pro
+-- Gegenstand; damit nach dem Update kein Gegenstand ohne Ortsbild dasteht,
+-- wird das vorhandene Bild in beide Felder uebernommen und kann anschliessend
+-- einzeln ausgetauscht werden.
+--
+-- Diese Datei laeuft bei jedem App-Start. Die Uebernahme haengt deshalb daran,
+-- dass die Spalte in genau diesem Durchlauf neu entsteht — ein pauschales
+-- "fuelle auf, wo NULL" wuerde ein spaeter bewusst entferntes Ortsbild beim
+-- naechsten Neustart wiederherstellen.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'items' AND column_name = 'location_image_path'
+  ) THEN
+    ALTER TABLE items ADD COLUMN location_image_path TEXT;
+    UPDATE items SET location_image_path = image_path WHERE image_path IS NOT NULL;
+  END IF;
+END $$;
 
 -- Nachtraegliche Migration: ungenutzte Item-Felder entfernen. `category` und
 -- `description` wurden ausschliesslich im Creator-Formular gepflegt und nie

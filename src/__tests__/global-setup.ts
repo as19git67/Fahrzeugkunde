@@ -104,6 +104,18 @@ export async function setup() {
       -- Nachträgliche Migration für bestehende Test-DBs
       ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
       ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
+      -- Spiegelt die Migration aus schema.sql: Spalte ergänzen und einmalig
+      -- aus image_path vorbelegen (siehe dort für die Begründung).
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'items' AND column_name = 'location_image_path'
+        ) THEN
+          ALTER TABLE items ADD COLUMN location_image_path TEXT;
+          UPDATE items SET location_image_path = image_path WHERE image_path IS NOT NULL;
+        END IF;
+      END $$;
       -- FK items.position_id / items.box_id auf ON DELETE CASCADE umstellen,
       -- falls die Test-DB noch die alte NO-ACTION-Variante hat.
       DO $$
