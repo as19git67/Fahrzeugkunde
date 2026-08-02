@@ -133,7 +133,6 @@ async function buildPackageFromDb(vehicleId: number) {
     locationImagePath: rewrite(row.locationImagePath),
     silhouettePath: rewrite(row.silhouettePath),
     difficulty: row.difficulty,
-    locationLabel: row.locationLabel,
   });
 
   const pkgBox = (row: (typeof bxs)[number]): PackageBox => ({

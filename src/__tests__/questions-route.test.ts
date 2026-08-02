@@ -84,11 +84,15 @@ describe("questions route – Fragengenerierung", () => {
       } else if (q.type === "where_is") {
         // Ortsoptionen mit genau einer korrekten, deren Label dem Item-Ort entspricht
         expect(q.locationOptions).toBeDefined();
-        expect(q.locationOptions!.length).toBeGreaterThanOrEqual(1);
+        expect(q.locationOptions!.length).toBeGreaterThanOrEqual(2);
         expect(q.locationOptions!.length).toBeLessThanOrEqual(4);
         const correct = q.locationOptions!.filter((o) => o.correct);
         expect(correct.length).toBe(1);
         expect(correct[0].label).toBe(q.item.locationLabel);
+        // Keine doppelten Ortstexte: mehrere Items können an derselben
+        // Stelle liegen, als Antwortoption darf ein Ort nur einmal auftauchen.
+        const labels = q.locationOptions!.map((o) => o.label);
+        expect(new Set(labels).size).toBe(labels.length);
       } else {
         // where_in_vehicle: Navigationsziel mit intakter Hierarchie
         expect(q.navigationTarget).toBeDefined();
@@ -96,6 +100,54 @@ describe("questions route – Fragengenerierung", () => {
         expect(q.navigationTarget!.compartmentId).toBeGreaterThan(0);
         expect(q.navigationTarget!.positionId).toBeGreaterThan(0);
       }
+    }
+  });
+
+  it("leitet den Ortstext aus der Fahrzeugstruktur ab", async () => {
+    // `location_label` gibt es nicht mehr — der Text muss aus Fach, Position
+    // und ggf. Kiste entstehen und zur Verortung des Items passen.
+    const pool = await getTestPool();
+    const res = await fetchQuestions({ vehicleId, count: 50 });
+    const questions = (await res.json()) as Question[];
+
+    const located = questions.filter((q) => q.item.positionId || q.item.boxId);
+    expect(located.length).toBeGreaterThan(0);
+
+    for (const q of located) {
+      const { rows } = await pool.query(
+        `SELECT c.label AS compartment, p.label AS position, b.label AS box
+           FROM positions p
+           JOIN compartments c ON c.id = p.compartment_id
+           LEFT JOIN boxes b ON b.id = $2
+          WHERE p.id = COALESCE((SELECT position_id FROM boxes WHERE id = $2), $1)`,
+        [q.item.positionId, q.item.boxId]
+      );
+      expect(rows.length).toBe(1);
+      const parts = [rows[0].compartment, rows[0].position];
+      if (rows[0].box) parts.push(rows[0].box);
+      expect(q.item.locationLabel).toBe(parts.join(", "));
+    }
+  });
+
+  it("bietet unverortete Gegenstände nicht als Ortsfrage an", async () => {
+    const pool = await getTestPool();
+    const { rows } = await pool.query(
+      "INSERT INTO items (vehicle_id, name, image_path) VALUES ($1,$2,$3) RETURNING id",
+      [vehicleId, "Loser Gegenstand", "/uploads/items/lose.jpg"]
+    );
+    const looseId = rows[0].id as number;
+    try {
+      const res = await fetchQuestions({ vehicleId, count: 50 });
+      const questions = (await res.json()) as Question[];
+      for (const q of questions) {
+        if (q.item.id !== looseId) continue;
+        // Ohne Verortung gibt es keinen Ortstext — das Item darf höchstens
+        // als "Was ist das?" drankommen.
+        expect(q.item.locationLabel).toBeNull();
+        expect(q.type).toBe("what_is");
+      }
+    } finally {
+      await pool.query("DELETE FROM items WHERE id = $1", [looseId]);
     }
   });
 

@@ -21,7 +21,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       difficulty: body.difficulty,
       positionId: body.positionId,
       boxId: body.boxId,
-      locationLabel: body.locationLabel,
     })
     .where(eq(items.id, parseInt(id)))
     .returning();

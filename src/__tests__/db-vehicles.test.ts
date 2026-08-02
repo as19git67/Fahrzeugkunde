@@ -107,7 +107,6 @@ describe("full vehicle hierarchy", () => {
         name: "Seilwinde",
         difficulty: 2,
         positionId: pos.id,
-        locationLabel: "G1, oben links",
       })
       .returning();
 
@@ -171,7 +170,6 @@ describe("boxes (optional Kiste-Ebene)", () => {
         name: "Seilwinde",
         positionId: pos.id,
         boxId: box.id,
-        locationLabel: "G1, unten rechts, orange Kiste",
       })
       .returning();
 

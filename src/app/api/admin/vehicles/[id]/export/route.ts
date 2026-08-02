@@ -145,7 +145,6 @@ export async function GET(
     locationImagePath: rewriteImagePath(row.locationImagePath, assetFiles),
     silhouettePath: rewriteImagePath(row.silhouettePath, assetFiles),
     difficulty: row.difficulty,
-    locationLabel: row.locationLabel,
   });
 
   const pkgBox = (row: typeof bxs[number]): PackageBox => ({

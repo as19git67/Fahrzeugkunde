@@ -98,11 +98,10 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
   for (const it of HLF20_ITEMS) {
     const pKey = posKey(it.compartment, it.position);
     const bKey = it.box ? boxKey(it.compartment, it.position, it.box) : null;
-    const location = buildLocationLabel(it);
     await client.query(
       `INSERT INTO items (vehicle_id, name, article, difficulty,
-         position_id, box_id, location_label, image_path)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+         position_id, box_id, image_path)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
       [
         vehicleId,
         it.name,
@@ -110,7 +109,6 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
         it.difficulty,
         positionIds[pKey],
         bKey ? boxIds[bKey] : null,
-        location,
         it.imagePath,
       ]
     );
@@ -126,8 +124,4 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
   };
 }
 
-function buildLocationLabel(it: ItemSeed): string {
-  const parts = [it.compartment, it.position];
-  if (it.box) parts.push(it.box);
-  return parts.join(", ");
-}
+

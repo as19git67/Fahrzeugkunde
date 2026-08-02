@@ -99,7 +99,6 @@ export async function setup() {
         difficulty INTEGER DEFAULT 1,
         position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
         box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
-        location_label TEXT,
         created_at TIMESTAMP DEFAULT now()
       );
       -- Nachträgliche Migration für bestehende Test-DBs

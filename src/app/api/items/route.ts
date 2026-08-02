@@ -24,7 +24,6 @@ export async function POST(req: NextRequest) {
       difficulty: body.difficulty ?? 1,
       positionId: body.positionId,
       boxId: body.boxId,
-      locationLabel: body.locationLabel,
     })
     .returning();
   return NextResponse.json(item, { status: 201 });

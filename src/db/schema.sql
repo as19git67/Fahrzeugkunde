@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS items (
   difficulty INTEGER DEFAULT 1,
   position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
   box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
-  location_label TEXT,
   created_at TIMESTAMP DEFAULT now()
 );
 
@@ -87,6 +86,13 @@ ALTER TABLE items ADD COLUMN IF NOT EXISTS location_image_path TEXT;
 -- im Spiel ausgewertet.
 ALTER TABLE items DROP COLUMN IF EXISTS category;
 ALTER TABLE items DROP COLUMN IF EXISTS description;
+
+-- Nachtraegliche Migration: `location_label` entfaellt. Der Aufbewahrungsort
+-- als Text wird zur Laufzeit aus der Fahrzeugstruktur abgeleitet (Fach,
+-- Position, ggf. Kiste) — siehe `src/lib/location-label.ts`. Als eigenes Feld
+-- war er eine Zweitschrift derselben Information und konnte der tatsaechlichen
+-- Verortung widersprechen.
+ALTER TABLE items DROP COLUMN IF EXISTS location_label;
 
 -- Nachtraegliche Migration fuer bestehende Datenbanken: FK von items.position_id
 -- und items.box_id auf ON DELETE CASCADE umstellen, damit das Loeschen eines

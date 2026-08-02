@@ -58,7 +58,6 @@ export interface PackageItem {
   locationImagePath?: string | null;
   silhouettePath: string | null;
   difficulty: number | null;
-  locationLabel: string | null;
 }
 
 export interface PackageBox extends Hotspot {

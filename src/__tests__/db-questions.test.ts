@@ -55,7 +55,6 @@ beforeAll(async () => {
       name: item.name,
       imagePath: item.imagePath,
       positionId: posIds[item.posIdx],
-      locationLabel: item.loc,
       difficulty: 1,
     });
   }
@@ -87,12 +86,14 @@ describe("question data requirements", () => {
   });
 
   it("items have locations for where_is questions", async () => {
-    const withLoc = await db
+    // Der Ortstext ist kein Feld mehr: Verortet ist ein Item über
+    // position_id/box_id, daraus leitet die Route den Text ab.
+    const all = await db
       .select()
       .from(items)
       .where(eq(items.vehicleId, vehicleId));
 
-    const count = withLoc.filter((i) => i.locationLabel).length;
+    const count = all.filter((i) => i.positionId || i.boxId).length;
     expect(count).toBeGreaterThanOrEqual(4);
   });
 

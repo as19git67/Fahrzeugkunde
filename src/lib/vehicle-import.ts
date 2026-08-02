@@ -74,7 +74,6 @@ export async function insertVehicleTree(
       difficulty: it.difficulty ?? 1,
       positionId: positionId ?? null,
       boxId: boxId ?? null,
-      locationLabel: it.locationLabel ?? null,
     });
   };
 
