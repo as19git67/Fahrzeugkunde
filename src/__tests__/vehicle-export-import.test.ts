@@ -129,10 +129,9 @@ async function buildPackageFromDb(vehicleId: number) {
   const pkgItem = (row: (typeof its)[number]): PackageItem => ({
     name: row.name,
     article: row.article,
-    description: row.description,
     imagePath: rewrite(row.imagePath),
+    locationImagePath: rewrite(row.locationImagePath),
     silhouettePath: rewrite(row.silhouettePath),
-    category: row.category,
     difficulty: row.difficulty,
     locationLabel: row.locationLabel,
   });

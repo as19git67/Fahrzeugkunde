@@ -20,6 +20,7 @@ function makeQuestions(n: number): Question[] {
       name: `Item ${i + 1}`,
       article: null,
       imagePath: null,
+      locationImagePath: null,
       locationLabel: null,
       positionId: null,
       boxId: null,

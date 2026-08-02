@@ -56,7 +56,6 @@ beforeAll(async () => {
       imagePath: item.imagePath,
       positionId: posIds[item.posIdx],
       locationLabel: item.loc,
-      category: "bergung",
       difficulty: 1,
     });
   }

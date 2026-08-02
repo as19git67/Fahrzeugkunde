@@ -57,15 +57,19 @@ CREATE TABLE IF NOT EXISTS boxes (
   sort_order INTEGER DEFAULT 0
 );
 
+-- `image_path` zeigt den Gegenstand selbst (Fragetyp "Was ist das?"),
+-- `location_image_path` zeigt die Stelle der Aufbewahrung im Fahrzeug und
+-- wird als Aufloesung der Ortsfragen eingeblendet. Beide Bilder sind
+-- unabhaengig voneinander, damit ein Gegenstand in beiden Fragetypen
+-- korrekt dargestellt werden kann.
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   article TEXT,
-  description TEXT,
   image_path TEXT,
+  location_image_path TEXT,
   silhouette_path TEXT,
-  category TEXT,
   difficulty INTEGER DEFAULT 1,
   position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
   box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
@@ -76,6 +80,13 @@ CREATE TABLE IF NOT EXISTS items (
 -- Nachtraegliche Migration fuer bestehende Datenbanken
 ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
 ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
+ALTER TABLE items ADD COLUMN IF NOT EXISTS location_image_path TEXT;
+
+-- Nachtraegliche Migration: ungenutzte Item-Felder entfernen. `category` und
+-- `description` wurden ausschliesslich im Creator-Formular gepflegt und nie
+-- im Spiel ausgewertet.
+ALTER TABLE items DROP COLUMN IF EXISTS category;
+ALTER TABLE items DROP COLUMN IF EXISTS description;
 
 -- Nachtraegliche Migration fuer bestehende Datenbanken: FK von items.position_id
 -- und items.box_id auf ON DELETE CASCADE umstellen, damit das Loeschen eines

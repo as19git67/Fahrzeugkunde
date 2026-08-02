@@ -105,8 +105,6 @@ describe("full vehicle hierarchy", () => {
       .values({
         vehicleId: v.id,
         name: "Seilwinde",
-        description: "Zum Ziehen schwerer Lasten",
-        category: "bergung",
         difficulty: 2,
         positionId: pos.id,
         locationLabel: "G1, oben links",
@@ -136,11 +134,11 @@ describe("full vehicle hierarchy", () => {
 
     const [updated] = await db
       .update(items)
-      .set({ description: "Hydraulisch", difficulty: 3 })
+      .set({ locationImagePath: "/img/g1-oben.jpg", difficulty: 3 })
       .where(eq(items.id, item.id))
       .returning();
 
-    expect(updated.description).toBe("Hydraulisch");
+    expect(updated.locationImagePath).toBe("/img/g1-oben.jpg");
     expect(updated.difficulty).toBe(3);
     expect(updated.name).toBe("Rettungsschere");
   });

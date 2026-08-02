@@ -99,6 +99,27 @@ describe("questions route – Fragengenerierung", () => {
     }
   });
 
+  it("liefert Gegenstands- und Aufbewahrungsbild getrennt aus", async () => {
+    // Beide Bilder sind eigenständige Spalten: `image_path` zeigt den
+    // Gegenstand ("Was ist das?"), `location_image_path` die Stelle der
+    // Aufbewahrung (Auflösung der Ortsfragen). Die Route darf sie nicht
+    // vermischen.
+    const pool = await getTestPool();
+    await pool.query(
+      "UPDATE items SET location_image_path = '/uploads/items/ort-' || id || '.jpg' WHERE vehicle_id = $1",
+      [vehicleId]
+    );
+
+    const res = await fetchQuestions({ vehicleId, count: 40 });
+    const questions = (await res.json()) as Question[];
+    expect(questions.length).toBeGreaterThan(0);
+
+    for (const q of questions) {
+      expect(q.item.locationImagePath).toBe(`/uploads/items/ort-${q.item.id}.jpg`);
+      expect(q.item.imagePath).not.toBe(q.item.locationImagePath);
+    }
+  });
+
   it("erzeugt über viele Fragen alle drei Fragetypen (Demo-Fahrzeug)", async () => {
     const res = await fetchQuestions({ vehicleId, count: 50 });
     const questions = (await res.json()) as Question[];

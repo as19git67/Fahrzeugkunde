@@ -11,7 +11,11 @@ export interface Question {
     id: number;
     name: string;
     article: string | null;
+    // Bild des Gegenstands — wird in "Was ist das?" gefragt und in den
+    // Ortsfragen gezeigt, damit klar ist, welcher Gegenstand gemeint ist.
     imagePath: string | null;
+    // Bild der Aufbewahrungsstelle — erst nach der Antwort als Auflösung.
+    locationImagePath: string | null;
     locationLabel: string | null;
     positionId: number | null;
     boxId: number | null;
@@ -26,6 +30,22 @@ export interface Question {
     compartmentId: number;
     positionId: number;
     boxId: number | null;
+  };
+}
+
+type ItemRow = typeof items.$inferSelect;
+
+/** Reduziert eine Item-Zeile auf die Felder, die der Client für Fragen braucht. */
+function toQuestionItem(row: ItemRow): Question["item"] {
+  return {
+    id: row.id,
+    name: row.name,
+    article: row.article,
+    imagePath: row.imagePath,
+    locationImagePath: row.locationImagePath,
+    locationLabel: row.locationLabel,
+    positionId: row.positionId,
+    boxId: row.boxId,
   };
 }
 
@@ -92,15 +112,7 @@ export async function GET(req: NextRequest) {
       questions.push({
         id: `q_${i}_${target.id}`,
         type: "what_is",
-        item: {
-          id: target.id,
-          name: target.name,
-          article: target.article,
-          imagePath: target.imagePath,
-          locationLabel: target.locationLabel,
-          positionId: target.positionId,
-          boxId: target.boxId,
-        },
+        item: toQuestionItem(target),
         options,
       });
     } else if (type === "where_is") {
@@ -117,15 +129,7 @@ export async function GET(req: NextRequest) {
       questions.push({
         id: `q_${i}_${target.id}`,
         type: "where_is",
-        item: {
-          id: target.id,
-          name: target.name,
-          article: target.article,
-          imagePath: target.imagePath,
-          locationLabel: target.locationLabel,
-          positionId: target.positionId,
-          boxId: target.boxId,
-        },
+        item: toQuestionItem(target),
         locationOptions,
       });
     } else {
@@ -135,15 +139,7 @@ export async function GET(req: NextRequest) {
       const q: Question = {
         id: `q_${i}_${target.id}`,
         type: "where_in_vehicle",
-        item: {
-          id: target.id,
-          name: target.name,
-          article: target.article,
-          imagePath: target.imagePath,
-          locationLabel: target.locationLabel,
-          positionId: target.positionId,
-          boxId: target.boxId,
-        },
+        item: toQuestionItem(target),
       };
       // Position-ID herleiten: entweder direkt oder über die Box
       let positionId = target.positionId;

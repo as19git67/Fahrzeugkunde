@@ -63,10 +63,12 @@ export const items = pgTable("items", {
   name: text("name").notNull(),
   // Grammatischer Artikel (der/die/das) — steuert die Anrede in der UI
   article: text("article"),
-  description: text("description"),
+  // Bild des Gegenstands selbst — Grundlage für "Was ist das?"
   imagePath: text("image_path"),
+  // Bild der Aufbewahrungsstelle im Fahrzeug — wird als Auflösung der
+  // Ortsfragen ("Wo ist …?" / "Wo im Fahrzeug?") eingeblendet.
+  locationImagePath: text("location_image_path"),
   silhouettePath: text("silhouette_path"),
-  category: text("category"),
   difficulty: integer("difficulty").default(1),
   positionId: integer("position_id").references(() => positions.id, { onDelete: "cascade" }),
   boxId: integer("box_id").references(() => boxes.id, { onDelete: "cascade" }),

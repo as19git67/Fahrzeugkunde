@@ -48,9 +48,8 @@ interface ItemData {
   id: number;
   name: string;
   article: string | null;
-  description: string | null;
   imagePath: string | null;
-  category: string | null;
+  locationImagePath: string | null;
   difficulty: number;
   positionId: number | null;
   boxId: number | null;
@@ -984,11 +983,11 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
     )
   );
 
-  // Liste nach Suchbegriff filtern (Name, Artikel, Kategorie, Ort, Beschreibung)
+  // Liste nach Suchbegriff filtern (Name, Artikel, Ort)
   const query = filter.trim().toLowerCase();
   const filteredItems = query
     ? vehicle.items.filter((item) =>
-        [item.name, item.article, item.category, item.locationLabel, item.description]
+        [item.name, item.article, item.locationLabel]
           .some((field) => field?.toLowerCase().includes(query))
       )
     : vehicle.items;
@@ -1046,6 +1045,22 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
               ) : (
                 <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
               )}
+              {/* Zweites Thumbnail: Aufbewahrungsstelle — macht auf einen Blick
+                  sichtbar, ob für die Ortsfragen ein Bild hinterlegt ist. */}
+              {item.locationImagePath ? (
+                <HoverPreviewImage src={item.locationImagePath} alt={`Aufbewahrungsort: ${item.name}`}>
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800 border border-zinc-700">
+                    <Image src={item.locationImagePath} alt={`Aufbewahrungsort: ${item.name}`} fill className="object-cover" sizes="64px" />
+                  </div>
+                </HoverPreviewImage>
+              ) : (
+                <div
+                  title="Kein Bild der Aufbewahrungsstelle"
+                  className="w-16 h-16 rounded-lg bg-zinc-800/50 border border-dashed border-zinc-700 flex items-center justify-center text-xl flex-shrink-0 text-zinc-600"
+                >
+                  📍
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-white truncate">
                   {item.article && <span className="text-zinc-400 mr-1">{item.article}</span>}
@@ -1053,9 +1068,6 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
                 </div>
                 {item.locationLabel && (
                   <div className="text-xs text-zinc-500 mt-0.5">{item.locationLabel}</div>
-                )}
-                {item.category && (
-                  <div className="text-xs text-red-400 mt-0.5">{item.category}</div>
                 )}
               </div>
             </div>
@@ -1150,8 +1162,6 @@ function ItemForm({
 }) {
   const [name, setName] = useState(item?.name ?? "");
   const [article, setArticle] = useState(item?.article ?? "");
-  const [description, setDescription] = useState(item?.description ?? "");
-  const [category, setCategory] = useState(item?.category ?? "");
   const [difficulty, setDifficulty] = useState(item?.difficulty ?? 1);
   // Kodiere aktuelles Ziel als "pos:<id>" oder "box:<id>"
   const initialTargetKey =
@@ -1159,20 +1169,26 @@ function ItemForm({
   const [targetKey, setTargetKey] = useState<string>(initialTargetKey);
   const [locationLabel, setLocationLabel] = useState(item?.locationLabel ?? "");
   const [imagePath, setImagePath] = useState(item?.imagePath ?? "");
+  const [locationImagePath, setLocationImagePath] = useState(item?.locationImagePath ?? "");
   const [uploading, setUploading] = useState(false);
+  const [uploadingLocation, setUploadingLocation] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
-    setUploading(true);
+  const uploadTo = async (
+    file: File,
+    setBusy: (v: boolean) => void,
+    setPath: (p: string) => void
+  ) => {
+    setBusy(true);
     try {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("folder", "items");
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const { path } = await res.json();
-      setImagePath(path);
+      setPath(path);
     } finally {
-      setUploading(false);
+      setBusy(false);
     }
   };
 
@@ -1196,13 +1212,12 @@ function ItemForm({
         vehicleId,
         name,
         article: article || null,
-        description: description || null,
-        category: category || null,
         difficulty,
         positionId,
         boxId,
         locationLabel: locationLabel || null,
         imagePath: imagePath || null,
+        locationImagePath: locationImagePath || null,
       };
 
       if (item) {
@@ -1272,28 +1287,6 @@ function ItemForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Kategorie</label>
-          <input
-            type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="bergung, atemschutz, ..."
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs text-zinc-400">Beschreibung</label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Kurzbeschreibung des Gegenstands"
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
           <label className="text-xs text-zinc-400">Aufbewahrungsort (Text)</label>
           <input
             type="text"
@@ -1334,14 +1327,29 @@ function ItemForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Bild</label>
+          <label className="text-xs text-zinc-400">Bild des Gegenstands</label>
           <ImageUpload
             label=""
             currentPath={imagePath}
-            onUpload={handleImageUpload}
+            onUpload={(f) => uploadTo(f, setUploading, setImagePath)}
             onRemove={() => setImagePath("")}
             uploading={uploading}
           />
+          <span className="text-[11px] text-zinc-500">Wird bei „Was ist das?“ gezeigt.</span>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-zinc-400">Bild der Aufbewahrungsstelle</label>
+          <ImageUpload
+            label=""
+            currentPath={locationImagePath}
+            onUpload={(f) => uploadTo(f, setUploadingLocation, setLocationImagePath)}
+            onRemove={() => setLocationImagePath("")}
+            uploading={uploadingLocation}
+          />
+          <span className="text-[11px] text-zinc-500">
+            Auflösung der Ortsfragen („Wo ist …?“).
+          </span>
         </div>
       </div>
 

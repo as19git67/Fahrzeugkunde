@@ -373,15 +373,52 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
       )}
 
       {feedback && (
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className={`text-2xl font-black ${feedback === "correct" ? "text-green-400" : "text-red-400"}`}
-        >
-          {feedback === "correct" ? "✓ Korrekt!" : `✗ Falsch! — ${question.item.locationLabel ?? ""}`}
-        </motion.div>
+        <>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`text-2xl font-black ${feedback === "correct" ? "text-green-400" : "text-red-400"}`}
+          >
+            {feedback === "correct" ? "✓ Korrekt!" : `✗ Falsch! — ${question.item.locationLabel ?? ""}`}
+          </motion.div>
+          <LocationReveal item={question.item} />
+        </>
       )}
     </div>
+  );
+}
+
+/**
+ * Auflösung der Ortsfragen: zeigt das Bild der Aufbewahrungsstelle, sobald
+ * geantwortet wurde. Bewusst getrennt vom Gegenstandsbild (`imagePath`) —
+ * das würde die Antwort sonst vorwegnehmen. Ohne hinterlegtes Ortsbild
+ * rendert die Komponente nichts.
+ */
+function LocationReveal({ item }: { item: Question["item"] }) {
+  if (!item.locationImagePath) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col items-center gap-1.5 w-full"
+    >
+      <span className="text-xs uppercase tracking-wider text-zinc-400">
+        Hier ist{item.article ? ` ${item.article}` : ""} {item.name} verstaut
+      </span>
+      <div className="relative w-full max-w-sm h-44 rounded-xl overflow-hidden border-2 border-green-400/50 bg-zinc-800">
+        <Image
+          src={item.locationImagePath}
+          alt={`Aufbewahrungsort: ${item.name}`}
+          fill
+          className="object-contain p-1"
+          sizes="384px"
+        />
+      </div>
+      {item.locationLabel && (
+        <span className="text-sm text-zinc-300">{item.locationLabel}</span>
+      )}
+    </motion.div>
   );
 }
 
@@ -445,6 +482,8 @@ function WhereIsChoiceQuestion({
           );
         })}
       </div>
+
+      {(answered || selected) && <LocationReveal item={question.item} />}
     </div>
   );
 }
