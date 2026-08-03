@@ -51,12 +51,13 @@ interface Hotspot {
 export interface PackageItem {
   name: string;
   article: string | null;
-  description: string | null;
+  /** Bild des Gegenstands selbst. */
   imagePath: string | null;
+  /** Bild der Aufbewahrungsstelle. Fehlt in Paketen, die vor der Trennung
+   *  von Gegenstands- und Ortsbild exportiert wurden — dann `undefined`. */
+  locationImagePath?: string | null;
   silhouettePath: string | null;
-  category: string | null;
   difficulty: number | null;
-  locationLabel: string | null;
 }
 
 export interface PackageBox extends Hotspot {
@@ -346,11 +347,13 @@ export function collectReferencedAssetPaths(vehicle: PackageVehicle): Set<string
           add(b.imagePath);
           for (const i of b.items ?? []) {
             add(i.imagePath);
+            add(i.locationImagePath);
             add(i.silhouettePath);
           }
         }
         for (const i of pos.items ?? []) {
           add(i.imagePath);
+          add(i.locationImagePath);
           add(i.silhouettePath);
         }
       }

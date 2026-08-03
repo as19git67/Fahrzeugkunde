@@ -68,14 +68,12 @@ export async function insertVehicleTree(
       vehicleId,
       name: it.name,
       article: it.article ?? null,
-      description: it.description ?? null,
       imagePath: rewrite(it.imagePath),
+      locationImagePath: rewrite(it.locationImagePath),
       silhouettePath: rewrite(it.silhouettePath),
-      category: it.category ?? null,
       difficulty: it.difficulty ?? 1,
       positionId: positionId ?? null,
       boxId: boxId ?? null,
-      locationLabel: it.locationLabel ?? null,
     });
   };
 

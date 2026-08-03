@@ -26,17 +26,24 @@ export function GameScreen({ vehicleId, vehicleName, vehicleData, onFinished }: 
   const [selectedMode, setSelectedMode] = useState(false);
   const finishedRef = useRef(false);
 
-  // Auto-next nach Feedback
+  // Auto-next nach Feedback. Ortsfragen mit hinterlegtem Bild der
+  // Aufbewahrungsstelle blenden dieses als Auflösung ein — dafür bleibt das
+  // Feedback länger stehen, sonst ist es weg bevor man es gesehen hat.
+  const showsLocationReveal =
+    !!currentQuestion &&
+    currentQuestion.type !== "what_is" &&
+    !!currentQuestion.item.locationImagePath;
+
   useEffect(() => {
     if (state.phase === "answer_feedback") {
       setAnswered(true);
       const timer = setTimeout(() => {
         setAnswered(false);
         nextQuestion();
-      }, 1200);
+      }, showsLocationReveal ? 2600 : 1200);
       return () => clearTimeout(timer);
     }
-  }, [state.phase, nextQuestion]);
+  }, [state.phase, nextQuestion, showsLocationReveal]);
 
   // Finished
   useEffect(() => {

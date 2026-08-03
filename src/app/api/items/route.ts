@@ -18,14 +18,12 @@ export async function POST(req: NextRequest) {
       vehicleId: body.vehicleId,
       name: body.name,
       article: body.article,
-      description: body.description,
       imagePath: body.imagePath,
+      locationImagePath: body.locationImagePath,
       silhouettePath: body.silhouettePath,
-      category: body.category,
       difficulty: body.difficulty ?? 1,
       positionId: body.positionId,
       boxId: body.boxId,
-      locationLabel: body.locationLabel,
     })
     .returning();
   return NextResponse.json(item, { status: 201 });

@@ -12,7 +12,6 @@
  */
 import { statSync } from "node:fs";
 import { NextRequest, NextResponse } from "next/server";
-import { statSync } from "node:fs";
 import { eq, sql } from "drizzle-orm";
 import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
 import { getSessionUser, isAdmin } from "@/lib/auth";
@@ -142,12 +141,10 @@ export async function GET(
   const pkgItem = (row: typeof its[number]): PackageItem => ({
     name: row.name,
     article: row.article,
-    description: row.description,
     imagePath: rewriteImagePath(row.imagePath, assetFiles),
+    locationImagePath: rewriteImagePath(row.locationImagePath, assetFiles),
     silhouettePath: rewriteImagePath(row.silhouettePath, assetFiles),
-    category: row.category,
     difficulty: row.difficulty,
-    locationLabel: row.locationLabel,
   });
 
   const pkgBox = (row: typeof bxs[number]): PackageBox => ({

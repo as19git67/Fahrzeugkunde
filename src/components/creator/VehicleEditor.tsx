@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { createLocationLabeler } from "@/lib/location-label";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -48,13 +49,11 @@ interface ItemData {
   id: number;
   name: string;
   article: string | null;
-  description: string | null;
   imagePath: string | null;
-  category: string | null;
+  locationImagePath: string | null;
   difficulty: number;
   positionId: number | null;
   boxId: number | null;
-  locationLabel: string | null;
 }
 
 interface Vehicle {
@@ -969,7 +968,6 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
           positionId: p.id,
           boxId: null as number | null,
           label: `${v.label} → ${c.label} → ${p.label}`,
-          shortLabel: `${c.label}, ${p.label}`,
         };
         const boxTargets = p.boxes.map((b) => ({
           kind: "box" as const,
@@ -977,18 +975,38 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
           positionId: p.id,
           boxId: b.id as number | null,
           label: `${v.label} → ${c.label} → ${p.label} → 📦 ${b.label}`,
-          shortLabel: `${c.label}, ${p.label}, ${b.label}`,
         }));
         return [posTarget, ...boxTargets];
       })
     )
   );
 
-  // Liste nach Suchbegriff filtern (Name, Artikel, Kategorie, Ort, Beschreibung)
+  // Ortstext exakt so ableiten, wie es die Fragengenerierung tut — damit im
+  // Creator steht, was im Spiel als Antwortoption erscheint.
+  const labelFor = createLocationLabeler({
+    views: vehicle.views,
+    compartments: vehicle.views.flatMap((v) =>
+      v.compartments.map((c) => ({ id: c.id, viewId: v.id, label: c.label }))
+    ),
+    positions: vehicle.views.flatMap((v) =>
+      v.compartments.flatMap((c) =>
+        c.positions.map((p) => ({ id: p.id, compartmentId: c.id, label: p.label }))
+      )
+    ),
+    boxes: vehicle.views.flatMap((v) =>
+      v.compartments.flatMap((c) =>
+        c.positions.flatMap((p) =>
+          p.boxes.map((b) => ({ id: b.id, positionId: p.id, label: b.label }))
+        )
+      )
+    ),
+  });
+
+  // Liste nach Suchbegriff filtern (Name, Artikel, Ort)
   const query = filter.trim().toLowerCase();
   const filteredItems = query
     ? vehicle.items.filter((item) =>
-        [item.name, item.article, item.category, item.locationLabel, item.description]
+        [item.name, item.article, labelFor(item.positionId, item.boxId)]
           .some((field) => field?.toLowerCase().includes(query))
       )
     : vehicle.items;
@@ -1046,17 +1064,35 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
               ) : (
                 <div className="w-16 h-16 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">🔧</div>
               )}
+              {/* Zweites Thumbnail: Aufbewahrungsstelle — macht auf einen Blick
+                  sichtbar, ob für die Ortsfragen ein Bild hinterlegt ist. */}
+              {item.locationImagePath ? (
+                <HoverPreviewImage src={item.locationImagePath} alt={`Aufbewahrungsort: ${item.name}`}>
+                  <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-zinc-800 border border-zinc-700">
+                    <Image src={item.locationImagePath} alt={`Aufbewahrungsort: ${item.name}`} fill className="object-cover" sizes="64px" />
+                  </div>
+                </HoverPreviewImage>
+              ) : (
+                <div
+                  title="Kein Bild der Aufbewahrungsstelle"
+                  className="w-16 h-16 rounded-lg bg-zinc-800/50 border border-dashed border-zinc-700 flex items-center justify-center text-xl flex-shrink-0 text-zinc-600"
+                >
+                  📍
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-white truncate">
                   {item.article && <span className="text-zinc-400 mr-1">{item.article}</span>}
                   {item.name}
                 </div>
-                {item.locationLabel && (
-                  <div className="text-xs text-zinc-500 mt-0.5">{item.locationLabel}</div>
-                )}
-                {item.category && (
-                  <div className="text-xs text-red-400 mt-0.5">{item.category}</div>
-                )}
+                {(() => {
+                  const ort = labelFor(item.positionId, item.boxId);
+                  return ort ? (
+                    <div className="text-xs text-zinc-500 mt-0.5">{ort}</div>
+                  ) : (
+                    <div className="text-xs text-amber-500/80 mt-0.5">nicht verortet</div>
+                  );
+                })()}
               </div>
             </div>
           ))}
@@ -1130,7 +1166,6 @@ interface Target {
   positionId: number;
   boxId: number | null;
   label: string;
-  shortLabel: string;
 }
 
 function ItemForm({
@@ -1150,29 +1185,32 @@ function ItemForm({
 }) {
   const [name, setName] = useState(item?.name ?? "");
   const [article, setArticle] = useState(item?.article ?? "");
-  const [description, setDescription] = useState(item?.description ?? "");
-  const [category, setCategory] = useState(item?.category ?? "");
   const [difficulty, setDifficulty] = useState(item?.difficulty ?? 1);
   // Kodiere aktuelles Ziel als "pos:<id>" oder "box:<id>"
   const initialTargetKey =
     item?.boxId ? `box:${item.boxId}` : item?.positionId ? `pos:${item.positionId}` : "";
   const [targetKey, setTargetKey] = useState<string>(initialTargetKey);
-  const [locationLabel, setLocationLabel] = useState(item?.locationLabel ?? "");
   const [imagePath, setImagePath] = useState(item?.imagePath ?? "");
+  const [locationImagePath, setLocationImagePath] = useState(item?.locationImagePath ?? "");
   const [uploading, setUploading] = useState(false);
+  const [uploadingLocation, setUploadingLocation] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
-    setUploading(true);
+  const uploadTo = async (
+    file: File,
+    setBusy: (v: boolean) => void,
+    setPath: (p: string) => void
+  ) => {
+    setBusy(true);
     try {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("folder", "items");
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const { path } = await res.json();
-      setImagePath(path);
+      setPath(path);
     } finally {
-      setUploading(false);
+      setBusy(false);
     }
   };
 
@@ -1196,13 +1234,11 @@ function ItemForm({
         vehicleId,
         name,
         article: article || null,
-        description: description || null,
-        category: category || null,
         difficulty,
         positionId,
         boxId,
-        locationLabel: locationLabel || null,
         imagePath: imagePath || null,
+        locationImagePath: locationImagePath || null,
       };
 
       if (item) {
@@ -1272,40 +1308,7 @@ function ItemForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Kategorie</label>
-          <input
-            type="text"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="bergung, atemschutz, ..."
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1 sm:col-span-2">
-          <label className="text-xs text-zinc-400">Beschreibung</label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Kurzbeschreibung des Gegenstands"
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Aufbewahrungsort (Text)</label>
-          <input
-            type="text"
-            value={locationLabel}
-            onChange={(e) => setLocationLabel(e.target.value)}
-            placeholder="G1, orange Kiste"
-            className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Position / Kiste (Navigation)</label>
+          <label className="text-xs text-zinc-400">Aufbewahrungsort</label>
           <select
             value={targetKey}
             onChange={(e) => setTargetKey(e.target.value)}
@@ -1318,6 +1321,9 @@ function ItemForm({
               </option>
             ))}
           </select>
+          <span className="text-[11px] text-zinc-500">
+            Steuert die Navigation und liefert den Ortstext der Frage „Wo ist …?“.
+          </span>
         </div>
 
         <div className="flex flex-col gap-1">
@@ -1334,14 +1340,29 @@ function ItemForm({
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs text-zinc-400">Bild</label>
+          <label className="text-xs text-zinc-400">Bild des Gegenstands</label>
           <ImageUpload
             label=""
             currentPath={imagePath}
-            onUpload={handleImageUpload}
+            onUpload={(f) => uploadTo(f, setUploading, setImagePath)}
             onRemove={() => setImagePath("")}
             uploading={uploading}
           />
+          <span className="text-[11px] text-zinc-500">Wird bei „Was ist das?“ gezeigt.</span>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-zinc-400">Bild der Aufbewahrungsstelle</label>
+          <ImageUpload
+            label=""
+            currentPath={locationImagePath}
+            onUpload={(f) => uploadTo(f, setUploadingLocation, setLocationImagePath)}
+            onRemove={() => setLocationImagePath("")}
+            uploading={uploadingLocation}
+          />
+          <span className="text-[11px] text-zinc-500">
+            Auflösung der Ortsfragen („Wo ist …?“).
+          </span>
         </div>
       </div>
 

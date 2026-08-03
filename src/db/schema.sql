@@ -57,25 +57,63 @@ CREATE TABLE IF NOT EXISTS boxes (
   sort_order INTEGER DEFAULT 0
 );
 
+-- `image_path` zeigt den Gegenstand selbst (Fragetyp "Was ist das?"),
+-- `location_image_path` zeigt die Stelle der Aufbewahrung im Fahrzeug und
+-- wird als Aufloesung der Ortsfragen eingeblendet. Beide Bilder sind
+-- unabhaengig voneinander, damit ein Gegenstand in beiden Fragetypen
+-- korrekt dargestellt werden kann.
 CREATE TABLE IF NOT EXISTS items (
   id SERIAL PRIMARY KEY,
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   article TEXT,
-  description TEXT,
   image_path TEXT,
+  location_image_path TEXT,
   silhouette_path TEXT,
-  category TEXT,
   difficulty INTEGER DEFAULT 1,
   position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
   box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
-  location_label TEXT,
   created_at TIMESTAMP DEFAULT now()
 );
 
 -- Nachtraegliche Migration fuer bestehende Datenbanken
 ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
 ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
+
+-- Nachtraegliche Migration: `location_image_path` ergaenzen und einmalig aus
+-- `image_path` vorbelegen. Vor der Trennung gab es nur ein Bild pro
+-- Gegenstand; damit nach dem Update kein Gegenstand ohne Ortsbild dasteht,
+-- wird das vorhandene Bild in beide Felder uebernommen und kann anschliessend
+-- einzeln ausgetauscht werden.
+--
+-- Diese Datei laeuft bei jedem App-Start. Die Uebernahme haengt deshalb daran,
+-- dass die Spalte in genau diesem Durchlauf neu entsteht — ein pauschales
+-- "fuelle auf, wo NULL" wuerde ein spaeter bewusst entferntes Ortsbild beim
+-- naechsten Neustart wiederherstellen.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'items' AND column_name = 'location_image_path'
+  ) THEN
+    ALTER TABLE items ADD COLUMN location_image_path TEXT;
+    UPDATE items SET location_image_path = image_path WHERE image_path IS NOT NULL;
+  END IF;
+END $$;
+
+-- Nachtraegliche Migration: ungenutzte Item-Felder entfernen. `category` und
+-- `description` wurden ausschliesslich im Creator-Formular gepflegt und nie
+-- im Spiel ausgewertet.
+ALTER TABLE items DROP COLUMN IF EXISTS category;
+ALTER TABLE items DROP COLUMN IF EXISTS description;
+
+-- Nachtraegliche Migration: `location_label` entfaellt. Der Aufbewahrungsort
+-- als Text wird zur Laufzeit aus der Fahrzeugstruktur abgeleitet (Fach,
+-- Position, ggf. Kiste) — siehe `src/lib/location-label.ts`. Als eigenes Feld
+-- war er eine Zweitschrift derselben Information und konnte der tatsaechlichen
+-- Verortung widersprechen.
+ALTER TABLE items DROP COLUMN IF EXISTS location_label;
 
 -- Nachtraegliche Migration fuer bestehende Datenbanken: FK von items.position_id
 -- und items.box_id auf ON DELETE CASCADE umstellen, damit das Loeschen eines
