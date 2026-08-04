@@ -12,19 +12,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "vehicleId und name erforderlich" }, { status: 400 });
   }
 
-  const [item] = await db
-    .insert(items)
-    .values({
-      vehicleId: body.vehicleId,
-      name: body.name,
-      article: body.article,
-      imagePath: body.imagePath,
-      locationImagePath: body.locationImagePath,
-      silhouettePath: body.silhouettePath,
-      difficulty: body.difficulty ?? 1,
-      positionId: body.positionId,
-      boxId: body.boxId,
-    })
-    .returning();
-  return NextResponse.json(item, { status: 201 });
+  try {
+    const [item] = await db
+      .insert(items)
+      .values({
+        vehicleId: body.vehicleId,
+        name: body.name,
+        article: body.article,
+        imagePath: body.imagePath,
+        locationImagePath: body.locationImagePath,
+        silhouettePath: body.silhouettePath,
+        difficulty: body.difficulty ?? 1,
+        positionId: body.positionId,
+        boxId: body.boxId,
+      })
+      .returning();
+    return NextResponse.json(item, { status: 201 });
+  } catch (err) {
+    if (err instanceof Error && "code" in err && err.code === "23503") {
+      return NextResponse.json(
+        { error: "Position oder Kiste existiert nicht mehr. Bitte Aufbewahrungsort neu auswählen." },
+        { status: 409 }
+      );
+    }
+    return NextResponse.json({ error: "Speichern fehlgeschlagen" }, { status: 500 });
+  }
 }

@@ -1241,20 +1241,23 @@ function ItemForm({
         locationImagePath: locationImagePath || null,
       };
 
-      if (item) {
-        await fetch(`/api/items/${item.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+      const res = item
+        ? await fetch(`/api/items/${item.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          })
+        : await fetch("/api/items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+      if (res.ok) {
+        onSave();
       } else {
-        await fetch("/api/items", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+        const data = await res.json().catch(() => ({}));
+        alert(`Speichern fehlgeschlagen: ${data.error ?? res.statusText}`);
       }
-      onSave();
     } finally {
       setSaving(false);
     }
