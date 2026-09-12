@@ -49,7 +49,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           .orderBy(boxes.sortOrder)
       : [];
 
-  const vehicleItems = await db.select().from(items).where(eq(items.vehicleId, vehicleId));
+  // Stabile Reihenfolge: Ohne ORDER BY liefert Postgres zuletzt geänderte
+  // Zeilen gern am Ende – im Creator sprang ein Gegenstand nach jedem
+  // Speichern an eine andere Stelle der Liste.
+  const vehicleItems = await db
+    .select()
+    .from(items)
+    .where(eq(items.vehicleId, vehicleId))
+    .orderBy(items.id);
 
   return NextResponse.json({
     ...vehicle,
