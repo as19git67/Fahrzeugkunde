@@ -147,7 +147,7 @@ Example `manifest.json`:
   },
   "assetChecksums": {
     "assets/items/seed/akku-bohrmaschine.svg": "a1b2c3…",
-    "assets/views/hlf_left.svg": "f9e8d7…"
+    "assets/views/seed/hlf_left.svg": "f9e8d7…"
   }
 }
 ```

@@ -87,7 +87,11 @@ const LEGACY_SCHEMA = `
 /** Zwei Gegenstände: einer mit Bild, einer ohne. */
 const LEGACY_DATA = `
   INSERT INTO vehicles (name) VALUES ('HLF 20');
-  INSERT INTO vehicle_views (vehicle_id, side, label) VALUES (1, 'left', 'Fahrzeug links');
+  -- Seed-Ansicht am alten Ablageort und eine Creator-hochgeladene Ansicht
+  INSERT INTO vehicle_views (vehicle_id, side, label, image_path)
+    VALUES (1, 'left', 'Fahrzeug links', '/uploads/views/hlf_left.svg');
+  INSERT INTO vehicle_views (vehicle_id, side, label, image_path)
+    VALUES (1, 'right', 'Fahrzeug rechts', '/api/uploads/views/1712345678_ab12cd.jpg');
   INSERT INTO compartments (view_id, label) VALUES (1, 'G1');
   INSERT INTO positions (compartment_id, label) VALUES (1, 'unten rechts');
   INSERT INTO boxes (position_id, label) VALUES (1, 'orange Kiste');
@@ -143,6 +147,16 @@ describe("schema.sql – Migration einer Bestandsdatenbank", () => {
 
   it("ergänzt location_image_path", async () => {
     expect(await columnNames()).toContain("location_image_path");
+  });
+
+  it("verschiebt Seed-Ansichten nach views/seed/, lässt Creator-Uploads unangetastet", async () => {
+    const { rows } = await client.query(
+      `SELECT side, image_path FROM vehicle_views ORDER BY side`
+    );
+    expect(rows).toEqual([
+      { side: "left", image_path: "/uploads/views/seed/hlf_left.svg" },
+      { side: "right", image_path: "/api/uploads/views/1712345678_ab12cd.jpg" },
+    ]);
   });
 
   it("ergänzt users.role sowie auth_codes.challenge/attempts", async () => {

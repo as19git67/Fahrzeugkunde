@@ -2,10 +2,10 @@
  * Generiert SVGs für die vier Fahrzeugansichten des HLF 20/16 im selben
  * Comic/Sketch-Stil wie die Item-Icons.
  *
- *   public/uploads/views/hlf_left.svg
- *   public/uploads/views/hlf_right.svg
- *   public/uploads/views/hlf_back.svg
- *   public/uploads/views/hlf_top.svg
+ *   public/uploads/views/seed/hlf_left.svg
+ *   public/uploads/views/seed/hlf_right.svg
+ *   public/uploads/views/seed/hlf_back.svg
+ *   public/uploads/views/seed/hlf_top.svg
  *
  * Keine sichtbaren Texte — nur aria-label.
  *
@@ -15,7 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const OUT_DIR = path.join(process.cwd(), "public", "uploads", "views");
+const OUT_DIR = path.join(process.cwd(), "public", "uploads", "views", "seed");
 
 // Style-Konstanten (identisch zu generate-seed-images.ts)
 const INK = "#1a1a1a";

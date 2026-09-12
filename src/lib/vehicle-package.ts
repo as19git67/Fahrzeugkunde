@@ -445,3 +445,49 @@ export function safeExtFromPath(p: string): string {
 export function generateUploadFilename(ext: string): string {
   return `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
 }
+
+/**
+ * Asset-Pfad aus dem Paket (z. B. "assets/items/seed/foo.svg") auf einen
+ * sicheren Ziel-Unterordner unter public/uploads/ abbilden. Die Zwischenordner
+ * werden übernommen, jedes Segment streng validiert (a–z, 0–9, Unterstrich,
+ * Bindestrich); als Dateiname wird ein neu generierter, kollisionsfreier Name
+ * gewählt.
+ *
+ * "seed"-Segmente werden dabei entfernt: Die kuratierten Seed-Ordner
+ * (items/seed, views/seed) werden beim Container-Start 1:1 aus dem Image
+ * gespiegelt – eine dort abgelegte Import-Kopie würde beim nächsten Start
+ * gelöscht und das importierte Fahrzeug verlöre seine Bilder.
+ *
+ * Gibt `null` zurück, wenn der Pfad keinen gültigen Ordner-Teil enthält oder
+ * ein Segment bösartig aussieht (Punkt-Segmente, Backslashes, Sonderzeichen).
+ */
+export function resolveTargetForAsset(pkgPath: string): {
+  relFolder: string;
+  absFolder: string;
+  relPath: string;
+  absPath: string;
+} | null {
+  if (!pkgPath.startsWith(PACKAGE_ASSET_PREFIX)) return null;
+  const rel = pkgPath.slice(PACKAGE_ASSET_PREFIX.length);
+  const parts = rel.split("/");
+  if (parts.length < 2) return null; // muss mindestens Ordner + Dateiname haben
+  const folderSegments = parts.slice(0, -1).filter((seg) => seg !== "seed");
+  if (folderSegments.length === 0) return null;
+  for (const seg of folderSegments) {
+    if (!/^[a-z0-9_-]{1,32}$/i.test(seg)) return null;
+  }
+  const ext = safeExtFromPath(pkgPath);
+  const newName = generateUploadFilename(ext);
+  const relFolder = folderSegments.join("/");
+  const absFolder = path.join(UPLOAD_DIR, ...folderSegments);
+  const absPath = path.join(absFolder, newName);
+  // Absicherung: resultierender Pfad muss innerhalb UPLOAD_DIR liegen
+  const resolved = path.resolve(absPath);
+  if (!resolved.startsWith(path.resolve(UPLOAD_DIR) + path.sep)) return null;
+  return {
+    relFolder,
+    absFolder,
+    relPath: `${relFolder}/${newName}`,
+    absPath,
+  };
+}
