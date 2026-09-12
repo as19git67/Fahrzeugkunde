@@ -6,6 +6,12 @@ import { createLocationLabeler } from "@/lib/location-label";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { whereIsQuestion } from "@/lib/grammar";
+import {
+  resolveTargetKey,
+  targetKey,
+  targetKeyForItem,
+  type LocationTarget,
+} from "@/lib/item-target";
 
 interface Box {
   id: number;
@@ -991,21 +997,21 @@ function ItemsEditor({ vehicle, onReload }: { vehicle: Vehicle; onReload: () => 
   const [filter, setFilter] = useState("");
 
   // Flache Liste aller Ziele (Position oder Box) mit Pfad
-  const allTargets = vehicle.views.flatMap((v) =>
+  const allTargets: LocationTarget[] = vehicle.views.flatMap((v) =>
     v.compartments.flatMap((c) =>
-      c.positions.flatMap((p) => {
-        const posTarget = {
-          kind: "position" as const,
+      c.positions.flatMap((p): LocationTarget[] => {
+        const posTarget: LocationTarget = {
+          kind: "position",
           id: p.id,
           positionId: p.id,
-          boxId: null as number | null,
+          boxId: null,
           label: `${v.label} → ${c.label} → ${p.label}`,
         };
-        const boxTargets = p.boxes.map((b) => ({
-          kind: "box" as const,
+        const boxTargets: LocationTarget[] = p.boxes.map((b) => ({
+          kind: "box",
           id: b.id,
           positionId: p.id,
-          boxId: b.id as number | null,
+          boxId: b.id,
           label: `${v.label} → ${c.label} → ${p.label} → 📦 ${b.label}`,
         }));
         return [posTarget, ...boxTargets];
@@ -1192,15 +1198,9 @@ function ItemFormDialog({ children, onClose }: { children: React.ReactNode; onCl
   );
 }
 
-interface Target {
-  kind: "position" | "box";
-  id: number;
-  positionId: number;
-  boxId: number | null;
-  label: string;
-}
-
-function ItemForm({
+// Exportiert für den Komponententest (Vorbelegung und Speichern des
+// Aufbewahrungsorts); im Editor nur über ItemsEditor verwendet.
+export function ItemForm({
   vehicleId,
   item,
   targets,
@@ -1210,7 +1210,7 @@ function ItemForm({
 }: {
   vehicleId: number;
   item: ItemData | null;
-  targets: Target[];
+  targets: LocationTarget[];
   onSave: () => void;
   onCancel: () => void;
   onDelete: () => void;
@@ -1219,10 +1219,9 @@ function ItemForm({
   const [article, setArticle] = useState(item?.article ?? "");
   const [plural, setPlural] = useState(item?.plural ?? false);
   const [difficulty, setDifficulty] = useState(item?.difficulty ?? 1);
-  // Kodiere aktuelles Ziel als "pos:<id>" oder "box:<id>"
-  const initialTargetKey =
-    item?.boxId ? `box:${item.boxId}` : item?.positionId ? `pos:${item.positionId}` : "";
-  const [targetKey, setTargetKey] = useState<string>(initialTargetKey);
+  // Aktuelles Ziel in derselben Kodierung wie die <option>-Werte unten –
+  // sonst öffnet das Formular mit „— keine —" und speichert den Ort als null.
+  const [selectedTargetKey, setSelectedTargetKey] = useState<string>(() => targetKeyForItem(item));
   const [imagePath, setImagePath] = useState(item?.imagePath ?? "");
   const [locationImagePath, setLocationImagePath] = useState(item?.locationImagePath ?? "");
   const [uploading, setUploading] = useState(false);
@@ -1249,28 +1248,24 @@ function ItemForm({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Ziel gegen die bekannte Fahrzeugstruktur auflösen. Ein unbekannter Wert
+    // heißt: Position/Kiste wurde inzwischen gelöscht – dann lieber abbrechen,
+    // als den Gegenstand still zu „entorten".
+    const placement = resolveTargetKey(selectedTargetKey, targets);
+    if (!placement) {
+      alert("Der gewählte Aufbewahrungsort existiert nicht mehr. Bitte neu auswählen.");
+      return;
+    }
     setSaving(true);
     try {
-      // Ziel auflösen: "pos:<id>" oder "box:<id>"
-      let positionId: number | null = null;
-      let boxId: number | null = null;
-      if (targetKey.startsWith("pos:")) {
-        positionId = parseInt(targetKey.slice(4));
-      } else if (targetKey.startsWith("box:")) {
-        const t = targets.find((x) => x.kind === "box" && x.id === parseInt(targetKey.slice(4)));
-        if (t) {
-          positionId = t.positionId;
-          boxId = t.boxId;
-        }
-      }
       const body = {
         vehicleId,
         name,
         article: article || null,
         plural,
         difficulty,
-        positionId,
-        boxId,
+        positionId: placement.positionId,
+        boxId: placement.boxId,
         imagePath: imagePath || null,
         locationImagePath: locationImagePath || null,
       };
@@ -1365,13 +1360,14 @@ function ItemForm({
         <div className="flex flex-col gap-1">
           <label className="text-xs text-zinc-400">Aufbewahrungsort</label>
           <select
-            value={targetKey}
-            onChange={(e) => setTargetKey(e.target.value)}
+            aria-label="Aufbewahrungsort"
+            value={selectedTargetKey}
+            onChange={(e) => setSelectedTargetKey(e.target.value)}
             className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
           >
             <option value="">— keine —</option>
             {targets.map((t) => (
-              <option key={`${t.kind}:${t.id}`} value={`${t.kind}:${t.id}`}>
+              <option key={targetKey(t.kind, t.id)} value={targetKey(t.kind, t.id)}>
                 {t.label}
               </option>
             ))}
