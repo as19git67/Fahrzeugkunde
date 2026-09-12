@@ -12,6 +12,17 @@ const BASE_WRONG = -50;
 const MAX_TIME_BONUS = 100;
 const TIME_WINDOW_SECONDS = 10; // voller Zeitbonus wenn < 10s
 
+export const GAME_MODES = ["time_attack", "speed_run"] as const;
+
+/**
+ * Obergrenze, die eine einzelne richtige Antwort einbringen kann:
+ * (Basis + voller Zeitbonus) × höchster Schwierigkeits-Multiplikator plus
+ * maximaler Streak-Bonus. Dient der Plausibilitätsprüfung eingereichter
+ * Highscores – der Score wird im Client berechnet und ist frei fälschbar.
+ */
+export const MAX_SCORE_PER_CORRECT_ANSWER =
+  Math.round((BASE_CORRECT + MAX_TIME_BONUS) * 2) + Math.floor(BASE_CORRECT * 0.1 * 5);
+
 export function calculateScore({
   correct,
   elapsedMs,

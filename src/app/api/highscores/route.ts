@@ -1,17 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, highscores } from "@/db";
+import { db, highscores, vehicles } from "@/db";
 import { and, desc, eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
+import { GAME_MODES, MAX_SCORE_PER_CORRECT_ANSWER } from "@/lib/scoring";
+import { intParam, nonNegativeInt, positiveInt, readJsonObject } from "@/lib/request";
+
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 100;
+const MAX_ANSWERS = 1000;
+const MAX_DURATION_SECONDS = 24 * 60 * 60;
+
+function isGameMode(value: unknown): value is (typeof GAME_MODES)[number] {
+  return typeof value === "string" && (GAME_MODES as readonly string[]).includes(value);
+}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const mode = searchParams.get("mode");
-  const vehicleId = searchParams.get("vehicleId");
-  const limit = parseInt(searchParams.get("limit") || "10");
+  const vehicleIdRaw = searchParams.get("vehicleId");
+  const limitRaw = searchParams.get("limit");
+
+  if (mode !== null && !isGameMode(mode)) {
+    return NextResponse.json({ error: "Ungültiger Modus" }, { status: 400 });
+  }
+  const vehicleId = vehicleIdRaw !== null ? intParam(vehicleIdRaw) : null;
+  if (vehicleIdRaw !== null && vehicleId === null) {
+    return NextResponse.json({ error: "Ungültige vehicleId" }, { status: 400 });
+  }
+  // Unlesbares limit → Default; lesbares wird auf 1..MAX_LIMIT geklemmt.
+  const limit = Math.min(MAX_LIMIT, Math.max(1, intParam(limitRaw, 0) ?? DEFAULT_LIMIT));
 
   const filters = [];
   if (mode) filters.push(eq(highscores.mode, mode));
-  if (vehicleId) filters.push(eq(highscores.vehicleId, parseInt(vehicleId)));
+  if (vehicleId !== null) filters.push(eq(highscores.vehicleId, vehicleId));
 
   const results = await db
     .select({
@@ -35,14 +56,41 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();
 
-  const body = await req.json();
-  const { score, mode, correctAnswers, totalAnswers, durationSeconds, vehicleId } = body;
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Ungültiger Request-Body" }, { status: 400 });
 
-  if (score == null || !mode || correctAnswers == null || totalAnswers == null || durationSeconds == null) {
-    return NextResponse.json({ error: "Fehlende Felder" }, { status: 400 });
+  const score = nonNegativeInt(body.score);
+  const correctAnswers = nonNegativeInt(body.correctAnswers);
+  const totalAnswers = nonNegativeInt(body.totalAnswers);
+  const durationSeconds = nonNegativeInt(body.durationSeconds);
+  if (score === null || correctAnswers === null || totalAnswers === null || durationSeconds === null) {
+    return NextResponse.json({ error: "Fehlende oder ungültige Felder" }, { status: 400 });
+  }
+  if (!isGameMode(body.mode)) {
+    return NextResponse.json({ error: "Ungültiger Modus" }, { status: 400 });
+  }
+  if (correctAnswers > totalAnswers || totalAnswers > MAX_ANSWERS || durationSeconds > MAX_DURATION_SECONDS) {
+    return NextResponse.json({ error: "Unplausible Spielwerte" }, { status: 400 });
+  }
+  // Der Score wird im Client berechnet und ist frei fälschbar. Mehr als das
+  // theoretische Maximum pro richtiger Antwort kann kein Spiel einbringen.
+  if (score > correctAnswers * MAX_SCORE_PER_CORRECT_ANSWER) {
+    return NextResponse.json({ error: "Unplausibler Score" }, { status: 400 });
   }
 
-  const handle = user?.handle ?? body.handle ?? "Anonym";
+  let vehicleId: number | null = null;
+  if (body.vehicleId !== undefined && body.vehicleId !== null) {
+    vehicleId = positiveInt(body.vehicleId);
+    if (vehicleId === null) {
+      return NextResponse.json({ error: "Ungültige vehicleId" }, { status: 400 });
+    }
+    const [v] = await db.select({ id: vehicles.id }).from(vehicles).where(eq(vehicles.id, vehicleId));
+    if (!v) return NextResponse.json({ error: "Fahrzeug existiert nicht" }, { status: 400 });
+  }
+
+  // Der angezeigte Name kommt ausschließlich aus der Session – nie aus dem
+  // Body, sonst ließen sich Einträge unter fremdem Namen anlegen.
+  const handle = user?.handle ?? "Anonym";
 
   const [entry] = await db
     .insert(highscores)
@@ -50,7 +98,7 @@ export async function POST(req: NextRequest) {
       userId: user?.id,
       handle,
       score,
-      mode,
+      mode: body.mode,
       correctAnswers,
       totalAnswers,
       durationSeconds,

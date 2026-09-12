@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, vehicles, vehicleViews, compartments, positions, boxes, items } from "@/db";
 import { eq, sql } from "drizzle-orm";
-import { getSessionUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { readJsonObject } from "@/lib/request";
 
 // Gibt komplette Fahrzeugstruktur zurück (Views → Compartments → Positions → Boxes → Items)
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -77,14 +78,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Ungültiger Request-Body" }, { status: 400 });
 
   const updates: Record<string, unknown> = {};
-  if (typeof body.name === "string") updates.name = body.name;
+  if (typeof body.name === "string" && body.name.trim()) updates.name = body.name.trim();
   if (typeof body.description === "string" || body.description === null)
     updates.description = body.description;
 
@@ -103,8 +105,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
   await db.delete(vehicles).where(eq(vehicles.id, parseInt(id)));

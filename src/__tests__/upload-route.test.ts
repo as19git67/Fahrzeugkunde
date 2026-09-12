@@ -10,11 +10,23 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { NextRequest } from "next/server";
 
-vi.mock("@/lib/auth", () => ({
-  getSessionUser: vi.fn(async () => ({ id: 1, handle: "tester", email: "t@example.org", role: "user" })),
-}));
+// Auth-Guard mocken: standardmäßig ein Admin, per `auth.denied` lässt sich
+// eine Ablehnung (401/403) simulieren.
+const auth = vi.hoisted(() => ({ denied: null as null | { status: number; error: string } }));
+vi.mock("@/lib/auth", async () => {
+  const { NextResponse } = await import("next/server");
+  return {
+    requireAdmin: vi.fn(async () =>
+      auth.denied
+        ? {
+            user: null,
+            denied: NextResponse.json({ error: auth.denied.error }, { status: auth.denied.status }),
+          }
+        : { user: { id: 1, handle: "admin", email: "a@example.org", role: "admin" }, denied: null }
+    ),
+  };
+});
 
-import { getSessionUser } from "@/lib/auth";
 import { POST } from "@/app/api/upload/route";
 import { MAX_UPLOAD_BYTES } from "@/lib/image-type";
 import { JPG_BYTES, PNG_BYTES, SVG_CLEAN } from "./image-type.test";
@@ -40,14 +52,17 @@ async function upload(content: Buffer, opts: { name: string; type: string; folde
 }
 
 afterEach(async () => {
+  auth.denied = null;
   await Promise.all(written.splice(0).map((p) => fs.unlink(p).catch(() => {})));
 });
 
 describe("POST /api/upload", () => {
-  it("verlangt eine Session", async () => {
-    vi.mocked(getSessionUser).mockResolvedValueOnce(null);
-    const { status } = await upload(PNG_BYTES, { name: "a.png", type: "image/png" });
-    expect(status).toBe(401);
+  it("verlangt eine Session (401) und Admin-Rechte (403)", async () => {
+    auth.denied = { status: 401, error: "Nicht eingeloggt" };
+    expect((await upload(PNG_BYTES, { name: "a.png", type: "image/png" })).status).toBe(401);
+    auth.denied = { status: 403, error: "Nur Administratoren" };
+    expect((await upload(PNG_BYTES, { name: "a.png", type: "image/png" })).status).toBe(403);
+    expect(written).toHaveLength(0);
   });
 
   it("speichert ein PNG mit Endung aus dem Inhalt – auch wenn Name und MIME lügen", async () => {

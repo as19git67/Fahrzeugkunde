@@ -1,34 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, boxes } from "@/db";
 import { eq } from "drizzle-orm";
-import { getSessionUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { readJsonObject } from "@/lib/request";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Ungültiger Request-Body" }, { status: 400 });
+
+  // Nur bekannte Felder in erwarteten Typen übernehmen – wie bei Fächern und
+  // Positionen. Vorher wurden alle Body-Felder ungeprüft gesetzt (`label: null`
+  // → NOT-NULL-Fehler → 500, leerer Body → "No values to set" → 500).
+  const updates: Record<string, unknown> = {};
+  if (typeof body.label === "string" && body.label.trim()) updates.label = body.label.trim();
+  if (typeof body.imagePath === "string" || body.imagePath === null)
+    updates.imagePath = body.imagePath;
+  if (typeof body.hotspotX === "number" || body.hotspotX === null) updates.hotspotX = body.hotspotX;
+  if (typeof body.hotspotY === "number" || body.hotspotY === null) updates.hotspotY = body.hotspotY;
+  if (typeof body.hotspotW === "number" || body.hotspotW === null) updates.hotspotW = body.hotspotW;
+  if (typeof body.hotspotH === "number" || body.hotspotH === null) updates.hotspotH = body.hotspotH;
+  if (typeof body.sortOrder === "number") updates.sortOrder = body.sortOrder;
+
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: "Keine Änderungen" }, { status: 400 });
+  }
 
   const [box] = await db
     .update(boxes)
-    .set({
-      label: body.label,
-      imagePath: body.imagePath,
-      hotspotX: body.hotspotX,
-      hotspotY: body.hotspotY,
-      hotspotW: body.hotspotW,
-      hotspotH: body.hotspotH,
-      sortOrder: body.sortOrder,
-    })
+    .set(updates)
     .where(eq(boxes.id, parseInt(id)))
     .returning();
+  if (!box) return NextResponse.json({ error: "Kiste nicht gefunden" }, { status: 404 });
   return NextResponse.json(box);
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
   await db.delete(boxes).where(eq(boxes.id, parseInt(id)));

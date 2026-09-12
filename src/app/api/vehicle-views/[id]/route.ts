@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, vehicleViews } from "@/db";
 import { eq } from "drizzle-orm";
-import { getSessionUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { readJsonObject } from "@/lib/request";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req);
+  if (!body) return NextResponse.json({ error: "Ungültiger Request-Body" }, { status: 400 });
 
   const updates: Record<string, unknown> = {};
-  if (typeof body.label === "string") updates.label = body.label;
+  if (typeof body.label === "string" && body.label.trim()) updates.label = body.label.trim();
   if (typeof body.imagePath === "string" || body.imagePath === null)
     updates.imagePath = body.imagePath;
   if (typeof body.sortOrder === "number") updates.sortOrder = body.sortOrder;
@@ -29,8 +31,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   const { id } = await params;
   await db.delete(vehicleViews).where(eq(vehicleViews.id, parseInt(id)));

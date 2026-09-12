@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import path from "path";
 import fs from "fs/promises";
 import {
@@ -12,8 +12,8 @@ import {
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 });
+  const { denied } = await requireAdmin();
+  if (denied) return denied;
 
   let formData: FormData;
   try {

@@ -23,6 +23,7 @@ interface Props {
 export function ResultScreen({ result, vehicleId, handle, onPlayAgain, onHome }: Props) {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const accuracy = result.totalAnswers > 0
     ? Math.round((result.correctAnswers / result.totalAnswers) * 100)
@@ -30,8 +31,11 @@ export function ResultScreen({ result, vehicleId, handle, onPlayAgain, onHome }:
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveError(null);
     try {
-      await fetch("/api/highscores", {
+      // Der Name wird serverseitig aus der Session genommen; ohne Login
+      // speichert der Server als "Anonym".
+      const res = await fetch("/api/highscores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -41,10 +45,15 @@ export function ResultScreen({ result, vehicleId, handle, onPlayAgain, onHome }:
           totalAnswers: result.totalAnswers,
           durationSeconds: result.durationSeconds,
           vehicleId,
-          handle: handle ?? "Anonym",
         }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? `Speichern fehlgeschlagen (${res.status})`);
+      }
       setSaved(true);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
     } finally {
       setSaving(false);
     }
@@ -90,8 +99,11 @@ export function ResultScreen({ result, vehicleId, handle, onPlayAgain, onHome }:
             disabled={saving}
             className="bg-yellow-500 hover:bg-yellow-400 disabled:bg-zinc-700 text-black font-bold py-3 rounded-xl transition-colors"
           >
-            {saving ? "Speichere..." : "🏆 Score speichern"}
+            {saving ? "Speichere..." : handle ? "🏆 Score speichern" : "🏆 Als „Anonym“ speichern"}
           </button>
+        )}
+        {saveError && (
+          <div className="text-center text-red-400 text-sm">{saveError}</div>
         )}
         {saved && (
           <div className="text-center text-green-400 font-semibold py-2">
