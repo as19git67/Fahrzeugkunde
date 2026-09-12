@@ -48,6 +48,22 @@ describe("Deploy-Konfiguration: Backup-/Restore-Kette", () => {
     expect(compose).toMatch(/^  backups:\s*$/m);
   });
 
+  it("CI-Workflow: Lint vor Tests, Concurrency-Schutz, kein Publish für Fork-PRs", () => {
+    const wf = read(".github", "workflows", "docker-image.yml");
+    expect(wf).toMatch(/^concurrency:\n\s+group: .*\n\s+cancel-in-progress: true/m);
+    const lintAt = wf.indexOf("run: npm run lint");
+    const testAt = wf.indexOf("run: npm test");
+    expect(lintAt).toBeGreaterThan(-1);
+    expect(testAt).toBeGreaterThan(lintAt);
+    expect(wf).toMatch(/run: npm ci/);
+    // Login/Push/Deploy nur, wenn der PR aus diesem Repo kommt
+    expect(wf).toMatch(/CAN_PUBLISH: .*head\.repo\.full_name == github\.repository/);
+    for (const step of ["Log in to the container registry", "Build and push Docker image", "Deploy to TrueNAS \\(test\\)"]) {
+      const block = wf.slice(wf.indexOf(`- name: ${step.replace(/\\/g, "")}`));
+      expect(block.slice(0, 200), step).toMatch(/env\.CAN_PUBLISH == 'true'/);
+    }
+  });
+
   it("das Seed-Bundle wird gebaut und ins Image kopiert", () => {
     // startup.js braucht dist/seed-data.cjs fuer den Voll-Seed beim Start.
     const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
