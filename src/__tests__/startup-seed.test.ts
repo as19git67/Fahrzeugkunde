@@ -7,15 +7,29 @@
  * legte ein zweites HLF 20 an. Dieser Test stellt sicher, dass nach einer
  * Umbenennung kein weiteres Fahrzeug angelegt wird.
  */
-import { it, expect, beforeEach, afterAll } from "vitest";
+import { it, expect, beforeEach, afterAll, describe as describeAlways } from "vitest";
 import { getTestDb, getTestPool, cleanDb, closeDb, describeDb as describe } from "./db-helper";
 import { vehicles } from "@/db/schema";
 
 // startup.js ist CommonJS; require() funktioniert dank tsx/vitest-Interop.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { seed } = require("../../startup.js");
+const { seed, SEED_MIRROR_DIRS } = require("../../startup.js");
 
 const db = getTestDb();
+
+describeAlways("startup: Seed-Asset-Spiegelung", () => {
+  it("spiegelt nur seed/-Unterordner – nie items/ oder views/ komplett", () => {
+    // Regression: views/ wurde früher komplett gespiegelt und hat damit alle im
+    // Creator hochgeladenen Fahrzeugansichten bei jedem Neustart gelöscht.
+    const dirs = (SEED_MIRROR_DIRS as string[]).map((d) => d.split(/[\\/]/));
+    expect(dirs).toEqual(
+      expect.arrayContaining([["items", "seed"], ["views", "seed"]])
+    );
+    for (const segs of dirs) {
+      expect(segs.at(-1)).toBe("seed");
+    }
+  });
+});
 
 beforeEach(async () => {
   await cleanDb();

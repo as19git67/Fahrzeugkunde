@@ -15,63 +15,19 @@
  * analog zu /api/admin/reset-seed.
  */
 import { NextRequest, NextResponse } from "next/server";
-import path from "node:path";
 import fs from "node:fs/promises";
 import { getSessionUser, isAdmin } from "@/lib/auth";
 import { db } from "@/db";
 import {
   collectReferencedAssetPaths,
-  generateUploadFilename,
   MAX_PACKAGE_BYTES,
-  PACKAGE_ASSET_PREFIX,
   PackageValidationError,
   readPackageZip,
-  safeExtFromPath,
-  UPLOAD_DIR,
+  resolveTargetForAsset,
   UPLOAD_URL_PREFIX,
   validatePackageAssets,
 } from "@/lib/vehicle-package";
 import { insertVehicleTree, makeRewriter } from "@/lib/vehicle-import";
-
-/**
- * Asset-Pfad aus dem Paket (z. B. "assets/items/seed/foo.svg") auf einen
- * sicheren Ziel-Unterordner unter public/uploads/ abbilden. Aus dem Paket-Pfad
- * werden die Zwischenordner übernommen, jeder Segmentname aber streng
- * validiert (a–z, 0–9, Unterstrich, Bindestrich). Als Dateiname wird ein neu
- * generierter, kollisionsfreier Name gewählt.
- *
- * Gibt `null` zurück, wenn der Pfad keinen gültigen Ordner-Teil enthält oder
- * ein Segment bösartig aussieht (z. B. Punkt-Segmente, Backslashes).
- */
-function resolveTargetForAsset(pkgPath: string): {
-  relFolder: string;
-  absFolder: string;
-  relPath: string;
-  absPath: string;
-} | null {
-  if (!pkgPath.startsWith(PACKAGE_ASSET_PREFIX)) return null;
-  const rel = pkgPath.slice(PACKAGE_ASSET_PREFIX.length);
-  const parts = rel.split("/");
-  if (parts.length < 2) return null; // muss mindestens Ordner + Dateiname haben
-  const folderSegments = parts.slice(0, -1);
-  for (const seg of folderSegments) {
-    if (!/^[a-z0-9_-]{1,32}$/i.test(seg)) return null;
-  }
-  const ext = safeExtFromPath(pkgPath);
-  const newName = generateUploadFilename(ext);
-  const relFolder = folderSegments.join("/");
-  const absFolder = path.join(UPLOAD_DIR, ...folderSegments);
-  const absPath = path.join(absFolder, newName);
-  // Absicherung: resultierender Pfad muss innerhalb UPLOAD_DIR liegen
-  const resolved = path.resolve(absPath);
-  if (!resolved.startsWith(path.resolve(UPLOAD_DIR) + path.sep)) return null;
-  return {
-    relFolder,
-    absFolder,
-    relPath: `${relFolder}/${newName}`,
-    absPath,
-  };
-}
 
 export async function POST(req: NextRequest) {
   const user = await getSessionUser();

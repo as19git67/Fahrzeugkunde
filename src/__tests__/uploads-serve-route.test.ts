@@ -3,7 +3,7 @@
  * Schutz-Header, die verhindern, dass ein Upload als HTML interpretiert oder
  * ein SVG mit Script im App-Origin ausgeführt wird.
  *
- * Nutzt die im Repo liegenden Seed-Ansichten (public/uploads/views/*.svg).
+ * Nutzt die im Repo liegenden Seed-Ansichten (public/uploads/views/seed/*.svg).
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import path from "node:path";
@@ -29,7 +29,7 @@ afterAll(async () => {
 
 describe("GET /api/uploads/[...path]", () => {
   it("liefert ein Seed-SVG mit nosniff, CSP-Sandbox und als Download", async () => {
-    const res = await get(["views", "hlf_left.svg"]);
+    const res = await get(["views", "seed", "hlf_left.svg"]);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("image/svg+xml");
     expect(res.headers.get("x-content-type-options")).toBe("nosniff");

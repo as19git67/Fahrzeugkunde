@@ -22,6 +22,20 @@ CREATE TABLE IF NOT EXISTS vehicle_views (
   sort_order INTEGER DEFAULT 0
 );
 
+-- Nachtraegliche Daten-Migration: Die kuratierten Seed-Ansichten liegen jetzt
+-- unter views/seed/ (wie die Item-Icons unter items/seed/). Nur dieser Ordner
+-- wird beim Container-Start aus dem Image gespiegelt; views/ selbst gehoert den
+-- Creator-Uploads (/api/uploads/views/<timestamp>_<zufall>.<ext>), die frueher
+-- bei jedem Neustart geloescht wurden. Idempotent: nur die vier Seed-Pfade.
+UPDATE vehicle_views
+   SET image_path = '/uploads/views/seed/' || substr(image_path, length('/uploads/views/') + 1)
+ WHERE image_path IN (
+   '/uploads/views/hlf_left.svg',
+   '/uploads/views/hlf_right.svg',
+   '/uploads/views/hlf_back.svg',
+   '/uploads/views/hlf_top.svg'
+ );
+
 CREATE TABLE IF NOT EXISTS compartments (
   id SERIAL PRIMARY KEY,
   view_id INTEGER NOT NULL REFERENCES vehicle_views(id) ON DELETE CASCADE,

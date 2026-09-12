@@ -18,6 +18,7 @@ import {
   PACKAGE_SCHEMA_VERSION,
   PackageValidationError,
   readPackageZip,
+  resolveTargetForAsset,
   resolveUploadFsPath,
   safeExtFromPath,
   slugifyName,
@@ -367,6 +368,35 @@ describe("validatePackageAssets", () => {
     expect(() =>
       validatePackageAssets(new Map([["assets/items/big.png", big]]))
     ).toThrow(/zu groß/);
+  });
+});
+
+describe("resolveTargetForAsset", () => {
+  it("behält Unterordner bei und generiert einen neuen Dateinamen", () => {
+    const t = resolveTargetForAsset("assets/items/foo.jpg");
+    expect(t?.relFolder).toBe("items");
+    expect(t?.relPath).toMatch(/^items\/\d+_[a-z0-9]+\.jpg$/);
+    expect(t?.absPath.startsWith(path.join(UPLOAD_DIR, "items") + path.sep)).toBe(true);
+  });
+
+  it("legt Paket-Assets aus seed/-Ordnern NIE wieder in seed/ ab", () => {
+    // Die kuratierten Seed-Ordner werden beim Start aus dem Image gespiegelt –
+    // eine Import-Kopie dort wäre beim nächsten Neustart weg.
+    expect(resolveTargetForAsset("assets/items/seed/axt.svg")?.relFolder).toBe("items");
+    expect(resolveTargetForAsset("assets/views/seed/hlf_left.svg")?.relFolder).toBe("views");
+    expect(resolveTargetForAsset("assets/views/seed/hlf_left.svg")?.relPath).toMatch(
+      /^views\/\d+_[a-z0-9]+\.svg$/
+    );
+    // nur "seed" ohne echten Ordner ist ungültig
+    expect(resolveTargetForAsset("assets/seed/x.svg")).toBeNull();
+  });
+
+  it("lehnt Pfade ohne Ordner, ohne Prefix oder mit bösartigen Segmenten ab", () => {
+    expect(resolveTargetForAsset("assets/x.jpg")).toBeNull();
+    expect(resolveTargetForAsset("items/x.jpg")).toBeNull();
+    expect(resolveTargetForAsset("assets/../x.jpg")).toBeNull();
+    expect(resolveTargetForAsset("assets/it ems/x.jpg")).toBeNull();
+    expect(resolveTargetForAsset("assets/items\\evil/x.jpg")).toBeNull();
   });
 });
 

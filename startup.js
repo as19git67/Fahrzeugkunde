@@ -47,7 +47,7 @@ function copyMissing(srcDir, destDir) {
 // Spiegelt einen Ordner force-overwrite ins Ziel: vorhandene Dateien werden
 // ueberschrieben, Dateien im Ziel die in der Quelle nicht mehr existieren
 // werden geloescht. Wird nur fuer kuratierte Seed-Ordner verwendet
-// (items/seed, views), niemals fuer User-Upload-Pfade.
+// (SEED_MIRROR_DIRS), niemals fuer User-Upload-Pfade.
 function mirrorForce(srcDir, destDir) {
   if (!fs.existsSync(srcDir)) return 0;
   fs.mkdirSync(destDir, { recursive: true });
@@ -75,6 +75,18 @@ function mirrorForce(srcDir, destDir) {
   return written;
 }
 
+// Kuratierte Seed-Ordner, die beim Start 1:1 aus dem Image gespiegelt werden.
+// Ausschliesslich seed/-Unterordner: Die Eltern items/ und views/ enthalten die
+// Uploads aus dem Creator (Item-Bilder bzw. Fahrzeugansichten) und duerfen nie
+// force-gespiegelt werden – sonst loescht jeder Neustart die Nutzerdateien.
+const SEED_MIRROR_DIRS = [path.join("items", "seed"), path.join("views", "seed")];
+
+// Alt-Ablageort der Seed-Ansichten (vor dem Umzug nach views/seed). Die Kopien
+// im Volume werden entfernt, damit sie nicht als Leichen liegen bleiben;
+// Creator-Uploads heissen nie so (<timestamp>_<zufall>.<ext>).
+const LEGACY_SEED_VIEW_FILES = ["hlf_left.svg", "hlf_right.svg", "hlf_back.svg", "hlf_top.svg"]
+  .map((name) => path.join("views", name));
+
 // --- Uploads-Verzeichnis vorbereiten (Docker-Volume) ---
 function setupUploads() {
   const dataAssets = "/data/assets";
@@ -95,20 +107,26 @@ function setupUploads() {
 
       // Kuratierte Seed-Ordner immer force-overwrite, damit neu generierte
       // Item-Icons und Fahrzeugansichten nach Re-Deploy wirksam werden.
-      // User-Uploads liegen in anderen Pfaden (z.B. items/ ohne "seed/")
-      // und bleiben unberührt.
-      const forceDirs = [
-        path.join("items", "seed"),
-        path.join("views"),
-      ];
       let refreshed = 0;
-      for (const rel of forceDirs) {
+      for (const rel of SEED_MIRROR_DIRS) {
         refreshed += mirrorForce(
           path.join(bundledUploads, rel),
           path.join(dataAssets, rel)
         );
       }
       if (refreshed > 0) console.log(`♻️  ${refreshed} kuratierte Seed-Asset(s) aktualisiert`);
+
+      // Seed-Ansichten am alten Ort (views/hlf_*.svg) aufraeumen – die DB-
+      // Migration in schema.sql zeigt bereits auf views/seed/.
+      let removed = 0;
+      for (const rel of LEGACY_SEED_VIEW_FILES) {
+        const legacy = path.join(dataAssets, rel);
+        if (fs.existsSync(legacy)) {
+          fs.rmSync(legacy, { force: true });
+          removed++;
+        }
+      }
+      if (removed > 0) console.log(`🧹 ${removed} alte Seed-Ansicht(en) aus views/ entfernt`);
     }
 
     // Prüfen, ob public/uploads bereits ein Symlink auf dataAssets ist
@@ -307,4 +325,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { seed, migrate };
+module.exports = { seed, migrate, SEED_MIRROR_DIRS };

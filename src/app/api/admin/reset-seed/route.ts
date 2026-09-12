@@ -50,6 +50,9 @@ function mirrorForce(srcDir: string, destDir: string): number {
  * im Upload-Ziel. Im Docker-Container liegt die Quelle unter /app/bundled-uploads,
  * in der Entwicklung unter public/uploads selbst — in letzterem Fall ist die
  * Operation ein No-Op, weil Quelle und Ziel identisch sind.
+ *
+ * Nur seed/-Unterordner: items/ und views/ selbst enthalten Creator-Uploads
+ * (gleiche Liste wie SEED_MIRROR_DIRS in startup.js).
  */
 function refreshSeedAssets(): number {
   const cwd = process.cwd();
@@ -58,7 +61,7 @@ function refreshSeedAssets(): number {
   if (!fs.existsSync(bundled)) return 0;
   if (path.resolve(bundled) === path.resolve(target)) return 0;
   let n = 0;
-  for (const rel of [path.join("items", "seed"), "views"]) {
+  for (const rel of [path.join("items", "seed"), path.join("views", "seed")]) {
     n += mirrorForce(path.join(bundled, rel), path.join(target, rel));
   }
   return n;
@@ -94,7 +97,7 @@ export async function POST() {
 
     const result = await seedDemoVehicle(pool);
 
-    // Kuratierte Seed-Bilder (items/seed, views) aus dem Image-Snapshot
+    // Kuratierte Seed-Bilder (items/seed, views/seed) aus dem Image-Snapshot
     // ueberschreiben, damit neu generierte SVGs nach DB-Reset auch auf
     // der Festplatte aktuell sind.
     const refreshed = refreshSeedAssets();

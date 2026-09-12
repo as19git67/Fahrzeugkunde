@@ -43,10 +43,13 @@ export interface CompartmentDef {
 }
 
 export const VIEW_DEFS: ViewDef[] = [
-  { side: "left", label: "Fahrzeug links", imagePath: "/uploads/views/hlf_left.svg" },
-  { side: "right", label: "Fahrzeug rechts", imagePath: "/uploads/views/hlf_right.svg" },
-  { side: "back", label: "Fahrzeug hinten", imagePath: "/uploads/views/hlf_back.svg" },
-  { side: "top", label: "Fahrzeug oben", imagePath: "/uploads/views/hlf_top.svg" },
+  // Kuratierte Seed-Ansichten liegen – wie die Item-Icons – in einem eigenen
+  // seed/-Unterordner, der beim Start aus dem Image gespiegelt wird. views/
+  // selbst gehört den Uploads aus dem Creator.
+  { side: "left", label: "Fahrzeug links", imagePath: "/uploads/views/seed/hlf_left.svg" },
+  { side: "right", label: "Fahrzeug rechts", imagePath: "/uploads/views/seed/hlf_right.svg" },
+  { side: "back", label: "Fahrzeug hinten", imagePath: "/uploads/views/seed/hlf_back.svg" },
+  { side: "top", label: "Fahrzeug oben", imagePath: "/uploads/views/seed/hlf_top.svg" },
 ];
 
 /**
