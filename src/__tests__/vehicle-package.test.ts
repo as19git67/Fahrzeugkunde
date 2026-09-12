@@ -12,6 +12,7 @@ import {
   buildPackageZip,
   collectReferencedAssetPaths,
   generateUploadFilename,
+  MAX_PACKAGE_ASSET_BYTES,
   PACKAGE_ASSET_PREFIX,
   PACKAGE_MAGIC,
   PACKAGE_SCHEMA_VERSION,
@@ -22,6 +23,7 @@ import {
   slugifyName,
   uploadPathToPackagePath,
   UPLOAD_DIR,
+  validatePackageAssets,
   type PackageManifest,
   type PackageVehicle,
 } from "@/lib/vehicle-package";
@@ -311,6 +313,60 @@ describe("readPackageZip: Validierung", () => {
     ]);
     const parsed = readPackageZip(buf);
     expect(parsed.assets.size).toBe(0);
+  });
+});
+
+describe("validatePackageAssets", () => {
+  const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0]);
+  const JPG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0]);
+  const SVG_OK = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>');
+  const SVG_BAD = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
+
+  it("akzeptiert Raster- und saubere SVG-Assets mit passender Endung", () => {
+    const assets = new Map<string, Buffer>([
+      ["assets/items/a.png", PNG],
+      ["assets/items/b.jpeg", JPG],
+      ["assets/items/c.JPG", JPG],
+      ["assets/views/v.svg", SVG_OK],
+    ]);
+    expect(() => validatePackageAssets(assets)).not.toThrow();
+  });
+
+  it("wirft, wenn die Endung nicht zum Inhalt passt", () => {
+    const assets = new Map([["assets/items/a.jpg", PNG]]);
+    expect(() => validatePackageAssets(assets)).toThrow(PackageValidationError);
+    expect(() => validatePackageAssets(assets)).toThrow(/Dateiendung passt nicht zum Inhalt \(png\)/);
+  });
+
+  it("wirft bei Nicht-Bildern – auch mit Bild-Endung", () => {
+    expect(() =>
+      validatePackageAssets(new Map([["assets/items/x.html", Buffer.from("<html>")]]))
+    ).toThrow(/kein unterstütztes Bild/);
+    expect(() =>
+      validatePackageAssets(new Map([["assets/items/x.png", Buffer.from("<html>")]]))
+    ).toThrow(/kein unterstütztes Bild/);
+  });
+
+  it("wirft bei SVG mit Script", () => {
+    expect(() =>
+      validatePackageAssets(new Map([["assets/items/x.svg", SVG_BAD]]))
+    ).toThrow(/unzulässigen Inhalt \(<script>\)/);
+  });
+
+  it("prüft nur die übergebenen Pfade und meldet fehlende", () => {
+    const assets = new Map([
+      ["assets/items/ok.png", PNG],
+      ["assets/items/bad.svg", SVG_BAD],
+    ]);
+    expect(() => validatePackageAssets(assets, ["assets/items/ok.png"])).not.toThrow();
+    expect(() => validatePackageAssets(assets, ["assets/items/fehlt.png"])).toThrow(/fehlt im Paket/);
+  });
+
+  it("wirft bei zu großen Assets", () => {
+    const big = Buffer.concat([PNG, Buffer.alloc(MAX_PACKAGE_ASSET_BYTES)]);
+    expect(() =>
+      validatePackageAssets(new Map([["assets/items/big.png", big]]))
+    ).toThrow(/zu groß/);
   });
 });
 

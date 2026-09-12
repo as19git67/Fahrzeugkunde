@@ -16,9 +16,21 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
 import { createZip, readZip, type ZipEntry } from "./zip";
+import {
+  PACKAGE_IMAGE_TYPES,
+  normalizeImageExt,
+  sniffImageType,
+  svgSafetyProblem,
+} from "./image-type";
 
 /** Schema-Version des Paketformats. Bei Breaking Changes erhöhen. */
 export const PACKAGE_SCHEMA_VERSION = 1;
+
+/** Maximale Größe eines .fzk-Pakets (Upload-Body beim Import). */
+export const MAX_PACKAGE_BYTES = 256 * 1024 * 1024;
+
+/** Maximale Größe eines einzelnen Bild-Assets im Paket. */
+export const MAX_PACKAGE_ASSET_BYTES = 20 * 1024 * 1024;
 
 /** Magic-String im Manifest, um das Format eindeutig zu identifizieren. */
 export const PACKAGE_MAGIC = "fahrzeugkunde-vehicle-package";
@@ -246,7 +258,11 @@ export class PackageValidationError extends Error {
 export function readPackageZip(buf: Buffer): ParsedPackage {
   let entries: ZipEntry[];
   try {
-    entries = readZip(buf);
+    entries = readZip(buf, {
+      maxEntries: 10_000,
+      maxEntryBytes: MAX_PACKAGE_ASSET_BYTES,
+      maxTotalBytes: MAX_PACKAGE_BYTES,
+    });
   } catch (err) {
     throw new PackageValidationError(
       `Datei ist kein gültiges ZIP-Archiv: ${err instanceof Error ? err.message : String(err)}`
@@ -360,6 +376,52 @@ export function collectReferencedAssetPaths(vehicle: PackageVehicle): Set<string
     }
   }
   return refs;
+}
+
+/**
+ * Prüft Bild-Assets eines Pakets inhaltlich, bevor sie auf die Platte
+ * geschrieben werden. Ein Paket kommt zwar nur von Admins, wird aber als Datei
+ * weitergereicht – der Import darf deshalb nicht weniger streng sein als die
+ * Upload-Route: Dateityp aus den Magic Bytes (nicht aus der Endung), Endung
+ * muss zum Inhalt passen, SVG nur ohne Script/Event-Handler/externe Referenzen.
+ *
+ * `paths` schränkt die Prüfung auf bestimmte Assets ein (z. B. nur die im
+ * vehicle.json referenzierten); ohne Angabe werden alle Assets geprüft.
+ * Wirft `PackageValidationError` beim ersten Problem.
+ */
+export function validatePackageAssets(
+  assets: Map<string, Buffer>,
+  paths: Iterable<string> = assets.keys()
+): void {
+  for (const pkgPath of paths) {
+    const data = assets.get(pkgPath);
+    if (!data) throw new PackageValidationError(`Asset fehlt im Paket: ${pkgPath}`);
+    if (data.length > MAX_PACKAGE_ASSET_BYTES) {
+      throw new PackageValidationError(
+        `Asset zu groß (max. ${MAX_PACKAGE_ASSET_BYTES / 1024 / 1024} MB): ${pkgPath}`
+      );
+    }
+    const type = sniffImageType(data);
+    if (!type || !PACKAGE_IMAGE_TYPES.has(type)) {
+      throw new PackageValidationError(
+        `Asset ist kein unterstütztes Bild (JPG, PNG, WebP, GIF, SVG): ${pkgPath}`
+      );
+    }
+    const ext = normalizeImageExt(safeExtFromPath(pkgPath));
+    if (ext !== type) {
+      throw new PackageValidationError(
+        `Dateiendung passt nicht zum Inhalt (${type}): ${pkgPath}`
+      );
+    }
+    if (type === "svg") {
+      const problem = svgSafetyProblem(data);
+      if (problem) {
+        throw new PackageValidationError(
+          `SVG-Asset enthält unzulässigen Inhalt (${problem}): ${pkgPath}`
+        );
+      }
+    }
+  }
 }
 
 /**

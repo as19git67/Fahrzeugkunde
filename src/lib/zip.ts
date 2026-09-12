@@ -114,12 +114,34 @@ export function createZip(entries: ZipEntry[]): Buffer {
   return Buffer.concat([...localParts, ...centralParts, eocd]);
 }
 
+export interface ReadZipLimits {
+  /** Maximale Anzahl Einträge. */
+  maxEntries: number;
+  /** Maximale entpackte Größe eines einzelnen Eintrags in Bytes. */
+  maxEntryBytes: number;
+  /** Maximale entpackte Gesamtgröße aller Einträge in Bytes. */
+  maxTotalBytes: number;
+}
+
+export const DEFAULT_ZIP_LIMITS: ReadZipLimits = {
+  maxEntries: 5000,
+  maxEntryBytes: 50 * 1024 * 1024,
+  maxTotalBytes: 512 * 1024 * 1024,
+};
+
 /**
  * Liest alle Einträge aus einem ZIP-Archiv im STORE-Modus. Unterstützt
  * zusätzlich DEFLATE-Einträge (Code 8) via `zlib.inflateRawSync`, falls jemand
  * ein extern erstelltes Paket importiert.
+ *
+ * Die Limits schützen vor Zip-Bomben: Ein kleiner DEFLATE-Eintrag kann sich
+ * auf Gigabytes entpacken und den Node-Prozess mit OOM beenden. Deshalb wird
+ * die angegebene Größe VOR dem Entpacken gegen die Limits geprüft und
+ * `inflateRawSync` zusätzlich hart auf diese Größe begrenzt – eine lügende
+ * Header-Angabe kann so nie mehr Speicher belegen als erlaubt.
  */
-export function readZip(buf: Buffer): ZipEntry[] {
+export function readZip(buf: Buffer, limits: Partial<ReadZipLimits> = {}): ZipEntry[] {
+  const { maxEntries, maxEntryBytes, maxTotalBytes } = { ...DEFAULT_ZIP_LIMITS, ...limits };
   // EOCD suchen: rückwärts vom Ende nach Signatur.
   let eocdOffset = -1;
   const minEocd = 22;
@@ -143,7 +165,12 @@ export function readZip(buf: Buffer): ZipEntry[] {
     throw new Error("Ungültiges ZIP: Central Directory außerhalb des Buffers");
   }
 
+  if (totalEntries > maxEntries) {
+    throw new Error(`ZIP enthält zu viele Einträge (${totalEntries}, max ${maxEntries})`);
+  }
+
   const entries: ZipEntry[] = [];
+  let totalBytes = 0;
   let p = cdOffset;
 
   for (let i = 0; i < totalEntries; i++) {
@@ -174,12 +201,30 @@ export function readZip(buf: Buffer): ZipEntry[] {
     }
     const compressed = buf.subarray(dataStart, dataEnd);
 
+    if (uncompressedSize > maxEntryBytes) {
+      throw new Error(
+        `ZIP-Eintrag ${name} zu groß (${uncompressedSize} Bytes, max ${maxEntryBytes})`
+      );
+    }
+    totalBytes += uncompressedSize;
+    if (totalBytes > maxTotalBytes) {
+      throw new Error(`ZIP-Gesamtgröße überschreitet das Limit von ${maxTotalBytes} Bytes`);
+    }
+
     let data: Buffer;
     if (compression === 0) {
       data = Buffer.from(compressed);
     } else if (compression === 8) {
-      // DEFLATE (für importierte Pakete von anderen Tools)
-      data = inflateRawSync(compressed);
+      // DEFLATE (für importierte Pakete von anderen Tools). maxOutputLength
+      // deckelt die Allokation auf die angegebene Größe; liefert der Stream
+      // mehr, bricht zlib ab statt weiter zu wachsen.
+      try {
+        data = inflateRawSync(compressed, { maxOutputLength: Math.max(1, uncompressedSize) });
+      } catch {
+        throw new Error(
+          `Ungültiges ZIP: DEFLATE-Daten für ${name} fehlerhaft oder größer als angegeben`
+        );
+      }
     } else {
       throw new Error(`Nicht unterstützte ZIP-Kompression ${compression} für ${name}`);
     }

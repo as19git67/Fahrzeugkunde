@@ -80,7 +80,7 @@ describe("zip: Kompatibilität mit DEFLATE beim Lesen", () => {
    * prüfen, dass `readZip` auch solche Archive (z. B. von externen Tools)
    * öffnen kann.
    */
-  function buildDeflateZip(name: string, raw: Buffer): Buffer {
+  function buildDeflateZip(name: string, raw: Buffer, declaredSize = raw.length): Buffer {
     const nameBuf = Buffer.from(name, "utf8");
     const compressed = deflateRawSync(raw);
     // CRC32 der ORIGINAL-Daten – via Node zlib.crc32
@@ -95,7 +95,7 @@ describe("zip: Kompatibilität mit DEFLATE beim Lesen", () => {
     lfh.writeUInt16LE(0, 12);
     lfh.writeUInt32LE(crc, 14);
     lfh.writeUInt32LE(compressed.length, 18);
-    lfh.writeUInt32LE(raw.length, 22);
+    lfh.writeUInt32LE(declaredSize, 22);
     lfh.writeUInt16LE(nameBuf.length, 26);
     lfh.writeUInt16LE(0, 28);
 
@@ -109,7 +109,7 @@ describe("zip: Kompatibilität mit DEFLATE beim Lesen", () => {
     cdh.writeUInt16LE(0, 14);
     cdh.writeUInt32LE(crc, 16);
     cdh.writeUInt32LE(compressed.length, 20);
-    cdh.writeUInt32LE(raw.length, 24);
+    cdh.writeUInt32LE(declaredSize, 24);
     cdh.writeUInt16LE(nameBuf.length, 28);
     cdh.writeUInt16LE(0, 30);
     cdh.writeUInt16LE(0, 32);
@@ -139,5 +139,45 @@ describe("zip: Kompatibilität mit DEFLATE beim Lesen", () => {
     const [entry] = readZip(zipBuf);
     expect(entry.name).toBe("text.txt");
     expect(entry.data.equals(payload)).toBe(true);
+  });
+
+  it("lehnt eine Zip-Bombe anhand der angegebenen Größe ab, bevor entpackt wird", () => {
+    // 1 MiB Nullen komprimieren auf ~1 KiB – klassisches Bomben-Verhältnis.
+    const payload = Buffer.alloc(1024 * 1024);
+    const zipBuf = buildDeflateZip("bomb.bin", payload);
+    expect(zipBuf.length).toBeLessThan(8 * 1024);
+    expect(() => readZip(zipBuf, { maxEntryBytes: 64 * 1024 })).toThrow(/zu groß/);
+    // Mit ausreichendem Limit ist derselbe Eintrag lesbar.
+    expect(readZip(zipBuf, { maxEntryBytes: 2 * 1024 * 1024 })[0].data.length).toBe(payload.length);
+  });
+
+  it("begrenzt die Entpackung hart, auch wenn der Header eine kleine Größe vortäuscht", () => {
+    const payload = Buffer.alloc(1024 * 1024);
+    // Header behauptet 16 Bytes, der Stream liefert 1 MiB.
+    const zipBuf = buildDeflateZip("liar.bin", payload, 16);
+    expect(() => readZip(zipBuf, { maxEntryBytes: 64 * 1024 })).toThrow(
+      /fehlerhaft oder größer als angegeben/
+    );
+  });
+});
+
+describe("zip: Limits", () => {
+  it("lehnt zu viele Einträge ab", () => {
+    const buf = createZip([
+      { name: "a", data: Buffer.from("1") },
+      { name: "b", data: Buffer.from("2") },
+      { name: "c", data: Buffer.from("3") },
+    ]);
+    expect(() => readZip(buf, { maxEntries: 2 })).toThrow(/zu viele Einträge/);
+    expect(readZip(buf, { maxEntries: 3 })).toHaveLength(3);
+  });
+
+  it("lehnt eine zu große Gesamtgröße ab", () => {
+    const buf = createZip([
+      { name: "a.bin", data: Buffer.alloc(100 * 1024) },
+      { name: "b.bin", data: Buffer.alloc(100 * 1024) },
+    ]);
+    expect(() => readZip(buf, { maxTotalBytes: 150 * 1024 })).toThrow(/Gesamtgröße/);
+    expect(readZip(buf, { maxTotalBytes: 200 * 1024 })).toHaveLength(2);
   });
 });
