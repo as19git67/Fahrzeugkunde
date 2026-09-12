@@ -157,13 +157,35 @@ async function migrate(client) {
   console.log("✅ Migration abgeschlossen");
 }
 
-// --- Seed: Demo-Fahrzeug HLF 20 (idempotent, aktuell ohne Beladung) ---
-// Wichtig: Der Check muss NICHT nach Name "HLF 20" suchen, sonst wuerde ein
-// vom Benutzer umbenanntes Seed-Fahrzeug beim naechsten Start zu einem
-// zweiten HLF 20 fuehren. Stattdessen pruefen wir, ob ueberhaupt bereits
-// ein Fahrzeug existiert — ist das der Fall, hat der Seed schon gelaufen
-// (oder der Benutzer hat manuell Fahrzeuge angelegt) und wir ruehren nichts an.
-async function seed(client) {
+// --- Seed: Demo-Fahrzeug HLF 20 mit kompletter Beladung (idempotent) ---
+// Die Seed-Logik lebt in TypeScript (src/db/seed-data.ts) und wird beim Build
+// per esbuild nach dist/seed-data.cjs gebuendelt (scripts/bundle-seed.mjs) –
+// das Standalone-Image hat weder tsx noch die TS-Quellen. Frueher legte der
+// Start nur ein LEERES "HLF 20" an; das Spiel war nicht spielbar, und weil
+// "ein Fahrzeug existiert" als "Seed ist gelaufen" gilt, blockierte das
+// leere Fahrzeug den Voll-Seed dauerhaft.
+//
+// Wichtig: Der Check darf NICHT nach dem Namen "HLF 20" suchen, sonst wuerde
+// ein vom Benutzer umbenanntes Seed-Fahrzeug beim naechsten Start zu einem
+// zweiten HLF 20 fuehren. Sobald ueberhaupt ein Fahrzeug existiert, hat der
+// Seed schon gelaufen (oder der Benutzer hat manuell Fahrzeuge angelegt).
+const SEED_BUNDLE_PATH = path.join(__dirname, "dist", "seed-data.cjs");
+
+function loadBundledSeeder() {
+  if (!fs.existsSync(SEED_BUNDLE_PATH)) {
+    throw new Error(
+      `Seed-Bundle fehlt: ${SEED_BUNDLE_PATH} – "npm run build" erzeugt es (scripts/bundle-seed.mjs).`
+    );
+  }
+  return require(SEED_BUNDLE_PATH).seedDemoVehicle;
+}
+
+/**
+ * @param client pg.Client oder pg.Pool
+ * @param seedDemoVehicle Seed-Funktion; Default: das gebuendelte Modul.
+ *   Tests uebergeben die TypeScript-Variante direkt.
+ */
+async function seed(client, seedDemoVehicle = loadBundledSeeder()) {
   const existing = await client.query("SELECT id, name FROM vehicles LIMIT 1");
   if (existing.rows.length > 0) {
     console.log(
@@ -173,16 +195,28 @@ async function seed(client) {
       existing.rows[0].name,
       "), Seed wird uebersprungen"
     );
-    return;
+    return null;
   }
 
-  const vehicleRes = await client.query(
-    "INSERT INTO vehicles (name, description) VALUES ($1, $2) RETURNING id",
-    ["HLF 20", "Hilfeleistungslöschgruppenfahrzeug 20"]
-  );
-  const vId = vehicleRes.rows[0].id;
-
-  console.log(`✅ Seed: HLF 20 angelegt (id: ${vId}, ohne Beladung)`);
+  // Alles oder nichts: Ein Fehler mittendrin darf kein halbes Fahrzeug
+  // hinterlassen. Fuer die Transaktion braucht es EINE Verbindung – bei einem
+  // Pool also einen geliehenen Client.
+  const isPool = typeof client.totalCount === "number";
+  const conn = isPool ? await client.connect() : client;
+  try {
+    await conn.query("BEGIN");
+    const result = await seedDemoVehicle(conn);
+    await conn.query("COMMIT");
+    console.log(
+      `✅ Seed: HLF 20 mit ${result.itemCount} Gegenstaenden angelegt (id: ${result.vehicleId})`
+    );
+    return result;
+  } catch (err) {
+    await conn.query("ROLLBACK").catch(() => {});
+    throw err;
+  } finally {
+    if (isPool) conn.release();
+  }
 }
 
 /**
@@ -325,4 +359,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { seed, migrate, SEED_MIRROR_DIRS };
+module.exports = { seed, migrate, SEED_MIRROR_DIRS, SEED_BUNDLE_PATH };

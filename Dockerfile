@@ -68,6 +68,12 @@ COPY --chown=nextjs:nodejs startup.js ./
 # Wird zur Laufzeit von startup.js und von src/db/schema-sql.ts eingelesen.
 COPY --chown=nextjs:nodejs src/db/schema.sql ./src/db/schema.sql
 
+# Gebuendelte Seed-Logik (aus src/db/seed-data.ts, erzeugt von `npm run build`
+# via scripts/bundle-seed.mjs). startup.js legt damit beim ersten Start das
+# komplette Demo-Fahrzeug an – das Standalone-Image hat weder tsx noch die
+# TypeScript-Quellen.
+COPY --from=builder --chown=nextjs:nodejs /app/dist/seed-data.cjs ./dist/seed-data.cjs
+
 # /data wird als Volume gemountet (gemeinsam mit PostgreSQL)
 # PostgreSQL nutzt /data/pgdata, die App nutzt /data/assets
 # /backups wird per Bind-Mount vom Host eingehängt (Backup-Sidecar + Restore)
