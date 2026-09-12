@@ -15,6 +15,8 @@
 
 # next.js
 /.next/
+# esbuild-Bundle der Seed-Logik fuer startup.js (scripts/bundle-seed.mjs)
+/dist/
 /out/
 
 # production

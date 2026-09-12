@@ -47,4 +47,11 @@ describe("Deploy-Konfiguration: Backup-/Restore-Kette", () => {
     // …und das Volume ist definiert
     expect(compose).toMatch(/^  backups:\s*$/m);
   });
+
+  it("das Seed-Bundle wird gebaut und ins Image kopiert", () => {
+    // startup.js braucht dist/seed-data.cjs fuer den Voll-Seed beim Start.
+    const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
+    expect(pkg.scripts.build).toMatch(/bundle-seed\.mjs/);
+    expect(dockerfile).toMatch(/COPY --from=builder[^\n]*\/app\/dist\/seed-data\.cjs \.\/dist\/seed-data\.cjs/);
+  });
 });
