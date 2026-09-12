@@ -70,6 +70,9 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
   const [selectedComp, setSelectedComp] = useState<number | null>(null);
   const [selectedPos, setSelectedPos] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
+  // Falsch geklickte Position/Kiste – wird rot markiert, damit neben der
+  // richtigen (grün) auch die eigene Fehlwahl sichtbar bleibt.
+  const [wrongPick, setWrongPick] = useState<{ kind: "position" | "box"; id: number } | null>(null);
 
   const target = question.navigationTarget;
 
@@ -101,11 +104,13 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
       // Ziel ist die Position direkt (keine Box erwartet) → sofortige Antwort
       const correct = posId === target?.positionId;
       setFeedback(correct ? "correct" : "wrong");
+      if (!correct) setWrongPick({ kind: "position", id: posId });
       onAnswer(correct);
       return;
     }
     const correct = posId === target?.positionId && !target?.boxId;
     setFeedback(correct ? "correct" : "wrong");
+    if (!correct) setWrongPick({ kind: "position", id: posId });
     onAnswer(correct);
   };
 
@@ -113,8 +118,12 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
     if (answered) return;
     const correct = boxId === target?.boxId;
     setFeedback(correct ? "correct" : "wrong");
+    if (!correct) setWrongPick({ kind: "box", id: boxId });
     onAnswer(correct);
   };
+
+  const isWrongPick = (kind: "position" | "box", id: number) =>
+    wrongPick?.kind === kind && wrongPick.id === id;
 
   if (question.type === "where_is") {
     return <WhereIsChoiceQuestion question={question} onAnswer={onAnswer} answered={answered} />;
@@ -296,8 +305,12 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
                     className={`absolute border-2 rounded transition-all ${
                       answered && p.id === target?.positionId && !target?.boxId
                         ? "border-green-400 bg-green-400/40"
+                        : answered && isWrongPick("position", p.id)
+                        ? "border-red-400 bg-red-500/40"
                         : "border-blue-400/70 bg-blue-400/20 hover:bg-blue-400/40"
                     }`}
+                    aria-label={p.label}
+                    title={p.label}
                     style={{
                       left: `${p.hotspotX}%`,
                       top: `${p.hotspotY}%`,
@@ -314,7 +327,11 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
                 const isTarget = p.id === target?.positionId && !target?.boxId;
                 let cls = "p-4 rounded-xl border-2 font-semibold text-white transition-all ";
                 if (answered) {
-                  cls += isTarget ? "bg-green-600 border-green-400" : "bg-zinc-700 border-zinc-600 text-zinc-400";
+                  cls += isTarget
+                    ? "bg-green-600 border-green-400"
+                    : isWrongPick("position", p.id)
+                    ? "bg-red-700 border-red-400"
+                    : "bg-zinc-700 border-zinc-600 text-zinc-400";
                 } else {
                   cls += "bg-zinc-800 border-zinc-600 hover:border-blue-400";
                 }
@@ -351,7 +368,11 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
               const isTarget = b.id === target?.boxId;
               let cls = "p-4 rounded-xl border-2 font-semibold text-white transition-all ";
               if (answered) {
-                cls += isTarget ? "bg-green-600 border-green-400" : "bg-zinc-700 border-zinc-600 text-zinc-400";
+                cls += isTarget
+                  ? "bg-green-600 border-green-400"
+                  : isWrongPick("box", b.id)
+                  ? "bg-red-700 border-red-400"
+                  : "bg-zinc-700 border-zinc-600 text-zinc-400";
               } else {
                 cls += "bg-zinc-800 border-zinc-600 hover:border-orange-400";
               }

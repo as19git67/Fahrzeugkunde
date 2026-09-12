@@ -233,7 +233,6 @@ export function GameScreen({ vehicleId, vehicleName, vehicleData, onFinished }: 
                 question={currentQuestion}
                 onAnswer={answerQuestion}
                 answered={answered}
-                wasCorrect={state.phase === "answer_feedback" ? (state.lastScoreDelta ?? 0) > 0 : null}
               />
             ) : (
               <WhereIsQuestion

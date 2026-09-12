@@ -2,6 +2,9 @@ import { configDefaults, defineConfig } from "vitest/config";
 import path from "path";
 
 export default defineConfig({
+  // tsconfig hat "jsx": "preserve" (Next übernimmt die Transformation). Für
+  // Komponententests (.tsx) muss Vitest JSX selbst umsetzen.
+  esbuild: { jsx: "automatic" },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

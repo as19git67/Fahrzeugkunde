@@ -139,8 +139,8 @@ export const HLF20_ITEMS: ItemSeed[] = [
   item("die", "Motorkettensäge", "werkzeug", 2, "left", "G3", "Auszug oben"),
   item("die", "Schnittschutzausrüstung", "werkzeug", 1, "left", "G3", "Schublade oben"),
   item("der", "Trennschleifer", "werkzeug", 2, "left", "G3", "Auszug oben"),
-  item("die", "Tauchpumpe", "wasser", 2, "left", "G3", "Boden"),
-  item("das", "Verlängerungskabel", "elektro", 1, "left", "G3", "unten rechts"),
+  item("die", "Tauchpumpe", "wasser", 2, "left", "G3", "Boden links"),
+  item("das", "Verlängerungskabel", "elektro", 1, "left", "G3", "Boden rechts"),
   item("die", "Brechstange", "werkzeug", 1, "left", "G3", "Innenwand links"),
   item("der", "Bolzenschneider", "werkzeug", 1, "left", "G3", "Innenwand links"),
   item("die", "Feuerwehraxt", "werkzeug", 1, "left", "G3", "Innenwand rechts"),
@@ -159,8 +159,8 @@ export const HLF20_ITEMS: ItemSeed[] = [
   item("der", "Überflurhydrantenschlüssel", "wasser", 1, "left", "G5", "Werkzeugleiste"),
   item("der", "Unterflurhydrantenschlüssel", "wasser", 1, "left", "G5", "Werkzeugleiste"),
   item("der", "Kupplungsschlüssel", "wasser", 1, "left", "G5", "Werkzeugleiste"),
-  item("die", "Schlauchbrücke", "wasser", 1, "left", "G5", "Boden"),
-  item("das", "Sammelstück", "armaturen", 1, "left", "G5", "unten mitte"),
+  item("die", "Schlauchbrücke", "wasser", 1, "left", "G5", "Boden links"),
+  item("das", "Sammelstück", "armaturen", 1, "left", "G5", "Boden mitte"),
 
   // ---------- G2 – Strom/Licht/Absicherung (11) ----------
   item("der", "Stromerzeuger", "elektro", 2, "right", "G2", "Auszug unten"),
@@ -173,14 +173,14 @@ export const HLF20_ITEMS: ItemSeed[] = [
   item("der", "Verkehrsleitkegel", "absicherung", 1, "right", "G2", "Kiste oben", "gelbe Kiste"),
   item("das", "Warndreieck", "absicherung", 1, "right", "G2", "Kiste oben", "gelbe Kiste"),
   item("das", "Faltsignal", "absicherung", 1, "right", "G2", "Auszug mitte"),
-  item("die", "Leitkegel-Tasche", "absicherung", 1, "right", "G2", "unten"),
+  item("die", "Leitkegel-Tasche", "absicherung", 1, "right", "G2", "Boden"),
 
   // ---------- G4 – Schaum/Löschmittel/Lüfter (10) ----------
   item("der", "Schaummittelbehälter", "loeschmittel", 1, "right", "G4", "Boden"),
   item("der", "Pulverlöscher", "loeschmittel", 1, "right", "G4", "Halterung links"),
   item("der", "CO2-Löscher", "loeschmittel", 1, "right", "G4", "Halterung mitte"),
   item("der", "Wasserlöscher", "loeschmittel", 1, "right", "G4", "Halterung rechts"),
-  item("die", "Kübelspritze", "loeschmittel", 1, "right", "G4", "oben"),
+  item("die", "Kübelspritze", "loeschmittel", 1, "right", "G4", "Halterung oben"),
   item("der", "Überdrucklüfter", "belueftung", 2, "right", "G4", "Auszug"),
   item("der", "Zumischer Z2", "armaturen", 2, "right", "G4", "Halterung innen"),
   item("der", "Zumischer Z4", "armaturen", 2, "right", "G4", "Halterung innen"),
