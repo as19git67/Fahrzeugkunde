@@ -151,10 +151,15 @@ export async function setup() {
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         code TEXT NOT NULL,
+        challenge TEXT UNIQUE,
+        attempts INTEGER NOT NULL DEFAULT 0,
         expires_at TIMESTAMP NOT NULL,
         used BOOLEAN DEFAULT false,
         created_at TIMESTAMP DEFAULT now()
       );
+      -- Nachträgliche Migration für bestehende Test-DBs
+      ALTER TABLE auth_codes ADD COLUMN IF NOT EXISTS challenge TEXT UNIQUE;
+      ALTER TABLE auth_codes ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0;
       CREATE TABLE IF NOT EXISTS sessions (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

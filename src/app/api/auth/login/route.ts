@@ -1,24 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, users } from "@/db";
 import { eq } from "drizzle-orm";
-import { createOrGetUser, createAuthCode } from "@/lib/auth";
+import {
+  createOrGetUser,
+  createAuthCode,
+  CODE_TTL_MINUTES,
+  LOGIN_COOKIE,
+  LOGIN_COOKIE_PATH,
+  secureCookies,
+} from "@/lib/auth";
 import { sendAuthCode } from "@/lib/email";
+import { readJsonObject } from "@/lib/request";
+
+const HANDLE_RE = /^[a-zA-Z0-9_\-]{3,20}$/;
+// Bewusst grob: ein "@" mit etwas davor und einer Domain mit Punkt dahinter.
+// Die eigentliche Prüfung ist der Code, der an diese Adresse geht.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL_LENGTH = 254;
 
 export async function POST(req: NextRequest) {
-  const { handle, email } = await req.json();
-
-  if (!handle || !email) {
+  const body = await readJsonObject(req);
+  if (!body || typeof body.handle !== "string" || typeof body.email !== "string") {
     return NextResponse.json({ error: "handle und email erforderlich" }, { status: 400 });
   }
 
-  const trimHandle = handle.trim();
-  const trimEmail = email.trim().toLowerCase();
+  const trimHandle = body.handle.trim();
+  const trimEmail = body.email.trim().toLowerCase();
 
-  if (!/^[a-zA-Z0-9_\-]{3,20}$/.test(trimHandle)) {
+  if (!HANDLE_RE.test(trimHandle)) {
     return NextResponse.json(
       { error: "Handle: 3-20 Zeichen, nur Buchstaben, Zahlen, _ und -" },
       { status: 400 }
     );
+  }
+  if (trimEmail.length > MAX_EMAIL_LENGTH || !EMAIL_RE.test(trimEmail)) {
+    return NextResponse.json({ error: "Ungültige E-Mail-Adresse" }, { status: 400 });
   }
 
   // Existiert User mit dieser Email aber anderem Handle?
@@ -43,12 +59,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Fehler beim Anlegen des Benutzers" }, { status: 500 });
   }
 
-  const code = await createAuthCode(result.user.id);
+  const { code, challenge } = await createAuthCode(result.user.id);
   await sendAuthCode(trimEmail, trimHandle, code);
 
-  return NextResponse.json({
+  // Der Login-Vorgang wird an den Browser gebunden: Der Code ist nur mit
+  // diesem Cookie einlösbar. Die user_id wird dem Client nicht mehr verraten.
+  const res = NextResponse.json({
     success: true,
-    userId: result.user.id,
     message: "Code wurde an deine Email gesendet",
   });
+  res.cookies.set(LOGIN_COOKIE, challenge, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: secureCookies(),
+    path: LOGIN_COOKIE_PATH,
+    maxAge: CODE_TTL_MINUTES * 60,
+  });
+  return res;
 }

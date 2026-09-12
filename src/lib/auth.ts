@@ -1,10 +1,23 @@
 import { db, users, authCodes, sessions } from "@/db";
-import { eq, and, gt, sql } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 export const SESSION_COOKIE = "fwk_session";
+
+/** Bindet den laufenden Login-Vorgang (challenge) an den Browser. */
+export const LOGIN_COOKIE = "fwk_login";
+export const LOGIN_COOKIE_PATH = "/api/auth";
+
+export const CODE_TTL_MINUTES = 15;
+/** Fehlversuche pro Code; danach wird der Code gelöscht (neuen anfordern). */
+export const MAX_CODE_ATTEMPTS = 5;
+
+/** Cookies nur in Produktion auf https beschränken – lokal läuft die App über http. */
+export function secureCookies(): boolean {
+  return process.env.NODE_ENV === "production";
+}
 
 export type UserRole = "admin" | "user";
 
@@ -22,8 +35,9 @@ export function isAdmin(user: { role?: string | null } | null | undefined): bool
   return !!user && user.role === "admin";
 }
 
+/** 6-stelliger Code aus einer kryptographisch sicheren Quelle (mit führenden Nullen). */
 export function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
 export function generateToken(): string {
@@ -51,43 +65,75 @@ export async function createOrGetUser(handle: string, email: string) {
   return { user, isNew: true };
 }
 
-export async function createAuthCode(userId: number): Promise<string> {
-  // Alte Codes löschen
+/**
+ * Legt einen neuen Login-Code an. Die zurückgegebene `challenge` wandert als
+ * httpOnly-Cookie zum Browser; nur wer sie besitzt, kann den Code einlösen.
+ */
+export async function createAuthCode(
+  userId: number
+): Promise<{ code: string; challenge: string }> {
+  // Alte Codes löschen – pro Nutzer ist immer nur ein Login-Vorgang offen
   await db.delete(authCodes).where(eq(authCodes.userId, userId));
 
   const code = generateCode();
-  const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 min
+  const challenge = generateToken();
+  const expiresAt = new Date(Date.now() + CODE_TTL_MINUTES * 60 * 1000).toISOString();
 
-  await db.insert(authCodes).values({ userId, code, expiresAt });
-  return code;
+  await db.insert(authCodes).values({ userId, code, challenge, expiresAt });
+  return { code, challenge };
 }
 
-export async function verifyCode(userId: number, code: string): Promise<boolean> {
-  const now = new Date().toISOString();
+export type VerifyResult =
+  | { ok: true; userId: number }
+  | { ok: false; reason: "invalid" | "expired" | "locked" };
+
+/**
+ * Löst einen Login-Code ein. Statt einer vom Client gewählten user_id
+ * identifiziert die `challenge` aus dem Login-Cookie den Vorgang – ein
+ * Angreifer kann so keinen fremden Code durchprobieren. Fehlversuche werden
+ * gezählt; ab MAX_CODE_ATTEMPTS wird der Code gelöscht (Brute-Force auf
+ * 6 Ziffern ist damit ausgeschlossen).
+ */
+export async function verifyCode(challenge: string, code: string): Promise<VerifyResult> {
   const [record] = await db
     .select()
     .from(authCodes)
-    .where(
-      and(
-        eq(authCodes.userId, userId),
-        eq(authCodes.code, code),
-        eq(authCodes.used, false),
-        gt(authCodes.expiresAt, now)
-      )
-    )
+    .where(and(eq(authCodes.challenge, challenge), eq(authCodes.used, false)))
     .limit(1);
+  if (!record) return { ok: false, reason: "invalid" };
 
-  if (!record) return false;
+  if (new Date(record.expiresAt).getTime() <= Date.now()) {
+    await db.delete(authCodes).where(eq(authCodes.id, record.id));
+    return { ok: false, reason: "expired" };
+  }
 
-  await db
-    .update(authCodes)
-    .set({ used: true })
-    .where(eq(authCodes.id, record.id));
+  const expected = Buffer.from(record.code);
+  const given = Buffer.from(code);
+  const matches = expected.length === given.length && crypto.timingSafeEqual(expected, given);
+  if (!matches) {
+    // Atomar hochzählen, damit parallele Versuche nicht denselben Stand lesen
+    const [updated] = await db
+      .update(authCodes)
+      .set({ attempts: sql`${authCodes.attempts} + 1` })
+      .where(eq(authCodes.id, record.id))
+      .returning({ attempts: authCodes.attempts });
+    if ((updated?.attempts ?? MAX_CODE_ATTEMPTS) >= MAX_CODE_ATTEMPTS) {
+      await db.delete(authCodes).where(eq(authCodes.id, record.id));
+      return { ok: false, reason: "locked" };
+    }
+    return { ok: false, reason: "invalid" };
+  }
 
+  await db.update(authCodes).set({ used: true }).where(eq(authCodes.id, record.id));
   // User als verifiziert markieren
-  await db.update(users).set({ verified: true }).where(eq(users.id, userId));
+  await db.update(users).set({ verified: true }).where(eq(users.id, record.userId));
 
-  return true;
+  return { ok: true, userId: record.userId };
+}
+
+/** Beendet eine Session serverseitig – ein gestohlener Token bleibt sonst gültig. */
+export async function destroySession(token: string): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.token, token));
 }
 
 export async function createSession(userId: number): Promise<string> {

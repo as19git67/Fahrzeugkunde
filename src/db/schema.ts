@@ -95,6 +95,9 @@ export const authCodes = pgTable("auth_codes", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   code: text("code").notNull(),
+  // Login-gebundenes Zufallstoken (httpOnly-Cookie); siehe src/lib/auth.ts
+  challenge: text("challenge").unique(),
+  attempts: integer("attempts").notNull().default(0),
   expiresAt: timestamp("expires_at", { mode: "string" }).notNull(),
   used: boolean("used").default(false),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),

@@ -13,10 +13,11 @@ export function LoginModal({ onSuccess, onClose }: Props) {
   const [handle, setHandle] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [userId, setUserId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Der Login-Vorgang selbst steckt in einem httpOnly-Cookie, das /api/auth/login
+  // setzt – der Client muss sich keine userId merken.
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -27,13 +28,15 @@ export function LoginModal({ onSuccess, onClose }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ handle, email }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Fehler");
+        setError(data.error ?? `Fehler (${res.status})`);
         return;
       }
-      setUserId(data.userId);
+      setCode("");
       setStep("code");
+    } catch {
+      setError("Verbindung fehlgeschlagen");
     } finally {
       setLoading(false);
     }
@@ -41,21 +44,22 @@ export function LoginModal({ onSuccess, onClose }: Props) {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) return;
     setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, code }),
+        body: JSON.stringify({ code }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data.error ?? "Ungültiger Code");
         return;
       }
       onSuccess();
+    } catch {
+      setError("Verbindung fehlgeschlagen");
     } finally {
       setLoading(false);
     }

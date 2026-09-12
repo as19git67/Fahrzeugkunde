@@ -162,10 +162,22 @@ CREATE TABLE IF NOT EXISTS auth_codes (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   code TEXT NOT NULL,
+  -- Zufallstoken, das der Login-Vorgang als httpOnly-Cookie im Browser ablegt.
+  -- Der Code ist nur zusammen mit diesem Token einloesbar, nie ueber eine
+  -- vom Client frei waehlbare user_id.
+  challenge TEXT UNIQUE,
+  -- Fehlversuche; ab MAX_CODE_ATTEMPTS (src/lib/auth.ts) wird der Code geloescht.
+  attempts INTEGER NOT NULL DEFAULT 0,
   expires_at TIMESTAMP NOT NULL,
   used BOOLEAN DEFAULT false,
   created_at TIMESTAMP DEFAULT now()
 );
+
+-- Nachtraegliche Migration fuer bestehende Datenbanken: challenge/attempts
+-- ergaenzen. Alte Codes ohne challenge sind damit nicht mehr einloesbar –
+-- sie laufen ohnehin nach 15 Minuten ab.
+ALTER TABLE auth_codes ADD COLUMN IF NOT EXISTS challenge TEXT UNIQUE;
+ALTER TABLE auth_codes ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS sessions (
   id SERIAL PRIMARY KEY,
