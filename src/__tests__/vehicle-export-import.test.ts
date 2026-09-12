@@ -39,6 +39,7 @@ import {
   uploadPathToPackagePath,
   UPLOAD_DIR,
   UPLOAD_URL_PREFIX,
+  validatePackageAssets,
   type PackageBox,
   type PackageCompartment,
   type PackageItem,
@@ -225,6 +226,10 @@ describe("Vehicle Package Export → Import Round-Trip", () => {
     expect(parsed.manifest.magic).toBe(PACKAGE_MAGIC);
     expect(parsed.manifest.schemaVersion).toBe(1);
     expect(parsed.manifest.vehicle.name).toBe("HLF 20");
+
+    // Die kuratierten Seed-SVGs müssen die Inhaltsprüfung des Imports bestehen –
+    // sonst wäre das eigene Demo-Fahrzeug nicht mehr importierbar.
+    expect(() => validatePackageAssets(parsed.assets)).not.toThrow();
 
     // Jedes im vehicle.json referenzierte Asset ist im Paket enthalten.
     const refs = collectReferencedAssetPaths(parsed.vehicle);

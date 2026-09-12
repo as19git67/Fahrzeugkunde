@@ -22,12 +22,14 @@ import { db } from "@/db";
 import {
   collectReferencedAssetPaths,
   generateUploadFilename,
+  MAX_PACKAGE_BYTES,
   PACKAGE_ASSET_PREFIX,
   PackageValidationError,
   readPackageZip,
   safeExtFromPath,
   UPLOAD_DIR,
   UPLOAD_URL_PREFIX,
+  validatePackageAssets,
 } from "@/lib/vehicle-package";
 import { insertVehicleTree, makeRewriter } from "@/lib/vehicle-import";
 
@@ -93,6 +95,13 @@ export async function POST(req: NextRequest) {
   if (!(file instanceof File)) {
     return NextResponse.json({ error: "Keine Datei (Feld 'file') übermittelt" }, { status: 400 });
   }
+  // Route Handler haben keine Body-Grenze – vor dem Einlesen in den Speicher deckeln.
+  if (file.size > MAX_PACKAGE_BYTES) {
+    return NextResponse.json(
+      { error: `Paket zu groß (max. ${MAX_PACKAGE_BYTES / 1024 / 1024} MB)` },
+      { status: 413 }
+    );
+  }
 
   const buf = Buffer.from(await file.arrayBuffer());
 
@@ -117,6 +126,17 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+  }
+
+  // 2b) Bild-Assets inhaltlich prüfen (Magic Bytes, Endung, SVG-Sicherheit),
+  //     bevor irgendetwas auf die Platte geschrieben wird.
+  try {
+    validatePackageAssets(assets, refs);
+  } catch (err) {
+    if (err instanceof PackageValidationError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    throw err;
   }
 
   // 3) Assets auf die Festplatte schreiben (unter neuen, eindeutigen Namen).

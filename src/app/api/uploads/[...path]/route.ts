@@ -50,11 +50,24 @@ export async function GET(
   const ext = (resolved.split(".").pop() ?? "").toLowerCase();
   const contentType = MIME_BY_EXT[ext] ?? "application/octet-stream";
 
-  return new NextResponse(new Uint8Array(data), {
-    status: 200,
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
-    },
-  });
+  const headers: Record<string, string> = {
+    "Content-Type": contentType,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    // Browser dürfen den Typ nicht erraten – sonst könnte eine Datei mit
+    // HTML-Inhalt trotz Bild-Endung als Seite interpretiert werden.
+    "X-Content-Type-Options": "nosniff",
+  };
+  if (ext === "svg") {
+    // SVG kann Script enthalten. Beim direkten Aufruf im Browser: kein Script,
+    // keine externen Ressourcen, isolierter Origin (sandbox) und Download statt
+    // Anzeige. In <img>/<Image> eingebettet führt SVG ohnehin nie Script aus –
+    // dafür sind diese Header ohne Nebenwirkung.
+    headers["Content-Security-Policy"] =
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox";
+    headers["Content-Disposition"] = "attachment";
+  } else if (!MIME_BY_EXT[ext]) {
+    headers["Content-Disposition"] = "attachment";
+  }
+
+  return new NextResponse(new Uint8Array(data), { status: 200, headers });
 }

@@ -30,6 +30,25 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/*": ["src/db/schema.sql"],
   },
+  // Statisch ausgelieferte Uploads (/uploads/**, Symlink auf das Asset-Volume)
+  // laufen nicht durch den Route Handler /api/uploads und bekämen sonst keine
+  // Schutz-Header. Laut Doku greifen headers() vor dem Dateisystem, also auch
+  // für public/: kein MIME-Sniffing, und ein direkt aufgerufenes SVG darf weder
+  // Script ausführen noch fremde Inhalte laden.
+  async headers() {
+    return [
+      {
+        source: "/uploads/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     // Lokale Uploads erlauben. /uploads/** kommt aus dem public-Ordner
     // (Seed-Bilder), /api/uploads/** wird vom Route Handler ausgeliefert.
