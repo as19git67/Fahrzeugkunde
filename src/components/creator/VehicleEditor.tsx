@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { createLocationLabeler } from "@/lib/location-label";
 import Image from "next/image";
@@ -79,25 +79,55 @@ const SIDES = [
   { value: "front", label: "Vorne" },
 ];
 
+/** Lädt die komplette Fahrzeugstruktur; wirft bei 4xx/5xx mit der Server-Meldung. */
+async function fetchVehicle(vehicleId: number): Promise<Vehicle> {
+  const res = await fetch(`/api/vehicles/${vehicleId}`, { cache: "no-store" });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error ?? `Fahrzeug konnte nicht geladen werden (${res.status})`);
+  }
+  return res.json();
+}
+
 export function VehicleEditor({ vehicleId, onBack, onDeleted }: Props) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [activeTab, setActiveTab] = useState<"structure" | "items">("structure");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [renamingVehicle, setRenamingVehicle] = useState(false);
   const [vehicleRenameValue, setVehicleRenameValue] = useState("");
 
-  const reload = async () => {
-    const res = await fetch(`/api/vehicles/${vehicleId}`, { cache: "no-store" });
-    const data = await res.json();
-    setVehicle(data);
-  };
-
-  useEffect(() => {
-    reload().finally(() => setLoading(false));
+  // Nachladen nach Mutationen. Fehler landen sichtbar beim Nutzer statt als
+  // Fehlerobjekt im State (vorher: 404 → `vehicle.items` → Crash der Seite).
+  const reload = useCallback(async () => {
+    try {
+      setVehicle(await fetchVehicle(vehicleId));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Fahrzeug konnte nicht geladen werden");
+    }
   }, [vehicleId]);
 
-  if (loading || !vehicle) {
+  useEffect(() => {
+    let cancelled = false;
+    fetchVehicle(vehicleId)
+      .then((v) => { if (!cancelled) setVehicle(v); })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Fahrzeug konnte nicht geladen werden");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [vehicleId]);
+
+  if (loading) {
     return <div className="text-zinc-400 py-12 text-center">Lade...</div>;
+  }
+  if (loadError || !vehicle) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-12 text-center">
+        <div className="text-red-300">{loadError ?? "Fahrzeug nicht gefunden"}</div>
+        <button onClick={onBack} className="text-zinc-400 hover:text-white transition-colors">← Zurück</button>
+      </div>
+    );
   }
 
   const startRenameVehicle = () => {
