@@ -71,6 +71,17 @@ const LEGACY_SCHEMA = `
     location_label TEXT,
     created_at TIMESTAMP DEFAULT now()
   );
+  -- Auth-Tabellen im Stand vor role (users) und challenge/attempts (auth_codes)
+  CREATE TABLE users (
+    id SERIAL PRIMARY KEY, handle TEXT NOT NULL UNIQUE, email TEXT NOT NULL UNIQUE,
+    verified BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT now()
+  );
+  CREATE TABLE auth_codes (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    code TEXT NOT NULL, expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT now()
+  );
 `;
 
 /** Zwei Gegenstände: einer mit Bild, einer ohne. */
@@ -90,10 +101,11 @@ const LEGACY_DATA = `
 
 let client: pg.Client;
 
-async function columnNames(): Promise<string[]> {
+async function columnNames(table = "items"): Promise<string[]> {
   const { rows } = await client.query(
     `SELECT column_name FROM information_schema.columns
-      WHERE table_name = 'items' ORDER BY column_name`
+      WHERE table_name = $1 ORDER BY column_name`,
+    [table]
   );
   return rows.map((r) => r.column_name as string);
 }
@@ -131,6 +143,20 @@ describe("schema.sql – Migration einer Bestandsdatenbank", () => {
 
   it("ergänzt location_image_path", async () => {
     expect(await columnNames()).toContain("location_image_path");
+  });
+
+  it("ergänzt users.role sowie auth_codes.challenge/attempts", async () => {
+    expect(await columnNames("users")).toContain("role");
+    const authCols = await columnNames("auth_codes");
+    expect(authCols).toContain("challenge");
+    expect(authCols).toContain("attempts");
+    // attempts ist NOT NULL DEFAULT 0 – ein Alt-Insert ohne die Spalte funktioniert
+    await client.query(`INSERT INTO users (handle, email) VALUES ('Alt', 'alt@test.de')`);
+    await client.query(
+      `INSERT INTO auth_codes (user_id, code, expires_at) VALUES (1, '123456', now() + interval '10 minutes')`
+    );
+    const { rows } = await client.query(`SELECT attempts, challenge FROM auth_codes`);
+    expect(rows[0]).toEqual({ attempts: 0, challenge: null });
   });
 
   it("übernimmt ein vorhandenes Bild in beide Felder", async () => {
