@@ -2,7 +2,13 @@
  * Global setup für Vitest: Test-Datenbank erstellen und Migrations ausführen.
  * Wird einmal vor allen Tests ausgeführt.
  * Wenn PostgreSQL nicht erreichbar ist, werden nur Unit-Tests ausgeführt.
+ *
+ * Die DDL kommt aus src/db/schema.sql – derselben Datei, die auch startup.js,
+ * migrate.ts und der Reset-Seed verwenden. Früher stand hier eine
+ * handgeschriebene Kopie, die bereits von schema.sql abgewichen war.
  */
+import fs from "node:fs";
+import path from "node:path";
 import pg from "pg";
 
 const ADMIN_URL =
@@ -15,6 +21,11 @@ const TEST_DB = "fahrzeugkunde_test";
 export const TEST_DATABASE_URL =
   process.env.POSTGRES_TEST_CONNECTION_STRING ||
   ADMIN_URL.replace(/\/postgres$/, `/${TEST_DB}`);
+
+const SCHEMA_SQL = fs.readFileSync(
+  path.join(process.cwd(), "src", "db", "schema.sql"),
+  "utf8"
+);
 
 export async function setup() {
   // Prüfen ob PostgreSQL erreichbar ist
@@ -38,149 +49,10 @@ export async function setup() {
     }
     await admin.end();
 
-    // Migrations auf Test-DB ausführen
+    // Migration auf der Test-DB – idempotent, auch auf einer wiederverwendeten DB
     const client = new pg.Client({ connectionString: TEST_DATABASE_URL });
     await client.connect();
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS vehicles (
-        id SERIAL PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        created_at TIMESTAMP DEFAULT now()
-      );
-      CREATE TABLE IF NOT EXISTS vehicle_views (
-        id SERIAL PRIMARY KEY,
-        vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
-        side TEXT NOT NULL CHECK(side IN ('left','right','back','top','front')),
-        label TEXT NOT NULL,
-        image_path TEXT,
-        sort_order INTEGER DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS compartments (
-        id SERIAL PRIMARY KEY,
-        view_id INTEGER NOT NULL REFERENCES vehicle_views(id) ON DELETE CASCADE,
-        label TEXT NOT NULL,
-        image_path TEXT,
-        hotspot_x DOUBLE PRECISION,
-        hotspot_y DOUBLE PRECISION,
-        hotspot_w DOUBLE PRECISION,
-        hotspot_h DOUBLE PRECISION,
-        sort_order INTEGER DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS positions (
-        id SERIAL PRIMARY KEY,
-        compartment_id INTEGER NOT NULL REFERENCES compartments(id) ON DELETE CASCADE,
-        label TEXT NOT NULL,
-        hotspot_x DOUBLE PRECISION,
-        hotspot_y DOUBLE PRECISION,
-        hotspot_w DOUBLE PRECISION,
-        hotspot_h DOUBLE PRECISION,
-        sort_order INTEGER DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS boxes (
-        id SERIAL PRIMARY KEY,
-        position_id INTEGER NOT NULL REFERENCES positions(id) ON DELETE CASCADE,
-        label TEXT NOT NULL,
-        image_path TEXT,
-        hotspot_x DOUBLE PRECISION,
-        hotspot_y DOUBLE PRECISION,
-        hotspot_w DOUBLE PRECISION,
-        hotspot_h DOUBLE PRECISION,
-        sort_order INTEGER DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS items (
-        id SERIAL PRIMARY KEY,
-        vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
-        name TEXT NOT NULL,
-        article TEXT,
-        plural BOOLEAN NOT NULL DEFAULT false,
-        image_path TEXT,
-        location_image_path TEXT,
-        silhouette_path TEXT,
-        difficulty INTEGER DEFAULT 1,
-        position_id INTEGER REFERENCES positions(id) ON DELETE CASCADE,
-        box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
-        created_at TIMESTAMP DEFAULT now()
-      );
-      -- Nachträgliche Migration für bestehende Test-DBs
-      ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
-      ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
-      ALTER TABLE items ADD COLUMN IF NOT EXISTS plural BOOLEAN NOT NULL DEFAULT false;
-      -- Spiegelt die Migration aus schema.sql: Spalte ergänzen und einmalig
-      -- aus image_path vorbelegen (siehe dort für die Begründung).
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.columns
-          WHERE table_name = 'items' AND column_name = 'location_image_path'
-        ) THEN
-          ALTER TABLE items ADD COLUMN location_image_path TEXT;
-          UPDATE items SET location_image_path = image_path WHERE image_path IS NOT NULL;
-        END IF;
-      END $$;
-      -- FK items.position_id / items.box_id auf ON DELETE CASCADE umstellen,
-      -- falls die Test-DB noch die alte NO-ACTION-Variante hat.
-      DO $$
-      BEGIN
-        IF EXISTS (
-          SELECT 1 FROM information_schema.referential_constraints
-          WHERE constraint_name = 'items_position_id_fkey' AND delete_rule <> 'CASCADE'
-        ) THEN
-          ALTER TABLE items DROP CONSTRAINT items_position_id_fkey;
-          ALTER TABLE items ADD CONSTRAINT items_position_id_fkey
-            FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE;
-        END IF;
-        IF EXISTS (
-          SELECT 1 FROM information_schema.referential_constraints
-          WHERE constraint_name = 'items_box_id_fkey' AND delete_rule <> 'CASCADE'
-        ) THEN
-          ALTER TABLE items DROP CONSTRAINT items_box_id_fkey;
-          ALTER TABLE items ADD CONSTRAINT items_box_id_fkey
-            FOREIGN KEY (box_id) REFERENCES boxes(id) ON DELETE CASCADE;
-        END IF;
-      END $$;
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        handle TEXT NOT NULL UNIQUE,
-        email TEXT NOT NULL UNIQUE,
-        verified BOOLEAN DEFAULT false,
-        role TEXT NOT NULL DEFAULT 'user',
-        created_at TIMESTAMP DEFAULT now()
-      );
-      -- Nachträgliche Migration für bestehende Test-DBs
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
-      CREATE TABLE IF NOT EXISTS auth_codes (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        code TEXT NOT NULL,
-        challenge TEXT UNIQUE,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        expires_at TIMESTAMP NOT NULL,
-        used BOOLEAN DEFAULT false,
-        created_at TIMESTAMP DEFAULT now()
-      );
-      -- Nachträgliche Migration für bestehende Test-DBs
-      ALTER TABLE auth_codes ADD COLUMN IF NOT EXISTS challenge TEXT UNIQUE;
-      ALTER TABLE auth_codes ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0;
-      CREATE TABLE IF NOT EXISTS sessions (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        token TEXT NOT NULL UNIQUE,
-        created_at TIMESTAMP DEFAULT now()
-      );
-      CREATE TABLE IF NOT EXISTS highscores (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id),
-        handle TEXT NOT NULL,
-        score INTEGER NOT NULL,
-        mode TEXT NOT NULL CHECK(mode IN ('time_attack','speed_run')),
-        correct_answers INTEGER NOT NULL,
-        total_answers INTEGER NOT NULL,
-        duration_seconds INTEGER NOT NULL,
-        vehicle_id INTEGER REFERENCES vehicles(id),
-        created_at TIMESTAMP DEFAULT now()
-      );
-    `);
+    await client.query(SCHEMA_SQL);
     await client.end();
 
     // DATABASE_URL setzen, damit App-Module die Test-DB nutzen

@@ -123,6 +123,7 @@ export const highscores = pgTable("highscores", {
   correctAnswers: integer("correct_answers").notNull(),
   totalAnswers: integer("total_answers").notNull(),
   durationSeconds: integer("duration_seconds").notNull(),
-  vehicleId: integer("vehicle_id").references(() => vehicles.id),
+  // SET NULL: Fahrzeug bleibt löschbar, der Eintrag verliert nur den Bezug
+  vehicleId: integer("vehicle_id").references(() => vehicles.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow(),
 });
