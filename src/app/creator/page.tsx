@@ -201,6 +201,24 @@ export default function CreatorPage() {
     );
   }
 
+  // Die API lässt Änderungen nur für Administratoren zu – Nicht-Admins bekämen
+  // sonst bei jeder Aktion ein 403. Deshalb hier klar sagen, woran es liegt.
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center gap-6 p-4">
+        <div className="text-6xl">🔒</div>
+        <h2 className="text-2xl font-bold">Creator-Modus</h2>
+        <p className="text-zinc-400 text-center max-w-sm">
+          Fahrzeuge und Beladung dürfen nur Administratoren bearbeiten.
+          Du bist als <span className="text-white">{user.handle}</span> angemeldet.
+        </p>
+        <Link href="/" className="text-zinc-500 hover:text-white text-sm transition-colors">
+          ← Zurück zur Startseite
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <header className="border-b border-zinc-800 px-4 py-3 flex items-center justify-between max-w-5xl mx-auto">

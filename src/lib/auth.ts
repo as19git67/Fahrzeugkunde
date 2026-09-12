@@ -1,6 +1,7 @@
 import { db, users, authCodes, sessions } from "@/db";
 import { eq, and, gt, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import crypto from "crypto";
 
 export const SESSION_COOKIE = "fwk_session";
@@ -105,4 +106,34 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   const [user] = await db.select().from(users).where(eq(users.id, session.userId));
   return (user as SessionUser | undefined) ?? null;
+}
+
+/**
+ * Autorisierungs-Guard für alle Routen, die Inhalte verändern (Creator,
+ * Upload, Admin). Laut Produktmodell bearbeiten nur Administratoren
+ * Fahrzeuge; normale Nutzer spielen und tragen Highscores ein.
+ *
+ * Aufruf: `const { denied } = await requireAdmin(); if (denied) return denied;`
+ * → 401 ohne Session, 403 mit Session aber ohne Admin-Rolle.
+ */
+export async function requireAdmin(): Promise<
+  { user: SessionUser; denied: null } | { user: null; denied: NextResponse }
+> {
+  const user = await getSessionUser();
+  if (!user) {
+    return {
+      user: null,
+      denied: NextResponse.json({ error: "Nicht eingeloggt" }, { status: 401 }),
+    };
+  }
+  if (!isAdmin(user)) {
+    return {
+      user: null,
+      denied: NextResponse.json(
+        { error: "Nur Administratoren dürfen Inhalte bearbeiten." },
+        { status: 403 }
+      ),
+    };
+  }
+  return { user, denied: null };
 }
