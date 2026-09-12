@@ -50,12 +50,16 @@ npm run dev             # http://localhost:3000
 docker compose up -d
 ```
 
-Two services are launched:
+Four services are launched:
 
 | Service | Purpose |
 |---|---|
-| `db`    | Postgres 16, data persisted in the `app-data` volume under `/data/pgdata`. |
-| `app`   | Next.js standalone build. On first start `startup.js` runs migrations, loads the seed vehicle, and mirrors bundled image assets into `/data/assets`. Uploads are served from there via `public/uploads`. |
+| `db`    | Postgres 18, data persisted in the `app-data` volume under `/data/pgdata`. |
+| `app`   | Next.js standalone build. On first start `startup.js` runs migrations, loads the seed vehicle, and mirrors bundled image assets into `/data/assets`. Uploads are served from there via `public/uploads`. Also mounts `backups/` for the drop-in restore (see below). |
+| `backup` | Sidecar that writes a daily DB + assets archive to `backups/` (see *Backup & Restore*). |
+| `watchtower` | Pulls the `:test` image on request from CI and restarts `app`. |
+
+The Postgres major version must be identical in three places — `image: postgres:N` here, `FROM postgres:N` in `scripts/backup/Dockerfile` (produces the dumps) and `postgresql-client-N` in the app `Dockerfile` (restores them). `src/__tests__/deploy-config.test.ts` fails if they drift apart.
 
 ### Environment variables
 
@@ -250,6 +254,11 @@ cp backups/fahrzeugkunde-20260414T020000Z.backup backups/restore.backup
 docker compose restart app
 ```
 
+The `app` service mounts the same `backups` volume as the sidecar. The app
+runs as uid 1001 and renames the trigger file after the run, so the host
+folder must be writable for that user (e.g. `chmod 775` with a shared group,
+or `chown 1001` the folder).
+
 `startup.js` checks for `/backups/restore.backup` on every container
 start. When it finds one:
 
@@ -263,8 +272,10 @@ start. When it finds one:
 6. If any step fails, the trigger is moved to `restore.backup.failed-<timestamp>`
    to avoid a restart loop – check the container logs for the cause
 
-The app image ships with `postgresql-client-16` (via PGDG) so
-`pg_restore` is available at runtime.
+The app image ships with `postgresql-client-18` (via PGDG) so
+`pg_restore` is available at runtime. Its major version must match the
+`postgres:18` images of `db` and `backup` — `pg_restore` refuses archives
+written by a newer `pg_dump` ("unsupported version in file header").
 
 ## Scripts
 

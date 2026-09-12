@@ -36,6 +36,11 @@ services:
       SMTP_FROM: ${SMTP_FROM}
     volumes:
       - app-data:/data
+      # Drop-in-Restore: startup.js sucht beim Start /backups/restore.backup
+      # (siehe README "Backup & Restore"). Ohne diesen Mount kann der Restore
+      # nie ausgelöst werden. Der App-User (uid 1001) braucht Schreibrecht auf
+      # dem Host-Ordner, um den Trigger nach dem Lauf umzubenennen.
+      - backups:/backups
     depends_on:
       db:
         condition: service_healthy
