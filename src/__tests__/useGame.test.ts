@@ -108,6 +108,56 @@ describe("useGame – Spieldurchlauf", () => {
     expect(result.current.state.timeLeft).toBe(0);
     expect(result.current.state.phase).toBe("finished");
     expect(result.current.state.finished).toBe(true);
+    expect(result.current.state.durationSeconds).toBe(TIME_ATTACK_DURATION);
+  });
+
+  it("time_attack: die Uhr verwirft beim Phasenwechsel keine angebrochenen Sekunden", () => {
+    // Regression: Früher wurde das Interval bei jeder Antwort neu gestartet –
+    // wer alle 900 ms antwortete, hatte eine Uhr, die nie tickte.
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useGame());
+    act(() => result.current.startGame(makeQuestions(3), "time_attack"));
+    for (let i = 0; i < 3; i++) {
+      act(() => { vi.advanceTimersByTime(900); });
+      act(() => result.current.answerQuestion(true));
+      act(() => result.current.nextQuestion());
+    }
+    // 2,7 s vergangen → 57,3 s übrig → Anzeige 58 (aufgerundet), nicht 60
+    expect(result.current.state.timeLeft).toBe(58);
+  });
+
+  it("time_attack: die Uhr läuft während des Antwort-Feedbacks weiter", () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useGame());
+    act(() => result.current.startGame(makeQuestions(3), "time_attack"));
+    act(() => { vi.advanceTimersByTime(1000); });
+    act(() => result.current.answerQuestion(true));
+    expect(result.current.state.phase).toBe("answer_feedback");
+    act(() => { vi.advanceTimersByTime(30_000); });
+    expect(result.current.state.timeLeft).toBe(29);
+    // Deadline erreicht, ohne dass nextQuestion je aufgerufen wurde
+    act(() => { vi.advanceTimersByTime(30_000); });
+    expect(result.current.state.phase).toBe("finished");
+    expect(result.current.state.durationSeconds).toBe(TIME_ATTACK_DURATION);
+  });
+
+  it("speed_run: Dauer wird beim Erreichen des Ziels fixiert und tickt danach nicht weiter", () => {
+    vi.useFakeTimers();
+    const { result } = renderHook(() => useGame());
+    act(() => result.current.startGame(makeQuestions(5), "speed_run"));
+    act(() => { vi.advanceTimersByTime(10_000); });
+    expect(result.current.elapsedSeconds).toBe(10);
+    for (let i = 0; i < SPEED_RUN_TARGET; i++) {
+      act(() => result.current.answerQuestion(true));
+      if (i < SPEED_RUN_TARGET - 1) act(() => result.current.nextQuestion());
+    }
+    expect(result.current.state.durationSeconds).toBe(10);
+    // Feedback-Zeit nach der letzten Antwort zählt nicht mehr
+    act(() => { vi.advanceTimersByTime(5_000); });
+    act(() => result.current.nextQuestion());
+    expect(result.current.state.phase).toBe("finished");
+    expect(result.current.state.durationSeconds).toBe(10);
+    expect(result.current.elapsedSeconds).toBe(10);
   });
 
   it("resetGame stellt den Ausgangszustand wieder her", () => {

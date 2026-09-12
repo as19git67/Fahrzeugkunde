@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, highscores, vehicles } from "@/db";
 import { and, desc, eq } from "drizzle-orm";
 import { getSessionUser } from "@/lib/auth";
-import { GAME_MODES, MAX_SCORE_PER_CORRECT_ANSWER } from "@/lib/scoring";
+import {
+  calculateSpeedRunResult,
+  GAME_MODES,
+  MAX_SCORE_PER_CORRECT_ANSWER,
+  MIN_SECONDS_PER_ANSWER,
+  SPEED_RUN_TARGET,
+  TIME_ATTACK_DURATION,
+} from "@/lib/scoring";
 import { intParam, nonNegativeInt, positiveInt, readJsonObject } from "@/lib/request";
 
 const DEFAULT_LIMIT = 10;
@@ -59,7 +66,7 @@ export async function POST(req: NextRequest) {
   const body = await readJsonObject(req);
   if (!body) return NextResponse.json({ error: "Ungültiger Request-Body" }, { status: 400 });
 
-  const score = nonNegativeInt(body.score);
+  let score = nonNegativeInt(body.score);
   const correctAnswers = nonNegativeInt(body.correctAnswers);
   const totalAnswers = nonNegativeInt(body.totalAnswers);
   const durationSeconds = nonNegativeInt(body.durationSeconds);
@@ -72,10 +79,32 @@ export async function POST(req: NextRequest) {
   if (correctAnswers > totalAnswers || totalAnswers > MAX_ANSWERS || durationSeconds > MAX_DURATION_SECONDS) {
     return NextResponse.json({ error: "Unplausible Spielwerte" }, { status: 400 });
   }
-  // Der Score wird im Client berechnet und ist frei fälschbar. Mehr als das
-  // theoretische Maximum pro richtiger Antwort kann kein Spiel einbringen.
-  if (score > correctAnswers * MAX_SCORE_PER_CORRECT_ANSWER) {
-    return NextResponse.json({ error: "Unplausibler Score" }, { status: 400 });
+
+  if (body.mode === "speed_run") {
+    // Speed-Run wird nach Zeit gewertet: Ein Lauf ist erst mit dem Ziel
+    // beendet, und schneller als MIN_SECONDS_PER_ANSWER je Antwort geht nicht.
+    // Der Score wird hier aus Zeit und Fehlern neu berechnet – der Client-
+    // Wert wird ignoriert, damit er nicht gefälscht werden kann.
+    if (correctAnswers !== SPEED_RUN_TARGET) {
+      return NextResponse.json(
+        { error: `Speed-Run ist erst mit ${SPEED_RUN_TARGET} richtigen Antworten beendet` },
+        { status: 400 }
+      );
+    }
+    if (durationSeconds < totalAnswers * MIN_SECONDS_PER_ANSWER) {
+      return NextResponse.json({ error: "Unplausible Spieldauer" }, { status: 400 });
+    }
+    score = calculateSpeedRunResult({ durationSeconds, correctAnswers, totalAnswers }).score;
+  } else {
+    // Time-Attack: Dauer ist fix (kleine Toleranz für das letzte Feedback);
+    // der Score wird im Client berechnet und ist frei fälschbar – mehr als das
+    // theoretische Maximum pro richtiger Antwort kann kein Spiel einbringen.
+    if (durationSeconds > TIME_ATTACK_DURATION + 5) {
+      return NextResponse.json({ error: "Unplausible Spieldauer" }, { status: 400 });
+    }
+    if (score > correctAnswers * MAX_SCORE_PER_CORRECT_ANSWER) {
+      return NextResponse.json({ error: "Unplausibler Score" }, { status: 400 });
+    }
   }
 
   let vehicleId: number | null = null;

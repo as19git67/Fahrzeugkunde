@@ -14,6 +14,52 @@ const TIME_WINDOW_SECONDS = 10; // voller Zeitbonus wenn < 10s
 
 export const GAME_MODES = ["time_attack", "speed_run"] as const;
 
+/** Time-Attack: Spieldauer in Sekunden. */
+export const TIME_ATTACK_DURATION = 60;
+/** Speed-Run: Anzahl richtiger Antworten bis zum Ziel. */
+export const SPEED_RUN_TARGET = 20;
+/** Speed-Run: Zeitstrafe je falscher Antwort (Sekunden). */
+export const SPEED_RUN_WRONG_PENALTY_SECONDS = 5;
+/**
+ * Schneller als das schafft niemand eine Antwort (Feedback-Pause + Klick).
+ * Dient der serverseitigen Plausibilitätsprüfung eingereichter Speed-Runs.
+ */
+export const MIN_SECONDS_PER_ANSWER = 1;
+
+export interface SpeedRunResult {
+  wrongAnswers: number;
+  penaltySeconds: number;
+  /** Gewertete Zeit: Spieldauer plus Strafe. */
+  effectiveSeconds: number;
+  score: number;
+}
+
+/**
+ * Speed-Run-Wertung: Es zählt die Zeit bis zur 20. richtigen Antwort; jeder
+ * Fehler kostet zusätzlich SPEED_RUN_WRONG_PENALTY_SECONDS. Der Score ist
+ * umgekehrt proportional zur gewerteten Zeit, damit die Highscore-Liste
+ * (absteigend nach Score) die schnellsten Läufe vorne zeigt.
+ */
+export function calculateSpeedRunResult({
+  durationSeconds,
+  correctAnswers,
+  totalAnswers,
+}: {
+  durationSeconds: number;
+  correctAnswers: number;
+  totalAnswers: number;
+}): SpeedRunResult {
+  const wrongAnswers = Math.max(0, totalAnswers - correctAnswers);
+  const penaltySeconds = wrongAnswers * SPEED_RUN_WRONG_PENALTY_SECONDS;
+  const effectiveSeconds = durationSeconds + penaltySeconds;
+  return {
+    wrongAnswers,
+    penaltySeconds,
+    effectiveSeconds,
+    score: calculateSpeedRunScore(effectiveSeconds, correctAnswers),
+  };
+}
+
 /**
  * Obergrenze, die eine einzelne richtige Antwort einbringen kann:
  * (Basis + voller Zeitbonus) × höchster Schwierigkeits-Multiplikator plus

@@ -6,7 +6,13 @@ import { it, expect, beforeAll, afterAll, beforeEach, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { getTestDb, getTestPool, cleanDb, closeDb, describeDb as describe } from "./db-helper";
 import { users, vehicles } from "@/db/schema";
-import { MAX_SCORE_PER_CORRECT_ANSWER } from "@/lib/scoring";
+import {
+  calculateSpeedRunResult,
+  calculateSpeedRunScore,
+  MAX_SCORE_PER_CORRECT_ANSWER,
+  SPEED_RUN_WRONG_PENALTY_SECONDS,
+  TIME_ATTACK_DURATION,
+} from "@/lib/scoring";
 
 process.env.DATABASE_URL =
   process.env.POSTGRES_TEST_CONNECTION_STRING || process.env.DATABASE_URL;
@@ -98,7 +104,26 @@ describe("/api/highscores", () => {
 
   it("lehnt unbekannte Modi ab", async () => {
     expect((await post({ ...validBody(), mode: "gottmodus" })).status).toBe(400);
-    expect((await post({ ...validBody(), mode: "speed_run" })).status).toBe(201);
+  });
+
+  it("speed_run: Score wird serverseitig aus Zeit und Fehlern berechnet, Client-Wert ignoriert", async () => {
+    const run = { mode: "speed_run", correctAnswers: 20, totalAnswers: 24, durationSeconds: 75, score: 999999 };
+    const { status, body } = await post(run);
+    expect(status).toBe(201);
+    expect(body.score).toBe(calculateSpeedRunResult(run).score);
+    expect(body.score).toBe(calculateSpeedRunScore(75 + 4 * SPEED_RUN_WRONG_PENALTY_SECONDS, 20));
+  });
+
+  it("speed_run: nur beendete Läufe (20 richtige) mit plausibler Dauer", async () => {
+    expect((await post({ mode: "speed_run", correctAnswers: 8, totalAnswers: 10, durationSeconds: 60, score: 1 })).status).toBe(400);
+    // 24 Antworten in 10 Sekunden gibt es nicht
+    expect((await post({ mode: "speed_run", correctAnswers: 20, totalAnswers: 24, durationSeconds: 10, score: 1 })).status).toBe(400);
+    expect((await post({ mode: "speed_run", correctAnswers: 20, totalAnswers: 20, durationSeconds: 20, score: 1 })).status).toBe(201);
+  });
+
+  it("time_attack: Dauer über der Spielzeit (plus Toleranz) wird abgelehnt", async () => {
+    expect((await post({ ...validBody(), durationSeconds: TIME_ATTACK_DURATION + 6 })).status).toBe(400);
+    expect((await post({ ...validBody(), durationSeconds: TIME_ATTACK_DURATION + 5 })).status).toBe(201);
   });
 
   it("lehnt unplausible Spielwerte ab", async () => {

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import type { GameMode } from "@/hooks/useGame";
+import { calculateSpeedRunResult } from "@/lib/scoring";
+import { formatSeconds } from "@/lib/format";
 
 interface Result {
   score: number;
@@ -28,6 +30,8 @@ export function ResultScreen({ result, vehicleId, handle, onPlayAgain, onHome }:
   const accuracy = result.totalAnswers > 0
     ? Math.round((result.correctAnswers / result.totalAnswers) * 100)
     : 0;
+  // Speed-Run: gewertet wird die Zeit inkl. Fehler-Strafe
+  const speedRun = result.mode === "speed_run" ? calculateSpeedRunResult(result) : null;
 
   const handleSave = async () => {
     setSaving(true);
@@ -82,15 +86,31 @@ export function ResultScreen({ result, vehicleId, handle, onPlayAgain, onHome }:
       </div>
 
       <div className="grid grid-cols-2 gap-4 w-full">
-        <StatCard label="Punkte" value={result.score.toString()} color="text-yellow-400" />
-        <StatCard label="Genauigkeit" value={`${accuracy}%`} color="text-green-400" />
-        <StatCard label="Richtig" value={`${result.correctAnswers}/${result.totalAnswers}`} color="text-blue-400" />
-        <StatCard
-          label={result.mode === "time_attack" ? "Zeit" : "Dauer"}
-          value={`${result.durationSeconds}s`}
-          color="text-purple-400"
-        />
+        {speedRun ? (
+          <>
+            <StatCard label="Gewertete Zeit" value={formatSeconds(speedRun.effectiveSeconds)} color="text-yellow-400" />
+            <StatCard label="Punkte" value={result.score.toString()} color="text-purple-400" />
+            <StatCard label="Gespielt" value={formatSeconds(result.durationSeconds)} color="text-blue-400" />
+            <StatCard
+              label="Fehler-Strafe"
+              value={speedRun.wrongAnswers > 0 ? `+${speedRun.penaltySeconds}s` : "keine"}
+              color={speedRun.wrongAnswers > 0 ? "text-red-400" : "text-green-400"}
+            />
+          </>
+        ) : (
+          <>
+            <StatCard label="Punkte" value={result.score.toString()} color="text-yellow-400" />
+            <StatCard label="Genauigkeit" value={`${accuracy}%`} color="text-green-400" />
+            <StatCard label="Richtig" value={`${result.correctAnswers}/${result.totalAnswers}`} color="text-blue-400" />
+            <StatCard label="Zeit" value={formatSeconds(result.durationSeconds)} color="text-purple-400" />
+          </>
+        )}
       </div>
+      {speedRun && speedRun.wrongAnswers > 0 && (
+        <p className="text-zinc-500 text-sm text-center -mt-2">
+          {result.correctAnswers}/{result.totalAnswers} richtig · {speedRun.wrongAnswers} Fehler × 5 s
+        </p>
+      )}
 
       <div className="flex flex-col gap-3 w-full">
         {!saved && (
