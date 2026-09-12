@@ -63,6 +63,8 @@ interface Hotspot {
 export interface PackageItem {
   name: string;
   article: string | null;
+  /** Mehrzahl ("Rundschlingen"). Fehlt in Paketen vor Einführung des Flags → `undefined` = false. */
+  plural?: boolean;
   /** Bild des Gegenstands selbst. */
   imagePath: string | null;
   /** Bild der Aufbewahrungsstelle. Fehlt in Paketen, die vor der Trennung

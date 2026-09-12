@@ -93,6 +93,7 @@ export async function setup() {
         vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         article TEXT,
+        plural BOOLEAN NOT NULL DEFAULT false,
         image_path TEXT,
         location_image_path TEXT,
         silhouette_path TEXT,
@@ -104,6 +105,7 @@ export async function setup() {
       -- Nachträgliche Migration für bestehende Test-DBs
       ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
       ALTER TABLE items ADD COLUMN IF NOT EXISTS article TEXT;
+      ALTER TABLE items ADD COLUMN IF NOT EXISTS plural BOOLEAN NOT NULL DEFAULT false;
       -- Spiegelt die Migration aus schema.sql: Spalte ergänzen und einmalig
       -- aus image_path vorbelegen (siehe dort für die Begründung).
       DO $$

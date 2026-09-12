@@ -13,6 +13,7 @@ import { positiveInt } from "./request";
 export interface ItemFields {
   name?: string;
   article?: string | null;
+  plural?: boolean;
   imagePath?: string | null;
   locationImagePath?: string | null;
   silhouettePath?: string | null;
@@ -47,6 +48,10 @@ export function pickItemFields(body: Record<string, unknown>): ItemFields | { er
       if (v !== null && typeof v !== "string") return { error: `${key} muss Text oder null sein` };
       out[key] = v === "" ? null : (v as string | null);
     }
+  }
+  if ("plural" in body) {
+    if (typeof body.plural !== "boolean") return { error: "plural muss true oder false sein" };
+    out.plural = body.plural;
   }
   if ("difficulty" in body) {
     const d = body.difficulty;

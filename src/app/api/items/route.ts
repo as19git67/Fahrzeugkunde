@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
         vehicleId,
         name: fields.name,
         article: fields.article ?? null,
+        plural: fields.plural ?? false,
         imagePath: fields.imagePath ?? null,
         locationImagePath: fields.locationImagePath ?? null,
         silhouettePath: fields.silhouettePath ?? null,

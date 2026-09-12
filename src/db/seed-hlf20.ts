@@ -17,6 +17,8 @@ export type Article = "der" | "die" | "das";
 export interface ItemSeed {
   article: Article;
   name: string;
+  /** Mehrzahl ("Rundschlingen") – steuert "Wo ist …?" vs. "Wo sind …?". */
+  plural?: boolean;
   /**
    * Rein bildgenerierungs-seitige Gruppierung: `scripts/generate-seed-images.ts`
    * leitet daraus die Akzentfarbe der Platzhalter-SVGs ab. Es gibt keine

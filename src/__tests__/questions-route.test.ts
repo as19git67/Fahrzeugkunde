@@ -73,6 +73,7 @@ describe("questions route – Fragengenerierung", () => {
       expect(q.item).toBeTruthy();
       expect(typeof q.item.id).toBe("number");
       expect(q.item.name).toBeTruthy();
+      expect(typeof q.item.plural).toBe("boolean");
 
       if (q.type === "what_is") {
         // 4 Namens-Optionen, eindeutige IDs, genau eine korrekte (= item.id)
