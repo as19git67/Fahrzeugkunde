@@ -135,37 +135,6 @@ ALTER TABLE items DROP COLUMN IF EXISTS description;
 -- Verortung widersprechen.
 ALTER TABLE items DROP COLUMN IF EXISTS location_label;
 
--- Nachtraegliche Migration fuer bestehende Datenbanken: FK von items.position_id
--- und items.box_id auf ON DELETE CASCADE umstellen, damit das Loeschen eines
--- Fachs, einer Position oder einer Kiste die darin verorteten Gegenstaende
--- mitloescht (statt an einem FK-Constraint zu scheitern). Die Standard-
--- Constraint-Namen von Postgres werden vorausgesetzt; ein DO-Block sorgt fuer
--- Idempotenz: umgestellt wird nur, wenn die delete_rule aktuell nicht CASCADE ist.
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM information_schema.referential_constraints
-    WHERE constraint_name = 'items_position_id_fkey'
-      AND delete_rule <> 'CASCADE'
-  ) THEN
-    ALTER TABLE items DROP CONSTRAINT items_position_id_fkey;
-    ALTER TABLE items ADD CONSTRAINT items_position_id_fkey
-      FOREIGN KEY (position_id) REFERENCES positions(id) ON DELETE CASCADE;
-  END IF;
-
-  IF EXISTS (
-    SELECT 1
-    FROM information_schema.referential_constraints
-    WHERE constraint_name = 'items_box_id_fkey'
-      AND delete_rule <> 'CASCADE'
-  ) THEN
-    ALTER TABLE items DROP CONSTRAINT items_box_id_fkey;
-    ALTER TABLE items ADD CONSTRAINT items_box_id_fkey
-      FOREIGN KEY (box_id) REFERENCES boxes(id) ON DELETE CASCADE;
-  END IF;
-END $$;
-
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   handle TEXT NOT NULL UNIQUE,
@@ -215,6 +184,54 @@ CREATE TABLE IF NOT EXISTS highscores (
   correct_answers INTEGER NOT NULL,
   total_answers INTEGER NOT NULL,
   duration_seconds INTEGER NOT NULL,
-  vehicle_id INTEGER REFERENCES vehicles(id),
+  -- SET NULL: Ein Fahrzeug mit Highscores bleibt loeschbar, die Eintraege
+  -- verlieren nur den Fahrzeugbezug (vorher: FK-Fehler → 500 im Creator).
+  vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT now()
 );
+
+-- Nachtraegliche Migration fuer bestehende Datenbanken: ON-DELETE-Regeln der
+-- Fremdschluessel nachziehen. Der Constraint wird ueber Tabelle und Spalte
+-- ermittelt, nicht ueber seinen Namen – eine per drizzle-kit angelegte DB
+-- heisst z.B. items_position_id_positions_id_fk statt items_position_id_fkey,
+-- und die fruehere namensgebundene Migration griff dort nie.
+--   items.position_id / items.box_id → CASCADE: Loeschen einer Position oder
+--     Kiste loescht die darin verorteten Gegenstaende mit.
+--   highscores.vehicle_id → SET NULL: siehe oben.
+-- Idempotent: umgestellt wird nur, wenn die delete_rule abweicht.
+DO $$
+DECLARE
+  spec RECORD;
+  fk RECORD;
+BEGIN
+  FOR spec IN
+    SELECT * FROM (VALUES
+      ('items',      'position_id', 'positions', 'CASCADE'),
+      ('items',      'box_id',      'boxes',     'CASCADE'),
+      ('highscores', 'vehicle_id',  'vehicles',  'SET NULL')
+    ) AS t(tbl, col, ref, rule)
+  LOOP
+    FOR fk IN
+      SELECT tc.constraint_name, rc.delete_rule
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu
+          ON kcu.constraint_name = tc.constraint_name
+         AND kcu.constraint_schema = tc.constraint_schema
+        JOIN information_schema.referential_constraints rc
+          ON rc.constraint_name = tc.constraint_name
+         AND rc.constraint_schema = tc.constraint_schema
+       WHERE tc.constraint_schema = current_schema()
+         AND tc.table_name = spec.tbl
+         AND tc.constraint_type = 'FOREIGN KEY'
+         AND kcu.column_name = spec.col
+    LOOP
+      IF fk.delete_rule <> spec.rule THEN
+        EXECUTE format('ALTER TABLE %I DROP CONSTRAINT %I', spec.tbl, fk.constraint_name);
+        EXECUTE format(
+          'ALTER TABLE %I ADD CONSTRAINT %I FOREIGN KEY (%I) REFERENCES %I(id) ON DELETE %s',
+          spec.tbl, spec.tbl || '_' || spec.col || '_fkey', spec.col, spec.ref, spec.rule
+        );
+      END IF;
+    END LOOP;
+  END LOOP;
+END $$;

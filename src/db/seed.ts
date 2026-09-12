@@ -30,7 +30,17 @@ async function main() {
       return;
     }
 
-    const result = await seedDemoVehicle(client);
+    // Alles oder nichts: bei einem Fehler mittendrin bleibt kein halbes
+    // Fahrzeug zurück, das den nächsten Seed-Lauf blockieren würde.
+    await client.query("BEGIN");
+    let result;
+    try {
+      result = await seedDemoVehicle(client);
+      await client.query("COMMIT");
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw err;
+    }
     console.log(`✅ Seed abgeschlossen: HLF 20 mit ${result.itemCount} Gegenständen angelegt (id: ${result.vehicleId})`);
   } finally {
     await client.end();

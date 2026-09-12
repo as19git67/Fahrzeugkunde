@@ -84,18 +84,32 @@ export async function POST() {
     // Schema sicherstellen, falls die DB frisch oder veraltet ist
     await pool.query(SCHEMA_SQL);
 
-    // Nur Fahrzeug- und Spiel-Daten löschen. Benutzer/Sessions bleiben erhalten.
-    await pool.query(`
-      DELETE FROM highscores;
-      DELETE FROM items;
-      DELETE FROM boxes;
-      DELETE FROM positions;
-      DELETE FROM compartments;
-      DELETE FROM vehicle_views;
-      DELETE FROM vehicles;
-    `);
-
-    const result = await seedDemoVehicle(pool);
+    // Löschen und neu seeden in EINER Transaktion: Scheitert der Seed
+    // mittendrin, bleibt der alte Stand vollständig erhalten. Vorher liefen
+    // die ~250 Seed-Inserts einzeln über den Pool – ein Fehler ließ ein halbes
+    // Fahrzeug zurück, und der Startup-Seed sprang danach nie mehr an.
+    const client = await pool.connect();
+    let result;
+    try {
+      await client.query("BEGIN");
+      // Nur Fahrzeug- und Spiel-Daten löschen. Benutzer/Sessions bleiben erhalten.
+      await client.query(`
+        DELETE FROM highscores;
+        DELETE FROM items;
+        DELETE FROM boxes;
+        DELETE FROM positions;
+        DELETE FROM compartments;
+        DELETE FROM vehicle_views;
+        DELETE FROM vehicles;
+      `);
+      result = await seedDemoVehicle(client);
+      await client.query("COMMIT");
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
 
     // Kuratierte Seed-Bilder (items/seed, views/seed) aus dem Image-Snapshot
     // ueberschreiben, damit neu generierte SVGs nach DB-Reset auch auf

@@ -7,10 +7,11 @@
  * abgeleitet. Wird sowohl vom CLI-Seed (src/db/seed.ts) als auch von Tests
  * genutzt.
  */
-import type { Pool, Client } from "pg";
-import { COMPARTMENT_DEFS, HLF20_ITEMS, VIEW_DEFS, ItemSeed } from "./seed-hlf20";
+import type { Pool, Client, PoolClient } from "pg";
+import { COMPARTMENT_DEFS, HLF20_ITEMS, VIEW_DEFS } from "./seed-hlf20";
 
-type Queryable = Pool | Client;
+/** Pool, eigener Client oder ein aus dem Pool geliehener Client (Transaktion). */
+type Queryable = Pool | Client | PoolClient;
 
 export interface SeedResult {
   vehicleId: number;

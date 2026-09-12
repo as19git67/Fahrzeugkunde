@@ -9,7 +9,7 @@ import { it, expect, beforeAll, afterAll, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { eq } from "drizzle-orm";
 import { getTestDb, cleanDb, closeDb, describeDb as describe } from "./db-helper";
-import { users, vehicles } from "@/db/schema";
+import { highscores, users, vehicles } from "@/db/schema";
 
 // Siehe questions-route.test.ts: `@/db` liest DATABASE_URL beim ersten Import.
 process.env.DATABASE_URL =
@@ -111,6 +111,22 @@ describe("requireAdmin und mutierende Routen", () => {
     cookie.token = adminToken;
     expect((await vehicleRoute.DELETE(req, params(v.id))).status).toBe(200);
     expect(await testDb.select().from(vehicles).where(eq(vehicles.id, v.id))).toHaveLength(0);
+  });
+
+  it("DELETE /api/vehicles/[id]: Fahrzeug mit Highscores ist löschbar, Einträge bleiben ohne Bezug", async () => {
+    // Vorher scheiterte das am FK ohne ON-DELETE-Regel → 500 im Creator.
+    const [v] = await testDb.insert(vehicles).values({ name: "Mit Highscore" }).returning();
+    const [h] = await testDb
+      .insert(highscores)
+      .values({ handle: "Anonym", score: 100, mode: "time_attack", correctAnswers: 1, totalAnswers: 1, durationSeconds: 60, vehicleId: v.id })
+      .returning();
+
+    cookie.token = adminToken;
+    const res = await vehicleRoute.DELETE(json(`/api/vehicles/${v.id}`, "DELETE"), params(v.id));
+    expect(res.status).toBe(200);
+    const [after] = await testDb.select().from(highscores).where(eq(highscores.id, h.id));
+    expect(after.vehicleId).toBeNull();
+    expect(after.score).toBe(100);
   });
 
   it("PATCH/DELETE /api/items/[id]: ohne Session 401, als Nutzer 403", async () => {

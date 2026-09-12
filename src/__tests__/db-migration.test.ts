@@ -66,8 +66,11 @@ const LEGACY_SCHEMA = `
     name TEXT NOT NULL, article TEXT, description TEXT,
     image_path TEXT, silhouette_path TEXT, category TEXT,
     difficulty INTEGER DEFAULT 1,
-    position_id INTEGER REFERENCES positions(id),
-    box_id INTEGER REFERENCES boxes(id),
+    -- drizzle-kit-artige Constraint-Namen: die frühere Migration suchte nur
+    -- nach den Postgres-Standardnamen (items_position_id_fkey) und griff
+    -- hier nie.
+    position_id INTEGER CONSTRAINT items_position_id_positions_id_fk REFERENCES positions(id),
+    box_id INTEGER CONSTRAINT items_box_id_boxes_id_fk REFERENCES boxes(id),
     location_label TEXT,
     created_at TIMESTAMP DEFAULT now()
   );
@@ -81,6 +84,13 @@ const LEGACY_SCHEMA = `
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     code TEXT NOT NULL, expires_at TIMESTAMP NOT NULL,
     used BOOLEAN DEFAULT false, created_at TIMESTAMP DEFAULT now()
+  );
+  -- Highscores im Stand ohne ON-DELETE-Regel am Fahrzeugbezug
+  CREATE TABLE highscores (
+    id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES users(id), handle TEXT NOT NULL,
+    score INTEGER NOT NULL, mode TEXT NOT NULL, correct_answers INTEGER NOT NULL,
+    total_answers INTEGER NOT NULL, duration_seconds INTEGER NOT NULL,
+    vehicle_id INTEGER REFERENCES vehicles(id), created_at TIMESTAMP DEFAULT now()
   );
 `;
 
@@ -101,6 +111,8 @@ const LEGACY_DATA = `
             '/uploads/items/seilwinde.jpg', 1, 1, 'handgetippter Ort');
   INSERT INTO items (vehicle_id, name, image_path, position_id)
     VALUES (1, 'Gegenstand ohne Bild', NULL, 1);
+  INSERT INTO highscores (handle, score, mode, correct_answers, total_answers, duration_seconds, vehicle_id)
+    VALUES ('Alt', 100, 'time_attack', 5, 6, 60, 1);
 `;
 
 let client: pg.Client;
@@ -239,5 +251,42 @@ describe("schema.sql – Migration einer Bestandsdatenbank", () => {
     const cols = await columnNames();
     expect(cols).toContain("location_image_path");
     expect(cols).not.toContain("category");
+  });
+
+  it("stellt ON-DELETE-Regeln unabhängig vom Constraint-Namen um", async () => {
+    const rule = async (table: string, column: string) => {
+      const { rows } = await client.query(
+        `SELECT rc.delete_rule
+           FROM information_schema.table_constraints tc
+           JOIN information_schema.key_column_usage kcu
+             ON kcu.constraint_name = tc.constraint_name
+           JOIN information_schema.referential_constraints rc
+             ON rc.constraint_name = tc.constraint_name
+          WHERE tc.table_name = $1 AND tc.constraint_type = 'FOREIGN KEY' AND kcu.column_name = $2`,
+        [table, column]
+      );
+      return rows.map((r) => r.delete_rule as string);
+    };
+    // Legacy-Constraints hießen items_position_id_positions_id_fk / items_box_id_boxes_id_fk
+    expect(await rule("items", "position_id")).toEqual(["CASCADE"]);
+    expect(await rule("items", "box_id")).toEqual(["CASCADE"]);
+    expect(await rule("highscores", "vehicle_id")).toEqual(["SET NULL"]);
+  });
+
+  it("Position löschen räumt die darin verorteten Gegenstände mit ab (CASCADE greift)", async () => {
+    await client.query("INSERT INTO positions (compartment_id, label) VALUES (1, 'temp')");
+    await client.query(
+      "INSERT INTO items (vehicle_id, name, position_id) VALUES (1, 'Temporär', (SELECT id FROM positions WHERE label = 'temp'))"
+    );
+    await client.query("DELETE FROM positions WHERE label = 'temp'");
+    const { rows } = await client.query("SELECT count(*)::int AS n FROM items WHERE name = 'Temporär'");
+    expect(rows[0].n).toBe(0);
+  });
+
+  // Bewusst zuletzt: löscht das Legacy-Fahrzeug samt Struktur.
+  it("Fahrzeug mit Highscores lässt sich löschen, der Eintrag bleibt ohne Fahrzeugbezug", async () => {
+    await expect(client.query("DELETE FROM vehicles WHERE id = 1")).resolves.toBeDefined();
+    const { rows } = await client.query("SELECT handle, score, vehicle_id FROM highscores");
+    expect(rows).toEqual([{ handle: "Alt", score: 100, vehicle_id: null }]);
   });
 });
