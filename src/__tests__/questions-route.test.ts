@@ -130,26 +130,85 @@ describe("questions route – Fragengenerierung", () => {
     }
   });
 
-  it("bietet unverortete Gegenstände nicht als Ortsfrage an", async () => {
+  /**
+   * Kleines Fahrzeug mit `located` verorteten Gegenständen (mit Bild) und
+   * `loose` unverorteten (nur Bild). Damit lassen sich Aussagen über die
+   * Fragenauswahl deterministisch prüfen – im Demo-Fahrzeug mit 100+ Items
+   * hinge alles am Zufall.
+   */
+  async function createMiniVehicle(located: number, loose: number): Promise<number> {
     const pool = await getTestPool();
-    const { rows } = await pool.query(
-      "INSERT INTO items (vehicle_id, name, image_path) VALUES ($1,$2,$3) RETURNING id",
-      [vehicleId, "Loser Gegenstand", "/uploads/items/lose.jpg"]
+    const v = await pool.query("INSERT INTO vehicles (name) VALUES ('Mini') RETURNING id");
+    const vid = v.rows[0].id as number;
+    const view = await pool.query(
+      "INSERT INTO vehicle_views (vehicle_id, side, label) VALUES ($1,'left','links') RETURNING id",
+      [vid]
     );
-    const looseId = rows[0].id as number;
-    try {
-      const res = await fetchQuestions({ vehicleId, count: 50 });
-      const questions = (await res.json()) as Question[];
-      for (const q of questions) {
-        if (q.item.id !== looseId) continue;
-        // Ohne Verortung gibt es keinen Ortstext — das Item darf höchstens
-        // als "Was ist das?" drankommen.
-        expect(q.item.locationLabel).toBeNull();
-        expect(q.type).toBe("what_is");
-      }
-    } finally {
-      await pool.query("DELETE FROM items WHERE id = $1", [looseId]);
+    const comp = await pool.query(
+      "INSERT INTO compartments (view_id, label) VALUES ($1,'G1') RETURNING id",
+      [view.rows[0].id]
+    );
+    for (let i = 0; i < located; i++) {
+      const pos = await pool.query(
+        "INSERT INTO positions (compartment_id, label) VALUES ($1,$2) RETURNING id",
+        [comp.rows[0].id, `Platz ${i + 1}`]
+      );
+      await pool.query(
+        "INSERT INTO items (vehicle_id, name, image_path, position_id) VALUES ($1,$2,$3,$4)",
+        [vid, `Verortet ${i + 1}`, `/uploads/items/v${i + 1}.jpg`, pos.rows[0].id]
+      );
     }
+    for (let i = 0; i < loose; i++) {
+      await pool.query(
+        "INSERT INTO items (vehicle_id, name, image_path) VALUES ($1,$2,$3)",
+        [vid, `Lose ${i + 1}`, `/uploads/items/l${i + 1}.jpg`]
+      );
+    }
+    return vid;
+  }
+
+  it("bietet unverortete Gegenstände nur als „Was ist das?“ an", async () => {
+    // 4 verortete + 1 loser Gegenstand, 5 Fragen → jeder kommt genau einmal
+    // dran, der lose muss dabei als what_is erscheinen.
+    const miniId = await createMiniVehicle(4, 1);
+    const res = await fetchQuestions({ vehicleId: miniId, count: 5 });
+    expect(res.status).toBe(200);
+    const questions = (await res.json()) as Question[];
+    expect(questions).toHaveLength(5);
+    const loose = questions.filter((q) => q.item.name.startsWith("Lose"));
+    expect(loose).toHaveLength(1);
+    expect(loose[0].type).toBe("what_is");
+    expect(loose[0].item.locationLabel).toBeNull();
+  });
+
+  it("stellt jeden Gegenstand höchstens einmal pro Spiel (Demo: 102 Items, 50 Fragen)", async () => {
+    const res = await fetchQuestions({ vehicleId, count: 50 });
+    const questions = (await res.json()) as Question[];
+    expect(new Set(questions.map((q) => q.item.id)).size).toBe(50);
+  });
+
+  it("wiederholt bei zu wenigen Gegenständen nie direkt hintereinander", async () => {
+    // 5 Gegenstände, 20 Fragen → jeder 4×, aber nie zwei gleiche nacheinander
+    // (die erste Frage würde sonst die Antwort der zweiten verraten).
+    const miniId = await createMiniVehicle(5, 0);
+    const res = await fetchQuestions({ vehicleId: miniId, count: 20 });
+    const questions = (await res.json()) as Question[];
+    expect(questions).toHaveLength(20);
+    const perItem = new Map<number, number>();
+    for (const q of questions) perItem.set(q.item.id, (perItem.get(q.item.id) ?? 0) + 1);
+    expect([...perItem.values()]).toEqual([4, 4, 4, 4, 4]);
+    for (let i = 1; i < questions.length; i++) {
+      expect(questions[i].item.id, `Frage ${i}`).not.toBe(questions[i - 1].item.id);
+    }
+  });
+
+  it("verteilt die Fragetypen ausgewogen", async () => {
+    // Alle Demo-Gegenstände unterstützen alle drei Typen → 30 Fragen = 10/10/10
+    const res = await fetchQuestions({ vehicleId, count: 30 });
+    const questions = (await res.json()) as Question[];
+    const counts = { what_is: 0, where_is: 0, where_in_vehicle: 0 };
+    for (const q of questions) counts[q.type]++;
+    expect(counts).toEqual({ what_is: 10, where_is: 10, where_in_vehicle: 10 });
   });
 
   it("liefert Gegenstands- und Aufbewahrungsbild getrennt aus", async () => {

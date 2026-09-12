@@ -148,33 +148,76 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const enabledTypes: QuestionType[] = [];
-  if (canWhatIs) enabledTypes.push("what_is");
-  if (canWhereIs) enabledTypes.push("where_is");
-  if (canWhereInVehicle) enabledTypes.push("where_in_vehicle");
+  // Navigationsziel eines Items: Position direkt oder über die Kiste; ohne
+  // vollständige Kette (Position → Fach) ist die Frage unlösbar und wird
+  // deshalb gar nicht erst gestellt.
+  const navigationTargetFor = (row: ItemRow): Question["navigationTarget"] | null => {
+    const box = row.boxId ? boxById.get(row.boxId) : undefined;
+    const positionId = box ? box.positionId : row.positionId;
+    const pos = positionId ? positionById.get(positionId) : undefined;
+    const comp = pos ? compartmentById.get(pos.compartmentId) : undefined;
+    if (!pos || !comp) return null;
+    return { viewId: comp.viewId, compartmentId: comp.id, positionId: pos.id, boxId: row.boxId ?? null };
+  };
 
-  const questions: Question[] = [];
+  // Kandidaten: je Gegenstand die Fragetypen, die er unterstützt.
+  interface Candidate {
+    item: LocatedItem;
+    types: QuestionType[];
+    target: Question["navigationTarget"] | null;
+  }
+  const candidates: Candidate[] = [];
+  for (const item of locatedItems) {
+    const types: QuestionType[] = [];
+    if (canWhatIs && item.row.imagePath) types.push("what_is");
+    if (canWhereIs && item.locationLabel) types.push("where_is");
+    const target = canWhereInVehicle ? navigationTargetFor(item.row) : null;
+    if (target) types.push("where_in_vehicle");
+    if (types.length) candidates.push({ item, types, target });
+  }
+  if (candidates.length === 0) {
+    return NextResponse.json(
+      { error: "Zu wenig Daten für Fragen. Bitte mehr Items mit Ort oder Bild anlegen." },
+      { status: 422 }
+    );
+  }
 
-  for (let i = 0; i < count; i++) {
-    const type = enabledTypes[Math.floor(Math.random() * enabledTypes.length)];
+  // Reihenfolge: Ziehen ohne Zurücklegen – jeder Gegenstand kommt pro Runde
+  // genau einmal dran. Reicht eine Runde nicht für `count`, folgt eine neue
+  // Mischung; ihr erstes Element darf nicht das letzte der vorigen sein,
+  // sonst stünde derselbe Gegenstand zweimal hintereinander (und die erste
+  // Frage verriete die Antwort der zweiten).
+  const order: Candidate[] = [];
+  while (order.length < count) {
+    const round = shuffle(candidates);
+    if (order.length > 0 && round.length > 1 && round[0] === order[order.length - 1]) {
+      [round[0], round[1]] = [round[1], round[0]];
+    }
+    order.push(...round);
+  }
+  const picked = order.slice(0, count);
+
+  // Typwahl: von den möglichen Typen den bisher seltensten – so bleibt die
+  // Mischung ausgewogen, ohne dass ein Gegenstand immer denselben Typ bekommt.
+  const typeCounts: Record<QuestionType, number> = { what_is: 0, where_is: 0, where_in_vehicle: 0 };
+  const questions: Question[] = picked.map((cand, i) => {
+    const fewest = Math.min(...cand.types.map((t) => typeCounts[t]));
+    const pool = cand.types.filter((t) => typeCounts[t] === fewest);
+    const type = pool[Math.floor(Math.random() * pool.length)];
+    typeCounts[type]++;
+
+    const target = cand.item;
+    const id = `q_${i}_${target.row.id}`;
 
     if (type === "what_is") {
-      const pool = shuffle(itemsWithImage);
-      const target = pool[0];
-      const distractors = pool.slice(1, 4);
+      const distractors = shuffle(itemsWithImage.filter((d) => d.row.id !== target.row.id)).slice(0, 3);
       const options = shuffle([
         { id: target.row.id, name: target.row.name, article: target.row.article },
         ...distractors.map((d) => ({ id: d.row.id, name: d.row.name, article: d.row.article })),
       ]);
-      questions.push({
-        id: `q_${i}_${target.row.id}`,
-        type: "what_is",
-        item: toQuestionItem(target),
-        options,
-      });
-    } else if (type === "where_is") {
-      const pool = shuffle(itemsWithLocation);
-      const target = pool[0];
+      return { id, type, item: toQuestionItem(target), options };
+    }
+    if (type === "where_is") {
       // Bis zu 3 falsche Orte als Distraktoren. Mehrere Items können an
       // derselben Stelle liegen — deshalb über die Orte deduplizieren, sonst
       // stünde derselbe Text mehrfach zur Auswahl.
@@ -185,37 +228,10 @@ export async function GET(req: NextRequest) {
         { label: target.locationLabel!, correct: true },
         ...distractors.map((label) => ({ label: label!, correct: false })),
       ]);
-      questions.push({
-        id: `q_${i}_${target.row.id}`,
-        type: "where_is",
-        item: toQuestionItem(target),
-        locationOptions,
-      });
-    } else {
-      // where_in_vehicle
-      const pool = shuffle(itemsWithPosition);
-      const target = pool[0];
-      const q: Question = {
-        id: `q_${i}_${target.row.id}`,
-        type: "where_in_vehicle",
-        item: toQuestionItem(target),
-      };
-      // Position herleiten: entweder direkt am Item oder über die Kiste.
-      const box = target.row.boxId ? boxById.get(target.row.boxId) : undefined;
-      const positionId = box ? box.positionId : target.row.positionId;
-      const pos = positionId ? positionById.get(positionId) : undefined;
-      const comp = pos ? compartmentById.get(pos.compartmentId) : undefined;
-      if (pos && comp) {
-        q.navigationTarget = {
-          viewId: comp.viewId,
-          compartmentId: comp.id,
-          positionId: pos.id,
-          boxId: target.row.boxId ?? null,
-        };
-      }
-      questions.push(q);
+      return { id, type, item: toQuestionItem(target), locationOptions };
     }
-  }
+    return { id, type, item: toQuestionItem(target), navigationTarget: cand.target! };
+  });
 
   return NextResponse.json(questions);
 }
