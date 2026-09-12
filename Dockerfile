@@ -23,10 +23,17 @@ FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# postgresql-client-16 stellt `pg_restore` bereit, das startup.js für den
+# postgresql-client-18 stellt `pg_restore` bereit, das startup.js für den
 # Drop-in-Restore benutzt (siehe /backups/restore.backup). `tar` ist bereits
 # in bookworm-slim enthalten und wird für das Auspacken der Backup-Datei
-# verwendet. Die Version (16) muss zur DB-Version passen, daher PGDG.
+# verwendet.
+#
+# Die Major-Version MUSS zu `image: postgres:N` in docker-compose.yml und zu
+# `FROM postgres:N` in scripts/backup/Dockerfile passen: pg_restore liest nur
+# Archive, deren Formatversion es kennt – ein Dump aus pg_dump 18 wird von
+# pg_restore 16 mit "unsupported version in file header" abgelehnt, und der
+# Restore ist damit unbrauchbar. src/__tests__/deploy-config.test.ts prüft
+# die drei Stellen gegeneinander. Daher PGDG statt Debian-Paket.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
  && install -d /usr/share/postgresql-common/pgdg \
@@ -35,7 +42,7 @@ RUN apt-get update \
  && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
       > /etc/apt/sources.list.d/pgdg.list \
  && apt-get update \
- && apt-get install -y --no-install-recommends postgresql-client-16 \
+ && apt-get install -y --no-install-recommends postgresql-client-18 \
  && apt-get purge -y --auto-remove curl gnupg \
  && rm -rf /var/lib/apt/lists/*
 
