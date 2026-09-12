@@ -1,8 +1,10 @@
 import { describe, it, expect } from "vitest";
 import {
   calculateScore,
+  calculateSpeedRunResult,
   calculateSpeedRunScore,
   calculateTimeAttackScore,
+  SPEED_RUN_WRONG_PENALTY_SECONDS,
 } from "@/lib/scoring";
 
 describe("calculateScore", () => {
@@ -130,6 +132,27 @@ describe("calculateSpeedRunScore", () => {
   it("rounds the result", () => {
     // 10000 / 3 * 1 = 3333.33... → 3333
     expect(calculateSpeedRunScore(3, 1)).toBe(3333);
+  });
+});
+
+describe("calculateSpeedRunResult", () => {
+  it("wertet die reine Spielzeit, wenn keine Fehler gemacht wurden", () => {
+    const r = calculateSpeedRunResult({ durationSeconds: 50, correctAnswers: 20, totalAnswers: 20 });
+    expect(r).toEqual({ wrongAnswers: 0, penaltySeconds: 0, effectiveSeconds: 50, score: 4000 });
+  });
+
+  it("addiert je Fehler die Zeitstrafe", () => {
+    const r = calculateSpeedRunResult({ durationSeconds: 75, correctAnswers: 20, totalAnswers: 24 });
+    expect(r.wrongAnswers).toBe(4);
+    expect(r.penaltySeconds).toBe(4 * SPEED_RUN_WRONG_PENALTY_SECONDS);
+    expect(r.effectiveSeconds).toBe(95);
+    expect(r.score).toBe(calculateSpeedRunScore(95, 20));
+  });
+
+  it("schnellere Läufe bekommen mehr Punkte – auch mit Fehlern", () => {
+    const fastWithErrors = calculateSpeedRunResult({ durationSeconds: 40, correctAnswers: 20, totalAnswers: 22 });
+    const slowClean = calculateSpeedRunResult({ durationSeconds: 90, correctAnswers: 20, totalAnswers: 20 });
+    expect(fastWithErrors.score).toBeGreaterThan(slowClean.score);
   });
 });
 
