@@ -99,13 +99,14 @@ export async function seedDemoVehicle(client: Queryable): Promise<SeedResult> {
     const pKey = posKey(it.compartment, it.position);
     const bKey = it.box ? boxKey(it.compartment, it.position, it.box) : null;
     await client.query(
-      `INSERT INTO items (vehicle_id, name, article, difficulty,
+      `INSERT INTO items (vehicle_id, name, article, plural, difficulty,
          position_id, box_id, image_path)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
       [
         vehicleId,
         it.name,
         it.article,
+        it.plural ?? false,
         it.difficulty,
         positionIds[pKey],
         bKey ? boxIds[bKey] : null,

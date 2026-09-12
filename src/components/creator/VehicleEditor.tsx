@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { createLocationLabeler } from "@/lib/location-label";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { whereIsQuestion } from "@/lib/grammar";
 
 interface Box {
   id: number;
@@ -49,6 +50,7 @@ interface ItemData {
   id: number;
   name: string;
   article: string | null;
+  plural: boolean;
   imagePath: string | null;
   locationImagePath: string | null;
   difficulty: number;
@@ -1185,6 +1187,7 @@ function ItemForm({
 }) {
   const [name, setName] = useState(item?.name ?? "");
   const [article, setArticle] = useState(item?.article ?? "");
+  const [plural, setPlural] = useState(item?.plural ?? false);
   const [difficulty, setDifficulty] = useState(item?.difficulty ?? 1);
   // Kodiere aktuelles Ziel als "pos:<id>" oder "box:<id>"
   const initialTargetKey =
@@ -1234,6 +1237,7 @@ function ItemForm({
         vehicleId,
         name,
         article: article || null,
+        plural,
         difficulty,
         positionId,
         boxId,
@@ -1308,6 +1312,24 @@ function ItemForm({
             placeholder="Seilwinde"
             className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2 text-white outline-none focus:border-red-400 text-sm"
           />
+        </div>
+
+        <div className="flex flex-col gap-1 sm:col-span-2">
+          <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
+            <input
+              type="checkbox"
+              checked={plural}
+              onChange={(e) => setPlural(e.target.checked)}
+              className="w-4 h-4 accent-red-500"
+            />
+            Mehrzahl – es sind mehrere Teile
+          </label>
+          <span className="text-[11px] text-zinc-500">
+            Name in der passenden Form eintragen (z.&nbsp;B. „Rundschlingen“). Die Frage lautet dann:{" "}
+            <span className="text-zinc-300">
+              „{whereIsQuestion({ name: name.trim() || "…", article: article || null, plural })}“
+            </span>
+          </span>
         </div>
 
         <div className="flex flex-col gap-1">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import type { Question } from "@/app/api/questions/route";
+import { hereIsStored, whereIsPrefix } from "@/lib/grammar";
 
 interface Box {
   id: number;
@@ -122,7 +123,7 @@ export function WhereIsQuestion({ question, vehicle, onAnswer, answered }: Props
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-xl mx-auto">
       <h2 className="text-xl font-bold text-white">
-        Wo ist{question.item.article ? ` ${question.item.article}` : ""}{" "}
+        {whereIsPrefix(question.item)}{" "}
         <span className="text-red-400">{question.item.name}</span>?
       </h2>
 
@@ -404,7 +405,7 @@ function LocationReveal({ item }: { item: Question["item"] }) {
       className="flex flex-col items-center gap-1.5 w-full"
     >
       <span className="text-xs uppercase tracking-wider text-zinc-400">
-        Hier ist{item.article ? ` ${item.article}` : ""} {item.name} verstaut
+        {hereIsStored(item)}
       </span>
       <div className="relative w-full max-w-sm h-44 rounded-xl overflow-hidden border-2 border-green-400/50 bg-zinc-800">
         <Image
@@ -449,7 +450,7 @@ function WhereIsChoiceQuestion({
       )}
 
       <h2 className="text-xl font-bold text-white">
-        Wo ist{question.item.article ? ` ${question.item.article}` : ""}{" "}
+        {whereIsPrefix(question.item)}{" "}
         <span className="text-red-400">{question.item.name}</span>?
       </h2>
 

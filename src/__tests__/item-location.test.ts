@@ -119,6 +119,8 @@ describe("validateItemLocation + Items-Routen", () => {
       name: "Axt",
       difficulty: 2,
     });
+    expect(lib.pickItemFields({ plural: true })).toEqual({ plural: true });
+    expect(lib.pickItemFields({ plural: "ja" })).toMatchObject({ error: expect.any(String) });
     expect(lib.pickItemFields({ name: "" })).toMatchObject({ error: expect.any(String) });
     expect(lib.pickItemFields({ difficulty: 7 })).toMatchObject({ error: expect.any(String) });
     expect(lib.pickItemFields({ positionId: "abc" })).toMatchObject({ error: expect.any(String) });

@@ -63,6 +63,8 @@ export const items = pgTable("items", {
   name: text("name").notNull(),
   // Grammatischer Artikel (der/die/das) — steuert die Anrede in der UI
   article: text("article"),
+  // Mehrzahl ("Rundschlingen"): "Wo sind die …?" statt "Wo ist die …?"
+  plural: boolean("plural").notNull().default(false),
   // Bild des Gegenstands selbst — Grundlage für "Was ist das?"
   imagePath: text("image_path"),
   // Bild der Aufbewahrungsstelle im Fahrzeug — wird als Auflösung der

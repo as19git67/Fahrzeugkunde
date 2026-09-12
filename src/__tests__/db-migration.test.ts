@@ -149,6 +149,17 @@ describe("schema.sql – Migration einer Bestandsdatenbank", () => {
     expect(await columnNames()).toContain("location_image_path");
   });
 
+  it("ergänzt das Mehrzahl-Flag mit Default false für Bestandsdaten", async () => {
+    expect(await columnNames()).toContain("plural");
+    const { rows } = await client.query(
+      `SELECT is_nullable, column_default FROM information_schema.columns
+        WHERE table_name = 'items' AND column_name = 'plural'`
+    );
+    expect(rows[0]).toEqual({ is_nullable: "NO", column_default: "false" });
+    const { rows: values } = await client.query(`SELECT DISTINCT plural FROM items`);
+    expect(values).toEqual([{ plural: false }]);
+  });
+
   it("verschiebt Seed-Ansichten nach views/seed/, lässt Creator-Uploads unangetastet", async () => {
     const { rows } = await client.query(
       `SELECT side, image_path FROM vehicle_views ORDER BY side`

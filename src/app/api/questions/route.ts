@@ -12,6 +12,8 @@ export interface Question {
     id: number;
     name: string;
     article: string | null;
+    // Mehrzahl: "Wo sind die …?" statt "Wo ist die …?"
+    plural: boolean;
     // Bild des Gegenstands — wird in "Was ist das?" gefragt und in den
     // Ortsfragen gezeigt, damit klar ist, welcher Gegenstand gemeint ist.
     imagePath: string | null;
@@ -54,6 +56,7 @@ function toQuestionItem({ row, locationLabel }: LocatedItem): Question["item"] {
     id: row.id,
     name: row.name,
     article: row.article,
+    plural: row.plural,
     imagePath: row.imagePath,
     locationImagePath: row.locationImagePath,
     locationLabel,

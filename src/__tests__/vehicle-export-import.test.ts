@@ -8,7 +8,7 @@
  * reale `resolveUploadFsPath` die Pfade auflösen kann.
  */
 import { it, expect, beforeAll, afterAll, beforeEach } from "vitest";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import path from "node:path";
 import fs from "node:fs/promises";
 import {
@@ -130,6 +130,7 @@ async function buildPackageFromDb(vehicleId: number) {
   const pkgItem = (row: (typeof its)[number]): PackageItem => ({
     name: row.name,
     article: row.article,
+    plural: row.plural,
     imagePath: rewrite(row.imagePath),
     locationImagePath: rewrite(row.locationImagePath),
     silhouettePath: rewrite(row.silhouettePath),
@@ -214,6 +215,11 @@ async function writeAssetsToTestDir(
 describe("Vehicle Package Export → Import Round-Trip", () => {
   it("reproduziert das HLF-20-Seed-Fahrzeug exakt", async () => {
     const seed = await resetAndSeedDb();
+    // Ein Gegenstand als Mehrzahl markieren – das Flag muss den Roundtrip überleben
+    await (await getTestPool()).query(
+      "UPDATE items SET plural = true WHERE vehicle_id = $1 AND name = 'Steckleiter'",
+      [seed.vehicleId]
+    );
 
     // 1) Export
     const { vehicle: exported, assetFiles } = await buildPackageFromDb(
@@ -306,6 +312,17 @@ describe("Vehicle Package Export → Import Round-Trip", () => {
         );
       }
     }
+
+    // 7) Das Mehrzahl-Flag überlebt Export und Import
+    const pluralByName = async (name: string) => {
+      const [row] = await db
+        .select({ plural: items.plural })
+        .from(items)
+        .where(and(eq(items.vehicleId, newId), eq(items.name, name)));
+      return row.plural;
+    };
+    expect(await pluralByName("Steckleiter")).toBe(true);
+    expect(await pluralByName("Feuerwehraxt")).toBe(false);
   });
 
   it("kann zweimal importieren und erhält zwei unabhängige Fahrzeuge", async () => {

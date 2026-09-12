@@ -141,6 +141,7 @@ export async function GET(
   const pkgItem = (row: typeof its[number]): PackageItem => ({
     name: row.name,
     article: row.article,
+    plural: row.plural,
     imagePath: rewriteImagePath(row.imagePath, assetFiles),
     locationImagePath: rewriteImagePath(row.locationImagePath, assetFiles),
     silhouettePath: rewriteImagePath(row.silhouettePath, assetFiles),

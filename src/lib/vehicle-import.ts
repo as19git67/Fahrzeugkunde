@@ -68,6 +68,7 @@ export async function insertVehicleTree(
       vehicleId,
       name: it.name,
       article: it.article ?? null,
+      plural: it.plural ?? false,
       imagePath: rewrite(it.imagePath),
       locationImagePath: rewrite(it.locationImagePath),
       silhouettePath: rewrite(it.silhouettePath),

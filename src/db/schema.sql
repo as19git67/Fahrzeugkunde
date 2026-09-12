@@ -81,6 +81,9 @@ CREATE TABLE IF NOT EXISTS items (
   vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   article TEXT,
+  -- Mehrzahl: der Gegenstand liegt als mehrere Teile im Fahrzeug ("Rundschlingen").
+  -- Steuert das Verb der Fragen: "Wo ist die …?" vs. "Wo sind die …?".
+  plural BOOLEAN NOT NULL DEFAULT false,
   image_path TEXT,
   location_image_path TEXT,
   silhouette_path TEXT,
@@ -89,6 +92,9 @@ CREATE TABLE IF NOT EXISTS items (
   box_id INTEGER REFERENCES boxes(id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT now()
 );
+
+-- Nachtraegliche Migration fuer bestehende Datenbanken: Mehrzahl-Flag.
+ALTER TABLE items ADD COLUMN IF NOT EXISTS plural BOOLEAN NOT NULL DEFAULT false;
 
 -- Nachtraegliche Migration fuer bestehende Datenbanken
 ALTER TABLE items ADD COLUMN IF NOT EXISTS box_id INTEGER REFERENCES boxes(id);
